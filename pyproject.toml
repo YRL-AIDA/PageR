@@ -1,0 +1,21 @@
+[build-system]
+requires = ['setuptools', 'setuptools-scm']
+build-backend = 'setuptools.build_meta'
+
+[project]
+name='pager'
+authors = [{name='Kopylov Daniil', email='it-daniil@yandex.ru'}]
+
+readme = 'README.md'
+license = {file = 'LICENSE'}
+
+requires-python = '>=3.9'
+
+dependencies = [
+  'pytesseract',
+  'numpy',
+  'opencv-python',
+  'matplotlib'
+]
+
+version = '0.0.1' 
