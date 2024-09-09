@@ -22,7 +22,7 @@ class WordsModel(BaseSubModel):
         with open(path_file, "r") as f:
             phis_json = json.load(f)
        
-        for word_dict in phis_json["additional_info"]["words"]:
+        for word_dict in phis_json["words"]:
             word = Word(word_dict)
             self.words.append(word)
     
