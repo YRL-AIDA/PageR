@@ -5,6 +5,53 @@ import json
 from .segment_clusterizer import KMeanClusterizer
 import numpy as np
 
+
+class SpGraph4NModel(BaseSubModel):
+    def __init__(self) -> None:
+        super().__init__()
+        self.A = None
+        self.nodes_feature  = None
+        self.edges_feature = None
+
+    def from_dict(self, input_model_dict: Dict):
+        pass
+
+    def to_dict(self) -> Dict:
+        return {"A": self.A.tolist(), "nodes_feature":self.nodes_feature.tolist(), "edges_feature": self.edges_feature.tolist()}
+
+    def read_from_file(self, path_file: str) -> None:
+        self.clean_model()
+
+    def clean_model(self):
+        self.A = None
+        self.nodes_feature  = None
+        self.edges_feature = None
+
+
+class WordsToSpGraph4N(BaseConverter):
+    def __init__(self) -> None:
+        super().__init__()
+        self.kmean_clusterizer = KMeanClusterizer()
+
+
+    def convert(self, input_model: BaseSubModel, output_model: BaseSubModel)-> None:
+        words = input_model.words
+        segments = [w.segment for w in words]
+        graph4n = self.kmean_clusterizer.get_index_neighbors_segment(segments)
+        distans = self.kmean_clusterizer.get_distans(graph4n, segments)
+        edges = [[], []]
+        edges_feature = []
+        for i, nodes in enumerate(graph4n):
+            for k, j in enumerate(nodes):
+                if not (i in edges[1] and j in edges[0]): # i-j еще нет, проверка что нет j-i
+                    edges[0].append(i)
+                    edges[1].append(j)
+                    edges_feature.append(distans[i][k])
+        output_model.A = np.array(edges)
+        output_model.nodes_feature = np.array([w.segment.get_height() for w in words])
+        output_model.edges_feature = np.array(edges_feature)
+
+
 class Graph4NModel(BaseSubModel):
     def __init__(self) -> None:
         super().__init__()
