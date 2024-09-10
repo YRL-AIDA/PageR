@@ -12,14 +12,19 @@ from .word import Word
 
 class Block(ABC):
     def __init__(self, dict_block):
-        self.segment = ImageSegment(dict_p_size = dict_block) if "width" in dict_block else ImageSegment(dict_2p = dict_block)
-        
+       
         # self.paragraphs: List[Paragraph] = []
         self.words: List[Word] = []
         self.label = None
         if "label" in dict_block.keys():
             self.label = dict_block["label"]
-    
+        if "words" in dict_block.keys():
+            self.words = [Word(word) for word in dict_block['words']]
+        if  "width" in dict_block.keys() or "x_bottom_right" in dict_block.keys():
+            self.segment = ImageSegment(dict_p_size = dict_block) if "width" in dict_block else ImageSegment(dict_2p = dict_block)
+        elif len(self.words) > 0:
+            self.segment = ImageSegment(0, 0, 1, 1)
+            self.segment.set_segment_max_segments([w.segment for w in self.words])
 
     def extract_place_in_block_for_word_segments(self):
         block_h = self.segment.get_height()
@@ -57,6 +62,7 @@ class Block(ABC):
         block_dict["text"] = self.get_text()
         if self.label is not None:
             block_dict["label"] = self.label
+        block_dict["words"] = [word.to_dict() for word in self.words]
         return block_dict
     
 class BlockWithoutWords(Exception):
