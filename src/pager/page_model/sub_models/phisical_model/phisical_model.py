@@ -33,5 +33,5 @@ class WordsToOneBlock(BaseConverter):
         segment.set_segment_2p(word_list[0].segment.get_segment_2p())
         segment.set_segment_max_segments([word.segment for word in word_list[1:]])
         block = Block(segment.get_segment_2p())
-        block.set_words_from_dict([word.to_dict() for word in word_list[1:]])
+        block.set_words_from_dict([word.to_dict() for word in word_list])
         output_model.blocks.append(block)
