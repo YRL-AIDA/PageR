@@ -21,11 +21,6 @@ class PhisicalModel(BaseSubModel):
             phis_json = json.load(f)
         for block_dict in phis_json["blocks"]:
             self.blocks.append(Block(block_dict))
-        for word_dict in phis_json["additional_info"]["words"]:
-            word = Word(word_dict)
-            for block in self.blocks:
-                if block.segment.is_intersection(word.segment):
-                    block.words.append(word)
 
     def clean_model(self):
         self.blocks = []
