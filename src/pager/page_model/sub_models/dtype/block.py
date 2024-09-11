@@ -24,7 +24,6 @@ class Block(ABC):
             self.segment = ImageSegment(dict_p_size = dict_block) if "width" in dict_block else ImageSegment(dict_2p = dict_block)
         elif len(self.words) > 0:
             self.segment = ImageSegment(0, 0, 1, 1)
-            segment.set_segment_2p(word_list[0].segment.get_segment_2p())
             self.segment.set_segment_max_segments([w.segment for w in self.words])
 
     def extract_place_in_block_for_word_segments(self):
