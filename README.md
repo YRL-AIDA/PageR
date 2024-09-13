@@ -52,5 +52,6 @@ python -m pip install .
 |   |   |   ├── image_model - блок изображения
 |   |   |   ├── pdf_model - блок pdf
 |   |   |   ├── words_model - блок работы со словами
+|   |   |   ├── words_and_styles_model - блок работы со словами их стилями
 |   |   |   └── phisical_model -блок работы с физическими сегментами
 ```
