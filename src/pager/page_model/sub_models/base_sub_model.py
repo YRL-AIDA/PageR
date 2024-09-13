@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Dict
-
+import json
 
 class BaseSubModel(ABC):
     @abstractmethod
@@ -14,6 +14,11 @@ class BaseSubModel(ABC):
     @abstractmethod
     def read_from_file(self, path_file: str) -> None:
         pass
+    
+    def _read_json(self, path_file: str) -> Dict:
+        with open(path_file, "r", encoding='utf-8') as f:
+            json_dict = json.load(f)
+        return json_dict
 
 class BaseConverter(ABC):
     @abstractmethod
