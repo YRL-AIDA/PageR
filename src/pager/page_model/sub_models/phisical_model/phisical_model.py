@@ -1,7 +1,6 @@
 from ..base_sub_model import BaseSubModel, BaseExtractor, BaseConverter
 from typing import Dict, List
 from ..dtype import ImageSegment, Block, Word
-import json
 
 
 class PhisicalModel(BaseSubModel):
@@ -17,8 +16,7 @@ class PhisicalModel(BaseSubModel):
 
     def read_from_file(self, path_file: str) -> None:
         self.clean_model()
-        with open(path_file, "r") as f:
-            phis_json = json.load(f)
+        phis_json = self._read_json(path_file)
         for block_dict in phis_json["blocks"]:
             self.blocks.append(Block(block_dict))
 

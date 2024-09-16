@@ -19,9 +19,7 @@ class WordsModel(BaseSubModel):
 
     def read_from_file(self, path_file: str) -> None:
         self.clean_model()
-        with open(path_file, "r") as f:
-            phis_json = json.load(f)
-       
+        phis_json = self._read_json(path_file)      
         for word_dict in phis_json["words"]:
             word = Word(word_dict)
             self.words.append(word)

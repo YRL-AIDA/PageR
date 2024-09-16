@@ -21,9 +21,7 @@ class WordsAndStylesModel(BaseSubModel):
 
     def read_from_file(self, path_file: str) -> None:
         self.clean_model()
-        with open(path_file, "r") as f:
-            words_and_styles_json = json.load(f)
-       
+        words_and_styles_json = self._read_json(path_file)      
         for word_dict in words_and_styles_json["words"]:
             word = StyleWord(word_dict)
             self.words.append(word)
