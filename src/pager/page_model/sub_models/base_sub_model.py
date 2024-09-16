@@ -14,6 +14,9 @@ class BaseSubModel(ABC):
     @abstractmethod
     def read_from_file(self, path_file: str) -> None:
         pass
+    
+    def is_include_pages(self) -> bool:
+        return False
 
 class BaseConverter(ABC):
     @abstractmethod

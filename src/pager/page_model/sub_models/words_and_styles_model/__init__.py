@@ -1,1 +1,2 @@
 from .words_and_styles_model import WordsAndStylesModel
+from .words_and_styles_model import PdfToWordsAndStyles

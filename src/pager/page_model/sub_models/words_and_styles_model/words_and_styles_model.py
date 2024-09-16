@@ -34,29 +34,39 @@ class WordsAndStylesModel(BaseSubModel):
     def clean_model(self):
         self.words = []
         self.styles = []
-"""
-class ImageToWords(BaseConverter):
+
+
+class PdfToWordsAndStyles(BaseConverter):
     def convert(self, input_model: BaseSubModel, output_model: BaseSubModel)-> None:
-        word_list = self.extract_from_img(input_model.img)
-        output_model.set_words_from_dict(word_list)
+        page_json = input_model.to_dict()
+        word_list, style_list = self.separate(page_json['words'])
+        output_model.words = word_list
+        output_model.styles = style_list
+
+    def separate(self, words_json):
+        styles = []
+        words = []
+        for word in words_json:
+            tmp_style = {       
+                "type": word['type'],
+                "font_size": word["font_size"]
+            }
+            index_style = self._get_style(tmp_style, styles)           
+            if index_style == -1:
+                styles.append(tmp_style)
+                index_style = len(styles) - 1 
+            words.append({"style_id": index_style,
+                          "content": word["text"],
+                          "y": word["y_top_left"] + word["height"],
+                          "x": word["x_top_left"],
+                          "type_align": None})
+        for i, style in enumerate(styles):
+            style["id"] = i
+        return [StyleWord(word) for word in words], [Style(style) for style in styles]
 
 
-    def extract_from_img(self, img, conf={"lang": "eng+rus", "psm": 4, "oem": 3, "k": 1}):
-        dim = (conf["k"]*img.shape[1], conf["k"]*img.shape[0])
-        img_ = cv2.resize(img, dim, interpolation = cv2.INTER_AREA)
-        tesseract_bboxes = pytesseract.image_to_data(
-            config=f"-l {conf['lang']} --psm {conf['psm']} --oem {conf['oem']}",
-            image=img_,
-            output_type=pytesseract.Output.DICT)
-        word_list = []
-        for index_bbox, level in enumerate(tesseract_bboxes["level"]):
-            if level == 5:
-                word_list.append({
-                    "text": tesseract_bboxes["text"][index_bbox],
-                    "x_top_left": round(tesseract_bboxes["left"][index_bbox]/conf["k"]),
-                    "y_top_left": round(tesseract_bboxes["top"][index_bbox]/conf["k"]),
-                    "width": round(tesseract_bboxes["width"][index_bbox]/conf["k"]),
-                    "height": round(tesseract_bboxes["height"][index_bbox]/conf["k"]),
-                })
-        return word_list
-"""
+    def _get_style(self, style, styles):
+        for i, style_ in enumerate(styles):
+            if style_ == style:
+                return i
+        return -1
