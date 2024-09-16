@@ -15,6 +15,10 @@ class BaseSubModel(ABC):
     def read_from_file(self, path_file: str) -> None:
         pass
     
+
+    def is_include_pages(self) -> bool:
+        return False
+
     def _read_json(self, path_file: str) -> Dict:
         with open(path_file, "r", encoding='utf-8') as f:
             json_dict = json.load(f)

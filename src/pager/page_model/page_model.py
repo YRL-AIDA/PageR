@@ -22,7 +22,17 @@ class PageModel:
         self.keys = {}
         for i, page_unit in enumerate(page_units):
             self.keys[page_unit.id] = i
+    
+    def next_page(self) -> None:
+        if not page_units[0].sub_model.is_include_pages():
+            raise ModelNotIncludePage()
+        page_units[0].sub_model.next() 
 
+    def back_page(self) -> None:
+        if not page_units[0].sub_model.is_include_pages():
+            raise ModelNotIncludePage()
+        page_units[0].sub_model.back() 
+            
 
     def read_from_file(self, path) -> None:
         self.page_units[0].read_from_file(path)
@@ -40,3 +50,7 @@ class PageModel:
             return self.page_units[-1].to_dict()
         return self.page_units[self.keys[id_model]].to_dict()
         
+class ModelNotIncludePage(Exception):
+    def __str__(self):
+        return f"Model is not include page"
+ 
