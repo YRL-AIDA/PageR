@@ -46,9 +46,12 @@ class PdfToWordsAndStyles(BaseConverter):
         words = []
         for word in words_json:
             tmp_style = {       
-                "type": word['type'],
-                "font_size": word["font_size"]
+                "size": word["font_size"],
+                "font_type": word["font_type"],
+                "italic": word["italic"],
+                "bold": 1.0 if word["bold"] else 0.0
             }
+            
             index_style = self._get_style(tmp_style, styles)           
             if index_style == -1:
                 styles.append(tmp_style)

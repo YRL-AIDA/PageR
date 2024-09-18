@@ -11,18 +11,12 @@ class TestPDF(unittest.TestCase):
     with open("files/text_header_table_jar.json") as f:
         true_dict = json.load(f) 
 
-    def test_page_0(self) -> None:
+    def test_page_0_and_end(self) -> None:
         page0 = self.pdf_model.to_dict()
-        tdk = self.true_dict['pages'][0]
-        self.assertEqual(tdk, page0, f"{tdk} \n != \n {page0}")
-    
-    def test_page_end(self) -> None:
         while not self.pdf_model.is_final_page():
             self.pdf_model.next_page()
         page1 = self.pdf_model.to_dict()
-        tdk = self.true_dict['pages'][-1]
-        self.assertEqual(tdk, page1, f"{tdk} \n != \n {page1}")
-    
+        self.assertEqual(page1, page0, f"{page0} \n != \n {page1}")
 
     def test_count_page(self) -> None:
         self.assertEqual(self.pdf_model.count_page, len(self.true_dict['pages']))
