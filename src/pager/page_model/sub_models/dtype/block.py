@@ -50,6 +50,9 @@ class Block(ABC):
         for dict_word in list_words:
             word = Word(dict_word)
             self.words.append(word)
+    
+    def set_label(self, text: str):
+        self.label = text
 
     def get_text(self):
         str_ = ""

@@ -49,7 +49,7 @@ class PdfToWordsAndStyles(BaseConverter):
                 "size": word["font_size"],
                 "font_type": word["font_type"],
                 "italic": word["italic"],
-                "bold": 1.0 if word["bold"] else 0.0
+                "width": 1.0 if word["bold"] else 0.0
             }
             
             index_style = self._get_style(tmp_style, styles)           
