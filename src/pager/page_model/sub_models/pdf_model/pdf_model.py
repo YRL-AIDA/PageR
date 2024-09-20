@@ -44,7 +44,7 @@ class PDFModel(BaseSubModel):
     def __read(self, path):
         jar_path = os.environ["JAR_PDF_PARSER"]
         res = subprocess.run(["java", "-jar", jar_path, "-i", path, "-w"], 
-                       stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='utf-8')
+                       stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding= os.device_encoding(1))
         if res.stderr:
             print(res.stderr.decode("utf-8"))
         return json.loads(res.stdout.decode("utf-8"))
