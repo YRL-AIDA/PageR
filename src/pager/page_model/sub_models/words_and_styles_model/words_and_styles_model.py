@@ -2,7 +2,7 @@ from ..base_sub_model import BaseSubModel, BaseConverter
 from typing import Dict, List
 import pytesseract
 import cv2
-from ..dtype import Style, StyleWord
+from ..dtype import Style, StyleWord, ImageSegment
 
 import json
 
@@ -58,8 +58,7 @@ class PdfToWordsAndStyles(BaseConverter):
                 index_style = len(styles) - 1 
             words.append({"style_id": index_style,
                           "content": word["text"],
-                          "y": word["y_top_left"] + word["height"],
-                          "x": word["x_top_left"],
+                          "segment": word,
                           "type_align": None})
         for i, style in enumerate(styles):
             style["id"] = i
