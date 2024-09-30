@@ -47,7 +47,13 @@ class PDFModel(BaseSubModel):
                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if res.stderr:
             print(res.stderr.decode("utf-8"))
-        return json.loads(res.stdout.decode("utf-8"))
+        try:
+            str_ = res.stdout.decode("utf-8")
+            json_ = json.loads(str_)
+            return json_
+        except json.JSONDecodeError as e:
+            print(e, "<stdout = ", str_, ">")
+
 
 class NotThisNumberPage(Exception):
     def __init__(self, num):
