@@ -16,9 +16,9 @@ class WordsAndStylesModel(BaseSubModel):
     def from_dict(self, input_model_dict: Dict):
         pass
 
-    def to_dict(self) -> Dict:
+    def to_dict(self, is_vec=False) -> Dict:
         return {"words": [word.to_dict() for word in self.words], 
-                "styles": [style.to_dict() for style in self.styles]}
+                "styles": [style.to_dict(is_vec) for style in self.styles]}
 
     def read_from_file(self, path_file: str) -> None:
         self.clean_model()
