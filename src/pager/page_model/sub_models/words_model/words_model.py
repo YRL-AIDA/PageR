@@ -55,4 +55,9 @@ class ImageToWords(BaseConverter):
                     "width": round(tesseract_bboxes["width"][index_bbox]/conf["k"]),
                     "height": round(tesseract_bboxes["height"][index_bbox]/conf["k"]),
                 })
+        
+        word_list = self.size_filter(word_list)
         return word_list
+
+    def size_filter(self, word_list):
+        return [word for word in word_list if word["width"] >= 2 and word["height"] >= 2]

@@ -76,12 +76,9 @@ class WordsAndStylesToSpGraph4N(BaseConverter):
     
     def get_vec_word(self, w, styles):
         style = [s for s in styles if s.id == w.style_id][0]
+        vec = style.to_dict(is_vec=True)["font2vec"]
         x, y = w.segment.get_center()
-        bold =style.width
-        italic = 1 if style.italic else 0
-        r, g, b = style.color
-        size = style.size
-        return [x, y, bold, italic, r, g, b, size]
+        return [x, y, *vec]
 
 class Graph4NModel(BaseSubModel):
     def __init__(self) -> None:

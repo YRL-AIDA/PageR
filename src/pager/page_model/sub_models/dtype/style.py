@@ -1,4 +1,5 @@
-from typing import Dict, Tuple
+from typing import Dict, Tuple, List
+import numpy as np
 
 class Style:
     def __init__(self, dict_style):
@@ -9,7 +10,7 @@ class Style:
         self.width: float = 0.5
         self.color: Tuple[int] = (0, 0, 0)
         self.label: str = self.id
-        
+        self.font2vec: List[float] = None
         keys_style = dict_style.keys()
         for key in ["size", 'font_type', 'italic', 'width', 'color', 'label']:
             fun = eval("self.set_"+key)
@@ -33,8 +34,27 @@ class Style:
 
     def set_label(self, label: str):
         self.label = label
+    
+    def set_font2vec(self, font2vec):
+        if isinstance(font2vec, np.dtype):
+            font2vec = font2vec.tolist()
+        self.font2vec = font2vec
+    
+    def extract_vec(self):
+        self.font2vec = [
+            self.width,
+            1.0 if self.italic else 0.0,
+            self.color[0],
+            self.color[1],
+            self.color[2],
+            self.size
+        ]        
 
-    def to_dict(self) -> Dict:
+    def to_dict(self, is_vec=False) -> Dict:
+        if is_vec:
+            self.extract_vec()
+            return {"font2vec": self.font2vec}
+
         dict_style = {
             "id": self.id,
             "size": self.size,

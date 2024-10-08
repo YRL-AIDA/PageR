@@ -3,8 +3,9 @@ from typing import Dict, List
 import pytesseract
 import cv2
 from ..dtype import Style, StyleWord, ImageSegment
-
+from ..words_model import ImageToWords
 import json
+import numpy as np
 
 class WordsAndStylesModel(BaseSubModel):
     def __init__(self) -> None:
@@ -68,5 +69,59 @@ class PdfToWordsAndStyles(BaseConverter):
     def _get_style(self, style, styles):
         for i, style_ in enumerate(styles):
             if style_ == style:
+                return i
+        return -1
+
+
+class ImageToWordsAndStyles(BaseConverter):
+    def convert(self, input_model: BaseSubModel, output_model: BaseSubModel)-> None:
+        conv_image_to_words = ImageToWords()
+        word_list = conv_image_to_words.extract_from_img(input_model.img)
+        word_list, style_list = self.separate(word_list, input_model.img)
+        output_model.words = word_list
+        output_model.styles = style_list
+
+    def separate(self, words_json, img):
+        styles = []
+        words = []
+        for word in words_json:
+            
+            seg = ImageSegment(dict_p_size=word)
+            word_img = cv2.cvtColor(seg.get_segment_from_img(img), cv2.COLOR_RGB2GRAY)/255
+            horizon = np.mean(word_img, axis=0)
+            vertical = np.mean(word_img, axis=1)
+            diff_vertical = np.diff(vertical)
+            h = word_img.shape[0]
+            vec_style = [
+                np.min(horizon),
+                np.max(horizon),
+                np.mean(horizon),
+                np.std(horizon),
+                np.mean(vertical),
+                np.argmax(diff_vertical)/h,
+                np.argmin(diff_vertical)/h
+            ]
+
+            tmp_style = {       
+                "font2vec": vec_style
+            }
+            index_style = self._get_style(tmp_style, styles, delta_ = 0.1)           
+            if index_style == -1:
+                styles.append(tmp_style)
+                index_style = len(styles) - 1 
+            words.append({"style_id": index_style,
+                          "content": word["text"],
+                          "segment": word,
+                          "type_align": None})
+        for i, style in enumerate(styles):
+            style["id"] = i
+        return [StyleWord(word) for word in words], [Style(style) for style in styles]
+
+
+    def _get_style(self, style, styles, delta_):
+        for i, style_ in enumerate(styles):
+            x1 = np.array(style_["font2vec"])
+            x2 = np.array(style["font2vec"])
+            if np.dot(x1-x2, x1-x2) < delta_:
                 return i
         return -1
