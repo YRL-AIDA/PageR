@@ -12,7 +12,7 @@ class Style:
         self.label: str = self.id
         self.font2vec: List[float] = None
         keys_style = dict_style.keys()
-        for key in ["size", 'font_type', 'italic', 'width', 'color', 'label']:
+        for key in ["size", 'font_type', 'italic', 'width', 'color', 'label', 'font2vec']:
             fun = eval("self.set_"+key)
             if key in keys_style:
                 fun(dict_style[key])
@@ -52,7 +52,10 @@ class Style:
 
     def to_dict(self, is_vec=False) -> Dict:
         if is_vec:
-            return {"font2vec": self.font2vec}
+            return {
+                    "font2vec": self.font2vec,
+                    "id": self.id
+                    }
 
         self.extract_vec()
         dict_style = {
