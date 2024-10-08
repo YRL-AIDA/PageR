@@ -52,9 +52,9 @@ class Style:
 
     def to_dict(self, is_vec=False) -> Dict:
         if is_vec:
-            self.extract_vec()
             return {"font2vec": self.font2vec}
 
+        self.extract_vec()
         dict_style = {
             "id": self.id,
             "size": self.size,
