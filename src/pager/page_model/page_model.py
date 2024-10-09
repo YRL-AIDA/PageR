@@ -8,6 +8,9 @@ class PageModelUnit:
         self.sub_model = sub_model
         self.extractors = extractors
         self.converters = converters
+    
+    def from_dict(self, input_dict: Dict):
+        self.sub_model.from_dict(input_dict)
 
     def read_from_file(self, path:str):
         self.sub_model.read_from_file(path)
@@ -44,6 +47,12 @@ class PageModel:
             
             for extr in page_unit.extractors:
                 extr.extract(page_unit.sub_model)
+    
+    def from_dict(self, input_dict: Dict, id_model:str = None) -> None:
+        if id_model is None:
+            self.page_units[0].from_dict(input_dict)
+            return
+        self.page_units[self.keys[id_model]].from_dict(input_dict)
 
     def to_dict(self, id_model:str = None) -> Dict:
         if id_model is None:

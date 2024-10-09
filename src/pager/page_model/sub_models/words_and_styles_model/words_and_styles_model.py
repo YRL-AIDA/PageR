@@ -14,7 +14,8 @@ class WordsAndStylesModel(BaseSubModel):
         self.styles: List[Style] = []
     
     def from_dict(self, input_model_dict: Dict):
-        pass
+        self.styles = [Style(st) for st in input_model_dict["styles"]]
+        self.words = [StyleWord(w) for w in input_model_dict["words"]]
 
     def to_dict(self, is_vec=False) -> Dict:
         return {"words": [word.to_dict() for word in self.words], 
@@ -74,9 +75,15 @@ class PdfToWordsAndStyles(BaseConverter):
 
 
 class ImageToWordsAndStyles(BaseConverter):
+    def __init__(self, conf=None):
+        if conf is None:
+            self.conf = {"lang": "eng+rus", "psm": 4, "oem": 3, "k": 1}
+        else:
+            self.conf = conf
+
     def convert(self, input_model: BaseSubModel, output_model: BaseSubModel)-> None:
         conv_image_to_words = ImageToWords()
-        word_list = conv_image_to_words.extract_from_img(input_model.img)
+        word_list = conv_image_to_words.extract_from_img(input_model.img, conf=self.conf)
         word_list, style_list = self.separate(word_list, input_model.img)
         output_model.words = word_list
         output_model.styles = style_list
