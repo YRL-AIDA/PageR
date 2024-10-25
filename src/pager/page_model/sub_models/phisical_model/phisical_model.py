@@ -1,7 +1,10 @@
 from ..base_sub_model import BaseSubModel, BaseExtractor, BaseConverter
 from typing import Dict, List
-from ..dtype import ImageSegment, Block, Word
-
+from ..dtype import ImageSegment, Block, Word, Graph
+from ..words_and_styles_model import WordsAndStylesModel 
+from .graph_model import SpGraph4NModel, WordsAndStylesToSpGraph4N
+import os
+from .segmodel_utils import get_model, classification_edges
 
 class PhisicalModel(BaseSubModel):
     def __init__(self) -> None:
@@ -32,3 +35,39 @@ class WordsToOneBlock(BaseConverter):
         block = Block(segment.get_segment_2p())
         block.set_words_from_dict([word.to_dict() for word in word_list])
         output_model.blocks.append(block)
+
+class WordsAndStylesToGNNBlocks(BaseConverter):
+    
+    path_seg_model = os.environ["PATH_SEG_MODEL"]
+    model = get_model(path_seg_model) 
+    def convert(self, input_model: BaseSubModel, output_model: BaseSubModel)-> None:
+        
+        words = input_model.words        
+        spgraph = SpGraph4NModel()
+        converter = WordsAndStylesToSpGraph4N()
+        converter.convert(input_model, spgraph)
+        graph = spgraph.to_dict()
+        edges_ind = classification_edges(self.model, graph, k=0.89)
+        relating_graph = Graph()
+        for word in words:
+            x, y = word.segment.get_center()
+            relating_graph.add_node(x, y)
+        
+        for n1, n2, ind in zip(graph['A'][0], graph['A'][1], edges_ind):
+            if ind == 1:
+                relating_graph.add_edge(n1+1, n2+1)
+
+        for r in relating_graph.get_related_graphs():
+            words_r = [words[n.index-1] for n in r.get_nodes()]
+        
+            segment = ImageSegment(0, 0, 1, 1)
+            segment.set_segment_max_segments([word.segment for word in words_r])
+            block = Block(segment.get_segment_2p())
+            
+            #TODO: Решить проблему с типами в блоке
+            words_ = [word.to_dict()['segment'] for word in words_r]
+            for word_, word in zip(words_, words_r):
+                word_["text"] = word.content
+            
+            block.set_words_from_dict(words_)
+            output_model.blocks.append(block)
