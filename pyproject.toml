@@ -15,7 +15,8 @@ dependencies = [
   'pytesseract',
   'numpy',
   'opencv-python',
-  'matplotlib'
+  'matplotlib',
+  'tensorflow'
 ]
 
 version = '0.0.1' 

@@ -1,11 +1,14 @@
-import unittest
+
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+import argparse
+
 from pager import (PageModel, PageModelUnit,
                    ImageModel, ImageToWordsAndStyles,
                    WordsAndStylesModel, PhisicalModel, 
                    WordsAndStylesToGNNBlocks)
 
-class TestWordsAndStyles2PhisModel(unittest.TestCase):
-    page = PageModel(page_units=[
+page = PageModel(page_units=[
         PageModelUnit(id="image_model", 
                       sub_model=ImageModel(), 
                       extractors=[], 
@@ -20,14 +23,14 @@ class TestWordsAndStyles2PhisModel(unittest.TestCase):
                       converters={"words_and_styles_model": WordsAndStylesToGNNBlocks()})
         ])
 
-    page.read_from_file('files/segment_test.png')
-    page.extract()
-    phis = page.to_dict()    
-    name_class = ["no_struct", "text", "header", "list", "table"]
-    def test_count_blocks(self) -> None:
-        str_ = "/n".join([f"{i} - block: \t {b['text']}" for i, b in enumerate(self.phis['blocks'])])
-        self.assertGreaterEqual(len(self.phis['blocks']), 3, )
-    
-    def test_nead_class(self) -> None:
-        for block in self.phis['blocks']:
-            self.assertIn(block['label'], self.name_class, block['label'])
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-i', type=str, nargs='?', required=True)
+args = parser.parse_args()
+
+page.read_from_file(args.i)
+page.extract()
+phis = page.to_dict()    
+
+str_ = "\n"*5+"-"*30+"\n"+"\n".join([f"{i} - block ({b['label']}): \t {b['text']}" for i, b in enumerate(phis['blocks'])]) + "\n"+"-"*30
+print(str_) 

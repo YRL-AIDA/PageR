@@ -4,7 +4,8 @@ from ..dtype import ImageSegment, Block, Word, Graph
 from ..words_and_styles_model import WordsAndStylesModel 
 from .graph_model import SpGraph4NModel, WordsAndStylesToSpGraph4N
 import os
-from .segmodel_utils import get_model, classification_edges
+from .segmodel_utils import get_model as get_model_seg, classification_edges
+from .classmodel_utils import get_model as get_model_class, classification_blocks
 
 class PhisicalModel(BaseSubModel):
     def __init__(self) -> None:
@@ -39,15 +40,18 @@ class WordsToOneBlock(BaseConverter):
 class WordsAndStylesToGNNBlocks(BaseConverter):
     
     path_seg_model = os.environ["PATH_SEG_MODEL"]
-    model = get_model(path_seg_model) 
+    path_class_model = os.environ["PATH_CLASS_MODEL"]
+    model_seg = get_model_seg(path_seg_model) 
+    model_class = get_model_class(path_class_model) 
+    name_class = ["no_struct", "text", "header", "list", "table"]
     def convert(self, input_model: BaseSubModel, output_model: BaseSubModel)-> None:
-        
         words = input_model.words        
         spgraph = SpGraph4NModel()
         converter = WordsAndStylesToSpGraph4N()
         converter.convert(input_model, spgraph)
         graph = spgraph.to_dict()
-        edges_ind = classification_edges(self.model, graph, k=0.89)
+        # SEGMENTER ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        edges_ind = classification_edges(self.model_seg, graph, k=0.75)
         relating_graph = Graph()
         for word in words:
             x, y = word.segment.get_center()
@@ -59,7 +63,6 @@ class WordsAndStylesToGNNBlocks(BaseConverter):
 
         for r in relating_graph.get_related_graphs():
             words_r = [words[n.index-1] for n in r.get_nodes()]
-        
             segment = ImageSegment(0, 0, 1, 1)
             segment.set_segment_max_segments([word.segment for word in words_r])
             block = Block(segment.get_segment_2p())
@@ -71,3 +74,32 @@ class WordsAndStylesToGNNBlocks(BaseConverter):
             
             block.set_words_from_dict(words_)
             output_model.blocks.append(block)
+
+        # CLASSIFIER +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        subgraphs = []
+        for block in output_model.blocks:
+            subgraph = {
+                "A": [[], []],
+                "nodes_feature": [],
+                "edges_feature": [],
+            }
+
+            block_nodes = []
+            for i, word in enumerate(words):
+                if block.segment.is_intersection(word.segment):
+                    block_nodes.append(i)
+                    subgraph["nodes_feature"].append(graph["nodes_feature"][i])
+
+            for i, (n1, n2) in enumerate(zip(graph["A"][0], graph["A"][1])):
+                if n1 in block_nodes and n2 in block_nodes:
+                    subgraph["A"][0].append(block_nodes.index(n1))
+                    subgraph["A"][1].append(block_nodes.index(n2))
+                    subgraph["edges_feature"].append(graph["edges_feature"][i])
+
+            subgraphs.append(subgraph) 
+        for block, sg in zip(output_model.blocks, subgraphs):
+            label = self.name_class[classification_blocks(self.model_class, sg)]
+            block.set_label(label)
+
+    
+
