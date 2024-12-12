@@ -5,10 +5,14 @@ params = {
     "start_w": 0.01,
     "start_b": 0.1,
     "count_neuron_layer_1": 9,
-    "count_neuron_layer_2": 18,
-    "count_neuron_layer_end": 9,
+    "count_neuron_layer_2": 27,
+    "count_neuron_layer_end": 18,
 }
-
+def value_matrix(v, index):
+    if index[0] == index[1] or v == 0:
+        return 0.0
+    else: 
+        return 1.0/v
 
 def get_need_model(graph):
     N = len(graph['nodes_feature'])#max(max(graph["A"][0])+1, max(graph["A"][1])+1)
@@ -24,10 +28,9 @@ def get_need_model(graph):
         v[:, i] = (max_[i] - v[:, i])/delta_[i] if delta_[i] != 0 else v[:, i]
     H0 = tf.constant(v[:, :])
     A = tf.SparseTensor(indices=indices_A,
-                    values=np.array([v + 0 if index[0] != index[1] else 1
-                                     for v, index in zip(graph["edges_feature"], np.transpose(graph["A"]))], dtype=np.float32), 
+                    values=np.array([value_matrix(v, index) for v, index in zip(graph["edges_feature"], np.transpose(graph["A"]))], dtype=np.float32), 
                     dense_shape=[N, N])
-    d = tf.sparse.reduce_sum(A, axis=1)
+    d = tf.sparse.reduce_sum(A, axis=1) + 1.0
     Mtrx = tf.SparseTensor(indices=indices_A,
                     values=np.array([val/d[index[0]] for index, val in zip(A.indices, A.values)], dtype=np.float32), 
                     dense_shape=[N, N])
@@ -53,25 +56,28 @@ def get_model(path=None):
     l2 = params["count_neuron_layer_2"]
     l3 = params["count_neuron_layer_end"]
     model = GraphSegmenter(l1, l2, l3)
-    if path is None:
-        return model
+#    if path is None:
+#        return model
     load_model = tf.saved_model.load(path)
-   
     model.conv1.W = load_model.conv1.W
     model.conv1.B = load_model.conv1.B
     model.conv2.W = load_model.conv2.W
     model.conv2.B = load_model.conv2.B
+    model.end_layer.W = load_model.end_layer.W
     return model
 
 
 class MyEndLayer(tf.Module):
-    def __call__(self, s1, s2, h): 
+    def __init__(self, input_size, activation_fun):
+        self.W = tf.Variable(tf.random.normal(mean=params["start_w"], stddev=1.0, shape=[2*input_size, 1]))
+        self.activation = activation_fun
+
+    def __call__(self, s1, s2, h):
         left_ = tf.sparse.sparse_dense_matmul(s1, h)
         right_ = tf.sparse.sparse_dense_matmul(s2, h)
-        # return tf.reduce_sum(left_norm * right_norm, axis=1)
-        return 0.5*(1.0-tf.losses.cosine_similarity(left_ , right_)) 
-        
-        
+        # return 0.5*(1.0-tf.losses.cosine_similarity(left_ , right_))
+        edges_vec = tf.concat([left_, right_], 1)
+        return self.activation(tf.matmul(edges_vec, self.W))
 
 class MyGraphConv(tf.Module):
     def __init__(self, input_size, outpu_size, activation_fun):
@@ -89,7 +95,7 @@ class GraphSegmenter(tf.Module):
     def __init__(self, l1, l2, l3):
         self.conv1 = MyGraphConv(l1, l2, tf.nn.relu)
         self.conv2 = MyGraphConv(l2, l3, tf.nn.relu)
-        self.end_layer = MyEndLayer()
+        self.end_layer = MyEndLayer(l3, tf.nn.sigmoid)
 
     @tf.function
     def __call__(self, A, H0, s1, s2):
