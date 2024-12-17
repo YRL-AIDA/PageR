@@ -22,3 +22,21 @@ def segmenter_UoI(true_segments: List[ImageSegment], pred_segments: List[ImageSe
     num2 = (true_mtrx | pred_mtrx).sum()
     return num1/num2 if num2 != 0 else 1.
     
+def AP_and_AR_from_TP_FP_FN(TP, FP, FN):
+    return TP/(TP+FP) if TP+FP != 0 else 0, TP/(TP+FN) if TP+FN != 0 else 0
+
+def TP_FP_FN_UoI(true_segments: List[ImageSegment], pred_segments: List[ImageSegment], alpha=0.5):
+    TP, FP, FN = 0,0,0
+    pred_mask = np.zeros((len(pred_segments)))
+    for i, pred_seg in enumerate(pred_segments):
+        for true_seg in true_segments:
+            UoI = segmenter_UoI([true_seg], [pred_seg])
+            if UoI > pred_mask[i]:
+                pred_mask[i] = UoI
+        if pred_mask[i] > alpha:
+            TP += 1
+        elif pred_mask[i] == 0:
+            FN += 1
+        else:
+            FP += 1
+    return TP, FP, FN

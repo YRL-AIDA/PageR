@@ -78,12 +78,12 @@ def get_model(path=None):
     l2 = params["count_neuron_layer_2"]
     output_size = params["output_size"]
     model = BlockClassifier(l1, l2, output_size)
-    if path is None:
-        return model
+    # if path is None:
+    #     return model
     load_model = tf.saved_model.load(path)
-#    model.conv1 = load_model.conv1
-#    model.conv2 = load_model.conv2
-#    model.output_layer = load_model.output_layer
+    model.conv1 = load_model.conv1
+    model.conv2 = load_model.conv2
+    model.output_layer = load_model.output_layer
     return load_model
 
 class MyGraphConv(tf.Module):

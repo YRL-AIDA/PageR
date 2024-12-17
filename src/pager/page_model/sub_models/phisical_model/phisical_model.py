@@ -51,7 +51,7 @@ class WordsAndStylesToGNNBlocks(BaseConverter):
         converter.convert(input_model, spgraph)
         graph = spgraph.to_dict()
         # SEGMENTER ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        edges_ind = classification_edges(self.model_seg, graph, k=0.75)
+        edges_ind = classification_edges(self.model_seg, graph, k=0.5)
         relating_graph = Graph()
         for word in words:
             x, y = word.segment.get_center()
@@ -98,7 +98,9 @@ class WordsAndStylesToGNNBlocks(BaseConverter):
 
             subgraphs.append(subgraph) 
         for block, sg in zip(output_model.blocks, subgraphs):
-            label = self.name_class[classification_blocks(self.model_class, sg)]
+            # class_ = classification_blocks(self.model_class, sg)
+            class_ = 1
+            label = self.name_class[class_]
             block.set_label(label)
 
     
