@@ -73,6 +73,7 @@ class WordsAndStylesToGNNBlocks(BaseConverter):
                 word_["text"] = word.content
             
             block.set_words_from_dict(words_)
+            block.sort_words()
             output_model.blocks.append(block)
 
         # CLASSIFIER +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -102,6 +103,4 @@ class WordsAndStylesToGNNBlocks(BaseConverter):
             class_ = 1
             label = self.name_class[class_]
             block.set_label(label)
-
-    
-
+            
