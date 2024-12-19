@@ -20,7 +20,7 @@ class SpGraph4NModel(BaseSubModel):
         return {"A": self.A.tolist(), "nodes_feature":self.nodes_feature.tolist(), "edges_feature": self.edges_feature.tolist()}
 
     def read_from_file(self, path_file: str) -> None:
-        self.clean_model()
+        pass
 
     def clean_model(self):
         self.A = None
@@ -96,7 +96,6 @@ class Graph4NModel(BaseSubModel):
         return {"neighbors": self.graph4n, "edges":self.sparce_graph, "words": [w.to_dict() for w in self.words]}
 
     def read_from_file(self, path_file: str) -> None:
-        self.clean_model()
         pass
 
     def clean_model(self):

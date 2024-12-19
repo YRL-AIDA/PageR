@@ -1,0 +1,7 @@
+{"words": [
+    {"x_top_left": 110, "x_bottom_right": 145, "y_top_left": 1, "y_bottom_right": 20, "text": "4"},
+    {"x_top_left": 10, "x_bottom_right": 45, "y_top_left": 30, "y_bottom_right": 50, "text": "2"},
+    {"x_top_left": 100, "x_bottom_right": 145, "y_top_left": 30, "y_bottom_right": 50, "text": "5"},
+    {"x_top_left": 1, "x_bottom_right": 45, "y_top_left": 1, "y_bottom_right": 20, "text": "1"},
+    {"x_top_left": 50, "x_bottom_right": 95, "y_top_left": 2, "y_bottom_right": 49, "text": "3"}
+]}

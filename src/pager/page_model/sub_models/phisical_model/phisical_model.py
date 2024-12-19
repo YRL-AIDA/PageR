@@ -19,7 +19,6 @@ class PhisicalModel(BaseSubModel):
         return {"blocks": [block.to_dict() for block in self.blocks]}
 
     def read_from_file(self, path_file: str) -> None:
-        self.clean_model()
         phis_json = self._read_json(path_file)
         for block_dict in phis_json["blocks"]:
             self.blocks.append(Block(block_dict))
@@ -73,6 +72,7 @@ class WordsAndStylesToGNNBlocks(BaseConverter):
                 word_["text"] = word.content
             
             block.set_words_from_dict(words_)
+            block.sort_words()
             output_model.blocks.append(block)
 
         # CLASSIFIER +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -102,6 +102,4 @@ class WordsAndStylesToGNNBlocks(BaseConverter):
             class_ = 1
             label = self.name_class[class_]
             block.set_label(label)
-
-    
-
+            

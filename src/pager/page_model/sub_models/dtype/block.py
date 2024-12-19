@@ -3,6 +3,7 @@ from typing import List
 # from ..paragraph import Paragraph
 from .image_segment import ImageSegment
 from .word import Word
+from .sortable_image_segment import Top2BottomLeft2RightImageSegment
 # from ..extractors.block_extractors import BaseRandomWalkClassificator, BaseRandomDeepNodeClassificator
 
 # CLASSIFICATOR = {
@@ -50,7 +51,20 @@ class Block(ABC):
         for dict_word in list_words:
             word = Word(dict_word)
             self.words.append(word)
+
+    def sort_words(self):
+        self._sort_segments([w.segment for w in self.words], self.words)
+
+    def _sort_segments(self, segs, elements):
+        bboxes = [Top2BottomLeft2RightImageSegment.converter(seg) for seg in segs]
+        #TODO: change sort
+        for i in range(len(bboxes)):
+            for j in range(len(bboxes)):
+                if bboxes[i] < bboxes[j]:
+                    bboxes[i], bboxes[j] = bboxes[j], bboxes[i]
+                    elements[i], elements[j] = elements[j], elements[i]
     
+
     def set_label(self, text: str):
         self.label = text
 
