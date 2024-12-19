@@ -35,7 +35,9 @@ class TestMSWord(unittest.TestCase):
     def test_to_dict(self) -> None:
         res = self.msword_model.to_dict()
         self.assertIn("styles", res.keys(), res.keys())
+        self.assertEqual(len(res["styles"]), 4, res.keys())
         self.assertIn("blocks", res.keys(), res.keys())
+        self.assertEqual(len(res["blocks"]), 5, res.keys())
 
 
 
