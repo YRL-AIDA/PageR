@@ -18,6 +18,8 @@ class ImageModel(BaseSubModel):
     def read_from_file(self, path_file: str) -> None:
         self.img = self.__read(path_file)
 
+    def clean_model(self) -> None:
+        pass
 
     def __read(self, path):
         with open(path, "rb") as f:

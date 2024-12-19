@@ -19,7 +19,6 @@ class PhisicalModel(BaseSubModel):
         return {"blocks": [block.to_dict() for block in self.blocks]}
 
     def read_from_file(self, path_file: str) -> None:
-        self.clean_model()
         phis_json = self._read_json(path_file)
         for block_dict in phis_json["blocks"]:
             self.blocks.append(Block(block_dict))

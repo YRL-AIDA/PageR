@@ -15,6 +15,9 @@ class BaseSubModel(ABC):
     def read_from_file(self, path_file: str) -> None:
         pass
     
+    @abstractmethod
+    def clean_model(self) -> None:
+        pass
 
     def is_include_pages(self) -> bool:
         return False

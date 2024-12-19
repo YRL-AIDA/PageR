@@ -38,11 +38,13 @@ class PageModel:
             
 
     def read_from_file(self, path) -> None:
+        self.page_units[0].sub_model.clean_model()
         self.page_units[0].read_from_file(path)
     
     def extract(self):
         for page_unit in self.page_units:
             for id_model, conv in page_unit.converters.items():
+                page_unit.sub_model.clean_model()
                 conv.convert(self.page_units[self.keys[id_model]].sub_model, page_unit.sub_model)
             
             for extr in page_unit.extractors:

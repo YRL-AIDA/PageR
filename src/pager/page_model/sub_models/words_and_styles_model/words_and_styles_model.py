@@ -22,7 +22,6 @@ class WordsAndStylesModel(BaseSubModel):
                 "styles": [style.to_dict(is_vec) for style in self.styles]}
 
     def read_from_file(self, path_file: str) -> None:
-        self.clean_model()
         words_and_styles_json = self._read_json(path_file)      
         for word_dict in words_and_styles_json["words"]:
             word = StyleWord(word_dict)

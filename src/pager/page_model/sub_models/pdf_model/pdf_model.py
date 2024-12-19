@@ -21,6 +21,11 @@ class PDFModel(BaseSubModel):
     def read_from_file(self, path_file: str) -> None:
         self.json = self.__read(path_file)
         self.count_page = len(self.json['pages'])
+
+    def clean_model(self)-> None:
+        self.json = {}
+        self.count_page = None
+        self.num_page = 0
     
     def is_include_pages(self) -> bool:
         return True

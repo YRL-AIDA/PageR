@@ -18,7 +18,6 @@ class WordsModel(BaseSubModel):
         return {"words": [word.to_dict() for word in self.words]}
 
     def read_from_file(self, path_file: str) -> None:
-        self.clean_model()
         phis_json = self._read_json(path_file)      
         for word_dict in phis_json["words"]:
             word = Word(word_dict)
