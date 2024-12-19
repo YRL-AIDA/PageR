@@ -31,6 +31,12 @@ class TestMSWord(unittest.TestCase):
         self.assertEqual(text.name, "Body Text", text)
         self.assertEqual(list_1.name, "Normal", list_1)
         self.assertEqual(list_1, list_2)
-        
+
+    def test_to_dict(self) -> None:
+        res = self.msword_model.to_dict()
+        self.assertIn("styles", res.keys(), res.keys())
+        self.assertIn("blocks", res.keys(), res.keys())
+
+
 
     
