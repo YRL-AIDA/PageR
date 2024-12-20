@@ -10,7 +10,24 @@ class MSWordModel(BaseSubModel):
         
     
     def from_dict(self, input_model_dict: Dict):
-        pass
+        self.doc = docx.Document()
+        styles = dict()
+        for st in input_model_dict['styles']:
+            styles[st['id']] = {"name": st['name'], "font": st['font']}
+        
+        for block in input_model_dict["blocks"]:
+            self.doc.add_paragraph(block["text"]).style = styles[block["style"]]["name"]
+
+        for key, st in styles.items():
+            self.doc.styles[key].font.name = st["font"]["name"]
+            self.doc.styles[key].font.size = st["font"]["size"]
+            self.doc.styles[key].font.bold = st["font"]["bold"]
+            self.doc.styles[key].font.italic = st["font"]["italic"]
+            self.doc.styles[key].font.underline = st["font"]["underline"]
+    
+    def save_doc(self, path):
+        self.doc.save(path)
+
 
     def to_dict(self) -> Dict:
         styles_paragraphs = []
