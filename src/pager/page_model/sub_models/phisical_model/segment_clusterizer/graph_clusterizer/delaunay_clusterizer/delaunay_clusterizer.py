@@ -47,7 +47,7 @@ class DelaunayClusterizer(BaseSegmentClusterizer):
             A[t[2], t[0]] = 1
             E[t[0], t[2]] = e3
             E[t[2], t[0]] = e3
-        return A, distans
+        return A, E
         
     def get_graph(self, segments, distans):
         graph = Graph()
