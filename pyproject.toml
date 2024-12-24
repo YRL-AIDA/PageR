@@ -16,7 +16,8 @@ dependencies = [
   'numpy',
   'opencv-python',
   'matplotlib',
-  'tensorflow'
+  'tensorflow',
+  'python-docx'
 ]
 
 version = '0.0.1' 
