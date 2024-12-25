@@ -46,13 +46,14 @@ class WordsAndStylesToGNNBlocks(BaseConverter):
         self.name_class = ["no_struct", "text", "header", "list", "table"]
         self.spgraph = SpGraph4NModel()
         self.converter = conf['graph_converter'] if "graph_converter" in conf.keys() else  WordsAndStylesToSpGraph4N()
+        self.seg_k = conf['seg_k'] if "seg_k" in conf.keys() else 0.5
        
     def convert(self, input_model: BaseSubModel, output_model: BaseSubModel)-> None:
         words = input_model.words        
         self.converter.convert(input_model, self.spgraph)
         graph = self.spgraph.to_dict()
         # SEGMENTER ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        edges_ind = classification_edges(self.model_seg, graph, k=0.5)
+        edges_ind = classification_edges(self.model_seg, graph, k=self.seg_k)
         relating_graph = Graph()
         for word in words:
             x, y = word.segment.get_center()
