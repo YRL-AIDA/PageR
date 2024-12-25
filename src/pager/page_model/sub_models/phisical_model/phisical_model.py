@@ -2,7 +2,7 @@ from ..base_sub_model import BaseSubModel, BaseExtractor, BaseConverter
 from typing import Dict, List
 from ..dtype import ImageSegment, Block, Word, Graph
 from ..words_and_styles_model import WordsAndStylesModel 
-from .graph_model import SpGraph4NModel, WordsAndStylesToSpGraph4N
+from .graph_model import SpGraph4NModel, WordsAndStylesToSpGraph4N, WordsAndStylesToSpDelaunayGraph
 import os
 from .segmodel_utils import get_model as get_model_seg, classification_edges
 from .classmodel_utils import get_model as get_model_class, classification_blocks
@@ -37,18 +37,20 @@ class WordsToOneBlock(BaseConverter):
         output_model.blocks.append(block)
 
 class WordsAndStylesToGNNBlocks(BaseConverter):
-    
-    path_seg_model = os.environ["PATH_SEG_MODEL"]
-    path_class_model = os.environ["PATH_CLASS_MODEL"]
-    model_seg = get_model_seg(path_seg_model) 
-    model_class = get_model_class(path_class_model) 
-    name_class = ["no_struct", "text", "header", "list", "table"]
+    def __init__(self, conf:Dict = {}) -> None:
+        
+        path_seg_model = conf['path_seg_model'] if "path_seg_model" in conf.keys() else os.environ["PATH_SEG_MODEL"] 
+        path_class_model = conf['path_class_model'] if "path_class_model" in conf.keys() else  os.environ["PATH_CLASS_MODEL"]
+        self.model_seg = get_model_seg(path_seg_model) 
+        self.model_class = get_model_class(path_class_model) 
+        self.name_class = ["no_struct", "text", "header", "list", "table"]
+        self.spgraph = SpGraph4NModel()
+        self.converter = conf['graph_converter'] if "graph_converter" in conf.keys() else  WordsAndStylesToSpGraph4N()
+       
     def convert(self, input_model: BaseSubModel, output_model: BaseSubModel)-> None:
         words = input_model.words        
-        spgraph = SpGraph4NModel()
-        converter = WordsAndStylesToSpGraph4N()
-        converter.convert(input_model, spgraph)
-        graph = spgraph.to_dict()
+        self.converter.convert(input_model, self.spgraph)
+        graph = self.spgraph.to_dict()
         # SEGMENTER ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         edges_ind = classification_edges(self.model_seg, graph, k=0.5)
         relating_graph = Graph()
