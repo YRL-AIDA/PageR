@@ -11,7 +11,7 @@ from scipy.spatial import Delaunay
 class DelaunayClusterizer(BaseSegmentClusterizer):
     def cluster(self, segments: List[ImageSegment], conf: Dict={}) -> List[ImageSegment]:
         A, distans = self.get_A_and_distans(segments)
-        graph = self.get_graph_segments(segments, distans)
+        graph = self.get_graph(segments, distans)
         parent_segments = []
         for r in graph.get_related_graphs():
             seg = ImageSegment(0, 0, 1, 1)
@@ -50,6 +50,7 @@ class DelaunayClusterizer(BaseSegmentClusterizer):
         return A, E
         
     def get_graph(self, segments, distans):
+        #TODO: сделать критерий
         graph = Graph()
         for seg in segments:
             c1x, c1y = seg.get_center()
@@ -57,7 +58,7 @@ class DelaunayClusterizer(BaseSegmentClusterizer):
 
         m = np.mean(distans)
         std = np.std(distans)
-        for i, row in enumerate(edges):
+        for i, row in enumerate(distans):
             for j, d in enumerate(row[i:]):
                 if d >= m-2*std:
                     graph.add_edge(i+1, j+1)
