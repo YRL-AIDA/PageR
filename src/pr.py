@@ -18,7 +18,7 @@ import sys
 from pager import (PageModel, PageModelUnit,
                    ImageModel, ImageToWordsAndStyles,
                    WordsAndStylesModel, PhisicalModel, 
-                   WordsAndStylesToGNNBlocks)
+                   WordsToDBSCANBlocks)
 if __name__ == "__main__":
     page = PageModel(page_units=[
         PageModelUnit(id="image_model", 
@@ -32,7 +32,7 @@ if __name__ == "__main__":
         PageModelUnit(id="phisical_model", 
                       sub_model=PhisicalModel(), 
                       extractors=[], 
-                      converters={"words_and_styles_model": WordsAndStylesToGNNBlocks()})
+                      converters={"words_and_styles_model": WordsToDBSCANBlocks()})
         ])
 
 
