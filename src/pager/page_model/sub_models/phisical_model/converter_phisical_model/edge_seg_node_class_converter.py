@@ -1,5 +1,6 @@
 from .segmodel_utils import get_model as get_model_seg, classification_edges 
 from .classmodel_utils import get_model as get_model_class, classification_blocks
+from .torch_segmodel_utils import get_segmenter as get_models_seg, torch_classification_edges 
 from ..converter_graph_model import SpGraph4NModel, WordsAndStylesToSpGraph4N
 from ...base_sub_model import BaseSubModel, BaseConverter
 from typing import Dict, List
@@ -99,4 +100,22 @@ class WordsAndStylesToGNNBlocks(EdgeSegNodeClassConverter):
     def classifier(self, graph) -> int:
         # return classification_blocks(self.model_class, graph)
         return 1
-        
+
+
+class WordsAndStylesToGNNpLinearBlocks(EdgeSegNodeClassConverter):
+    def __init__(self, conf:Dict = {}) -> None:
+        super().__init__(conf)
+        params = {
+            "count_neuron_layers_gnn": [9, 27, 18],
+            "count_neuron_layers_edge": [18*2, 1],
+            "path_node_gnn": conf["path_node_gnn"],
+            "path_edge_linear": conf["path_edge_linear"]
+        }
+        self.seg_k = conf['seg_k'] if "seg_k" in conf.keys() else 0.5
+        self.model_seg = get_models_seg(params)
+
+    def segmenter(self, graph) -> List[int]:
+        return torch_classification_edges(self.model_seg, graph, self.seg_k)
+    
+    def classifier(self, graph) -> int:
+        return 1

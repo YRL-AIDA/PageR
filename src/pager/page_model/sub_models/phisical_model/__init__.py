@@ -1,5 +1,5 @@
 from .phisical_model import PhisicalModel
-from .converter_phisical_model import WordsToOneBlock, WordsAndStylesToGNNBlocks
+from .converter_phisical_model import WordsToOneBlock, WordsAndStylesToGNNBlocks, WordsAndStylesToGNNpLinearBlocks
 from .converter_graph_model import (WordsAndStylesToSpGraph4N,
                           WordsAndStylesToSpDelaunayGraph,
                           Graph4NModel, WordsToGraph4N,

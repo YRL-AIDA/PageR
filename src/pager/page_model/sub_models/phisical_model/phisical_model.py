@@ -3,7 +3,6 @@ from typing import Dict, List
 from ..dtype import Block
 
 
-
 class PhisicalModel(BaseSubModel):
     def __init__(self) -> None:
         super().__init__()

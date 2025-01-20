@@ -1,5 +1,7 @@
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+GNN_MODEL = os.environ["PATH_TORCH_SEG_GNN_MODEL"]
+LINEAR_MODEL = os.environ["PATH_TORCH_SEG_LINEAR_MODEL"]
 """
 pr - Page Read
 
@@ -13,12 +15,14 @@ pr - Page Read
 > 1. list
 > 2. list
 """
-
 import sys
 from pager import (PageModel, PageModelUnit,
                    ImageModel, ImageToWordsAndStyles,
                    WordsAndStylesModel, PhisicalModel, 
-                   WordsToDBSCANBlocks)
+                   )
+from pager import WordsAndStylesToGNNpLinearBlocks
+# from pager import WordsToDBSCANBlocks
+
 if __name__ == "__main__":
     page = PageModel(page_units=[
         PageModelUnit(id="image_model", 
@@ -29,10 +33,18 @@ if __name__ == "__main__":
                       sub_model=WordsAndStylesModel(), 
                       extractors=[], 
                       converters={"image_model": ImageToWordsAndStyles()}),
+        # PageModelUnit(id="phisical_model", 
+        #               sub_model=PhisicalModel(), 
+        #               extractors=[], 
+        #               converters={"words_and_styles_model": WordsToDBSCANBlocks()})
         PageModelUnit(id="phisical_model", 
                       sub_model=PhisicalModel(), 
                       extractors=[], 
-                      converters={"words_and_styles_model": WordsToDBSCANBlocks()})
+                      converters={"words_and_styles_model": WordsAndStylesToGNNpLinearBlocks(conf={
+                          "path_node_gnn": GNN_MODEL,
+                          "path_edge_linear": LINEAR_MODEL,
+                          "seg_k": 0.5
+                      })})
         ])
 
 
