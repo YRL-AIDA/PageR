@@ -7,6 +7,8 @@ from ..words_model import ImageToWords
 import json
 import numpy as np
 
+from .model_scripts.model_20250121 import classifier_image_word, get_model
+
 class WordsAndStylesModel(BaseSubModel):
     def __init__(self) -> None:
         super().__init__()
@@ -75,10 +77,12 @@ class PdfToWordsAndStyles(BaseConverter):
 
 class ImageToWordsAndStyles(BaseConverter):
     def __init__(self, conf=None):
-        if conf is None:
-            self.conf = {"lang": "eng+rus", "psm": 4, "oem": 3, "k": 1}
-        else:
-            self.conf = conf
+        self.conf = {"lang": "eng+rus", "psm": 4, "oem": 3, "k": 1}
+        if conf is not None:
+            for key, value in conf.items():
+                if key in self.conf.items():
+                    self.conf[key] = value
+
 
     def convert(self, input_model: BaseSubModel, output_model: BaseSubModel)-> None:
         conv_image_to_words = ImageToWords()
@@ -94,22 +98,10 @@ class ImageToWordsAndStyles(BaseConverter):
             
             seg = ImageSegment(dict_p_size=word)
             word_img = cv2.cvtColor(seg.get_segment_from_img(img), cv2.COLOR_RGB2GRAY)/255
-            horizon = np.mean(word_img, axis=0)
-            vertical = np.mean(word_img, axis=1)
-            diff_vertical = np.diff(vertical)
-            h = word_img.shape[0]
-            vec_style = [
-                np.min(horizon),
-                np.max(horizon),
-                np.mean(horizon),
-                np.std(horizon),
-                np.mean(vertical),
-                np.argmax(diff_vertical)/h,
-                np.argmin(diff_vertical)/h
-            ]
+            
 
             tmp_style = {       
-                "font2vec": vec_style
+                "font2vec": self.get_style_from_word_img(word_img)
             }
             index_style = self._get_style(tmp_style, styles, delta_ = 0.1)           
             if index_style == -1:
@@ -131,3 +123,27 @@ class ImageToWordsAndStyles(BaseConverter):
             if np.dot(x1-x2, x1-x2) < delta_:
                 return i
         return -1
+
+    def get_style_from_word_img(self, word_img):
+        horizon = np.mean(word_img, axis=0)
+        vertical = np.mean(word_img, axis=1)
+        diff_vertical = np.diff(vertical)
+        h = word_img.shape[0]
+        vec_style = [
+            np.min(horizon),
+            np.max(horizon),
+            np.mean(horizon),
+            np.std(horizon),
+            np.mean(vertical),
+            np.argmax(diff_vertical)/h,
+            np.argmin(diff_vertical)/h
+        ]
+        return vec_style
+    
+class ImageToWordsAndCNNStyles(ImageToWordsAndStyles):
+    def __init__(self, conf=None):
+        super().__init__(conf)
+        self.model = get_model(conf["path_model"])
+    
+    def get_style_from_word_img(self, word_img):
+        return classifier_image_word(self.model, word_img).detach().numpy()
