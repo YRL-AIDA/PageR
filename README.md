@@ -12,7 +12,12 @@
 
 Создать переменную 
 ```
-JAVA_PDF_PARSER=path_jar_java_pdf_parser
+export JAR_PDF_PARSER="Java-PDF-Parser.jar"
+export PATH_SEG_MODEL="PageR/models/segmodel"
+export PATH_CLASS_MODEL="PageR/models/classmodel"
+export PATH_TORCH_SEG_GNN_MODEL="PageR/models/seg_gnn"
+export PATH_TORCH_SEG_LINEAR_MODEL="PageR/models/seg_linear"
+export PATH_STYLE_MODEL="PageR/models/style_classmodel_20250121"
 ```
 
 ```
