@@ -40,10 +40,12 @@ class WordsAndStylesToSpG(BaseConverter):
 
 
 class WordsAndStylesToSpGraph4N(WordsAndStylesToSpG):
-    def __init__(self, conf:Dict) -> None:
+    def __init__(self, conf=None) -> None:
         super().__init__()
         self.kmean_clusterizer = KMeanClusterizer()
-        self.with_text = conf["with_text"] if "with_text" in conf.keys() else False
+        self.with_text = False
+        if conf is not None:
+            self.with_text = conf["with_text"] if "with_text" in conf.keys() else False
 
 
     def convert(self, input_model: BaseSubModel, output_model: BaseSubModel)-> None:
@@ -65,10 +67,12 @@ class WordsAndStylesToSpGraph4N(WordsAndStylesToSpG):
         output_model.edges_feature = np.array(edges_feature)
     
 class WordsAndStylesToSpDelaunayGraph(WordsAndStylesToSpG):
-    def __init__(self, conf:Dict) -> None:
+    def __init__(self, conf=None) -> None:
         super().__init__()
         self.delaunay_clusterizer = DelaunayClusterizer()
-        self.with_text = conf["with_text"] if "with_text" in conf.keys() else False
+        self.with_text = False
+        if conf is not None:
+            self.with_text = conf["with_text"] if "with_text" in conf.keys() else False
 
     def convert(self, input_model: BaseSubModel, output_model: BaseSubModel)-> None:
         words = input_model.words
