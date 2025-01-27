@@ -18,7 +18,10 @@ dependencies = [
   'matplotlib',
   'tensorflow',
   'python-docx',
-  'scipy'
+  'scipy',
+  'transformers',
+  'torch',
+  'torch-geometric'
 ]
 
 version = '0.0.1' 
