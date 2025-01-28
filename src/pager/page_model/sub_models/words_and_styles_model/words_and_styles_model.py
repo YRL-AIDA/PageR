@@ -146,4 +146,4 @@ class ImageToWordsAndCNNStyles(ImageToWordsAndStyles):
         self.model = get_model(conf["path_model"])
     
     def get_style_from_word_img(self, word_img):
-        return classifier_image_word(self.model, word_img).detach().numpy()
+        return classifier_image_word(self.model, word_img).detach().numpy().tolist()
