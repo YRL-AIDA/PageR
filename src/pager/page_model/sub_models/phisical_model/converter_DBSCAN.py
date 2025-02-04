@@ -23,7 +23,7 @@ class WordsToDBSCANBlocks(BaseConverter):
             h = word.segment.get_height()
             list_h.append(h)
             n = len(word.content)
-            dx = w/n
+            dx = w/n if n!= 0 else 0.0
             x0 =seg["x_top_left"] + dx/2
             y = seg["y_top_left"] + h/2
             for i in range(n):
