@@ -26,9 +26,10 @@ class SegDetectionBenchmark(BaseBenchmark):
     def start(self):
         if self.path_json is None:
             json_dataset_path = [file for file in  os.listdir(self.path_dataset) if file.split(".")[-1] == "json"][0]
+            path_ = os.path.join(self.path_dataset, json_dataset_path)
         else:
-            json_dataset_path = self.path_json
-        with open(os.path.join(self.path_dataset, json_dataset_path)) as f:
+            path_ = self.path_json
+        with open(path_) as f:
             json_dataset = json.load(f)
         
         self.CATEGORY = dict()
