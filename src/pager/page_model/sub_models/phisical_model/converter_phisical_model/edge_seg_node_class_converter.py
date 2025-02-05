@@ -1,11 +1,15 @@
 from .segmodel_utils import get_model as get_model_seg, classification_edges 
 from .classmodel_utils import get_model as get_model_class, classification_blocks
 from .torch_segmodel_utils import get_segmenter as get_models_seg, torch_classification_edges 
+from .glam_model import load_weigths, NodeGLAM, EdgeGLAM, get_tensor_from_graph
+
 from ..converter_graph_model import SpGraph4NModel, WordsAndStylesToSpGraph4N
 from ...base_sub_model import BaseSubModel, BaseConverter
 from typing import Dict, List
 from ...dtype import ImageSegment, Block, Graph
 import os
+import torch
+import numpy as np
 
 class EdgeSegNodeClassConverter(BaseConverter):
     def __init__(self, conf:Dict = {}) -> None:
@@ -74,7 +78,7 @@ class EdgeSegNodeClassConverter(BaseConverter):
             subgraphs.append(subgraph) 
         for block, sg in zip(output_model.blocks, subgraphs):
             class_ = self.classifier(sg)
-            class_ = 1
+            # class_ = 1
             label = self.name_class[class_]
             block.set_label(label)
 
@@ -119,3 +123,52 @@ class WordsAndStylesToGNNpLinearBlocks(EdgeSegNodeClassConverter):
     
     def classifier(self, graph) -> int:
         return 1
+
+
+class WordsAndStylesToGLAMBlocks(EdgeSegNodeClassConverter):
+    def __init__(self, conf):
+        super().__init__(conf)
+        params = {
+            "H1": conf["H1"],
+            "H2": conf["H2"],
+            "path_node_gnn": conf["path_node_gnn"],
+            "path_edge_linear": conf["path_edge_linear"]
+        }
+        self.seg_k = conf['seg_k'] if "seg_k" in conf.keys() else 0.5
+        self.spgraph = SpGraph4NModel()
+        self.graph_converter = WordsAndStylesToSpGraph4N({"with_text": True})
+        
+        self.name_class = ["figure", "text", "header", "list", "table"]
+        models = [NodeGLAM(37, params["H1"], 5), EdgeGLAM(2*37+2*5, params["H2"], 1)]
+        self.models = load_weigths(models, conf["path_node_gnn"], conf["path_edge_linear"])
+    
+    def convert(self, input_model, output_model)-> None:
+        words = input_model.words   
+        self.graph_converter.convert(input_model, self.spgraph)
+        graph = self.spgraph.to_dict()
+        self.set_output_block(output_model, words, graph)
+            
+    def segmenter(self, graph) -> List[int]:
+        X, sp_A, i = get_tensor_from_graph(graph)
+        Node_emb = self.models[0](X, sp_A)
+        self.tmp = Node_emb
+        Omega = torch.cat([Node_emb[i[0]],Node_emb[i[1]], X[i[0]], X[i[1]]],dim=1)
+        E_pred = self.models[1](Omega)
+        rez = np.zeros(E_pred.shape)
+        rez[E_pred>0.5] = 1
+        return rez
+        
+    def classifier(self, graph) -> int:
+        pass
+
+    def set_label_output_block(self, output_model, words, graph):
+        # CLASSIFIER +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        for block in output_model.blocks:
+            block_nodes = []
+            for i, word in enumerate(words):
+                if block.segment.is_intersection(word.segment):
+                    block_nodes.append(self.tmp[i].detach().numpy())
+            
+            class_ = int(np.argmax(np.array(block_nodes).mean(axis=0)))
+            label = self.name_class[class_]
+            block.set_label(label)

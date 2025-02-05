@@ -18,6 +18,8 @@ export PATH_CLASS_MODEL="PageR/models/classmodel"
 export PATH_TORCH_SEG_GNN_MODEL="PageR/models/seg_gnn"
 export PATH_TORCH_SEG_LINEAR_MODEL="PageR/models/seg_linear"
 export PATH_STYLE_MODEL="PageR/models/style_classmodel_20250121"
+export PATH_TORCH_GLAM_NODE_MODEL="PageR/models/glam_128_node_gnn"
+export PATH_TORCH_GLAM_EDGE_MODEL="PageR/models/glam_128_edge_linear"
 ```
 
 ```
