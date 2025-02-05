@@ -1,4 +1,4 @@
-from ..base_benchmark import BaseBenchmark, DocumentsBenchmark
+from ..base_benchmark import BaseBenchmark
 from typing import Dict
 import os 
 import json
@@ -11,109 +11,98 @@ LABELS = {
             "table": 3,
             "figure": 4,
         }
+COUNT_CLASS = 5
+IOU_INTERVAL = np.arange(0.5, 1.0, 0.05)
+COUNT_IOU_INTERVAL = len(IOU_INTERVAL)
 
 class SegDetectionBenchmark(BaseBenchmark):
-    def __init__(self, path_dataset, page_model):
+    def __init__(self, path_dataset, page_model, path_images=None, path_json=None):
         self.path_dataset = path_dataset
         self.page_model = page_model
+        self.path_images = path_images
+        self.path_json = path_json
         super().__init__()
+
+    def start(self):
+        if self.path_json is None:
+            json_dataset_path = [file for file in  os.listdir(self.path_dataset) if file.split(".")[-1] == "json"][0]
+        else:
+            json_dataset_path = self.path_json
+        with open(os.path.join(self.path_dataset, json_dataset_path)) as f:
+            json_dataset = json.load(f)
         
+        self.CATEGORY = dict()
+        self.NAME_CATEGORY_ID = dict()
+        for category in json_dataset["categories"]:
+            self.CATEGORY[category["id"]] = category["name"]
+            self.NAME_CATEGORY_ID[category["name"]] = category["id"]
 
-    def test_one_document(self, document) -> Dict[str, float]:
-        rez = dict()
-        json_true = document[0]
-        path_img = document[1]
-        start = time.time()
+        self.extract_image_pred(json_dataset, self.page_model)
+        self.extract_image_true(json_dataset)
+        
+        TPplusFN = np.zeros(COUNT_CLASS)
+        TPplusFP = np.zeros(COUNT_CLASS)
+        TPplusTP = np.zeros((COUNT_CLASS, COUNT_IOU_INTERVAL))
+        IoU = [[] for i in range(COUNT_CLASS)]
+        Recall = np.zeros((COUNT_CLASS, 10))
+        Precision = np.zeros((COUNT_CLASS, 10))
+        
+        for image in json_dataset["images"]:
+            TPplusFP_one_image, TPplusFN_one_image, IoU_one_image = self.calculate_metrics(image)
+            for i in range(COUNT_CLASS):
+                TPplusFP[i] += TPplusFP_one_image[i]
+                TPplusFN[i] += TPplusFN_one_image[i]
+                IoU[i] += IoU_one_image[i]
+            
+        for k, theta in enumerate(IOU_INTERVAL):
+            for i, iou in enumerate(IoU):
+                TPplusTP[i, k] = sum(np.array(iou) >= theta)
+       
+        for i in range(COUNT_CLASS):
+            Precision[i] = TPplusTP[i] / TPplusFP[i] if TPplusFP[i] != 0 else 0.0
+            Recall[i] = TPplusTP[i] / TPplusFN[i] if TPplusFN[i] != 0 else 0.0
+        AP = np.zeros(COUNT_CLASS)
+        for i in range(COUNT_CLASS):
+            p = Precision[i]
+            r = Recall[i]
+            ind = np.argsort(r)
+            AP[i] = np.trapezoid(p[ind], x=r[ind])
+        for name, ind in LABELS.items():
+            self.loger(f"AP@IoU[0.50:0.95] ({name}) = {AP[ind]:.4f}")
+        self.loger(f"mAP@IoU[0.50:0.95] = {np.mean(AP):.4f}") 
 
-        self.page_model.read_from_file(path_img)
-        self.page_model.extract()
-        rez['time'] = time.time() - start
-        json_rez = self.page_model.to_dict()
-        json_pred = {
-            "bbox": [[seg["x_top_left"],seg["y_top_left"], seg["x_bottom_right"]-seg["x_top_left"],seg["y_bottom_right"]-seg["y_top_left"]] for seg in json_rez["blocks"]],
-            "category_id": [LABELS[seg["label"]] for seg in json_rez["blocks"]]
-        }
-        mAP=  self.mAP_IoU(json_true, json_pred)
-        rez['mAP @ IoU=0.5'] = mAP[0]
-        rez['mAP @ IoU=0.5 (text)'] = mAP[1][0]
-        rez['mAP @ IoU=0.5 (header)'] = mAP[1][1]
-        rez['mAP @ IoU=0.5 (list)'] = mAP[1][2]
-        rez['mAP @ IoU=0.5 (table)'] = mAP[1][3]
-        rez['mAP @ IoU=0.5 (figure)'] = mAP[1][4]
-        return rez
+        time_ = np.mean([image["time"] for image in json_dataset["images"]])
+        self.loger(f"mean time: {time_ : .4f} sec.")
     
-    def mAP_IoU(self, json_true, json_pred, iou_threshold=0.5, num_classes=5):
-        gt_boxes = json_true['bbox']
-        gt_categories = json_true['category_id']
+    def calculate_metrics(self, image):
+        annotation_true = [[] for i in range(COUNT_CLASS)]
+        annotation_pred = [[] for i in range(COUNT_CLASS)]
+        def get_index_from_block(block):
+            category_id = block["category_id"]
+            label = self.CATEGORY[category_id]
+            return LABELS[label]
 
-        pred_boxes = json_pred['bbox']
-        pred_categories = json_pred['category_id']
+        for block_true in image["annotations_true"]:
+            annotation_true[get_index_from_block(block_true)].append(block_true["bbox"])
 
-        # Initialize list to store AP for each class
-        aps = []
+        for block_pred in image["annotations_pred"]:    
+            annotation_pred[get_index_from_block(block_pred)].append(block_pred["bbox"])
 
-        # Calculate AP for each class
-        for class_id in range(num_classes):
-            # Filter boxes and categories for the current class
-            gt_boxes_class = [box for box, cat in zip(gt_boxes, gt_categories) if cat == class_id]
-            gt_categories_class = [cat for cat in gt_categories if cat == class_id]
+        TPplusFN = np.array([len(a) for a in annotation_true])
+        TPplusFP = np.array([len(a) for a in annotation_pred])
+        IoU = [[] for i in range(COUNT_CLASS)]
 
-            pred_boxes_class = [box for box, cat in zip(pred_boxes, pred_categories) if cat == class_id]
-            pred_categories_class = [cat for cat in pred_categories if cat == class_id]
-
-            if len(gt_boxes_class) != 0 or len(pred_boxes_class) != 0:
-            # Calculate AP for the current class
-                ap = self.calculate_ap(gt_boxes_class, gt_categories_class, pred_boxes_class, pred_categories_class, iou_threshold)
-            else:
-                ap = None
-            aps.append(ap)
-
-        # Calculate mAP as the mean of APs
-        mAP = np.mean([ap for ap in aps if ap != None]) if len(aps) != 0 else 1
-        return mAP, aps
-
-    def calculate_ap(self, gt_boxes, gt_categories, pred_boxes, pred_categories, iou_threshold=0.5):
-        # Initialize variables for AP calculation
-        tp = np.zeros(len(pred_boxes))
-        fp = np.zeros(len(pred_boxes))
-
-        # Match predictions to ground truth
-        for i, pred_box in enumerate(pred_boxes):
-            max_iou = 0
-            best_gt_idx = -1
-
-            for j, gt_box in enumerate(gt_boxes):
-                if gt_categories[j] == pred_categories[i]:
-                    iou = self.calculate_iou(pred_box, gt_box)
-                    if iou > max_iou:
-                        max_iou = iou
-                        best_gt_idx = j
-
-            if max_iou >= iou_threshold:
-                tp[i] = 1
-            else:
-                fp[i] = 1
-
-        # Calculate Precision and Recall
-        tp_cumsum = np.cumsum(tp)
-        fp_cumsum = np.cumsum(fp)
-
-        precision = tp_cumsum / (tp_cumsum + fp_cumsum)
-        recall = tp_cumsum / len(gt_boxes)
-
-        # Calculate AP (Area under Precision-Recall curve)
-        ap = 0
-        for t in np.arange(0, 1.1, 0.1):
-            if np.sum(recall >= t) == 0:
-                p = 0
-            else:
-                p = np.max(precision[recall >= t])
-            ap += p / 11
-
-        return ap
-
+        for i in range(COUNT_CLASS):
+            for bloc_pred in annotation_pred[i]:
+                iou = np.max([self.calculate_iou(bloc_pred, block_true) for block_true in annotation_true[i]] + [0.0])
+                                                                                                 # ^ если пусто, то 0.0
+                IoU[i].append(iou)
+                    
+        return TPplusFP, TPplusFN, IoU
+        
     def calculate_iou(self, box1, box2):
         # box = [x, y, width, height]
+        
         x1, y1, w1, h1 = box1
         x2, y2, w2, h2 = box2
 
@@ -132,54 +121,39 @@ class SegDetectionBenchmark(BaseBenchmark):
 
         # Calculate IoU
         iou = inter_area / union_area if union_area > 0 else 0
-        return iou
+        return iou 
 
-    def get_documents(self) -> DocumentsBenchmark:
-        return SegDetectionDocumentsBenchmark(self.path_dataset)
+    def extract_image_pred(self, json_dataset, page_model):
+        def get_annotations_from_page(path):
+            page_model.read_from_file(path)
+            start = time.time()
+            page_model.extract()
+            time_ = time.time() - start
+            phis = page_model.to_dict()
+            return [{"category_id": self.NAME_CATEGORY_ID[block["label"]],
+                     "bbox": [block["x_top_left"],
+                              block["y_top_left"], 
+                              block["x_bottom_right"]-block["x_top_left"],
+                              block["y_bottom_right"]-block["y_top_left"]],
+             } for block in phis["blocks"]], time_
+            
+        for image_d in json_dataset["images"]:
+            path = os.path.join(self.path_dataset if self.path_images is None else self.path_images, image_d["file_name"])
+            an, time_ =  get_annotations_from_page(path)
+            image_d["annotations_pred"] = an
+            image_d["time"] = time_
 
-class SegDetectionDocumentsBenchmark(DocumentsBenchmark):
-    def __init__(self, path):
-        path_pred = os.path.join(path, 'images')
-        self.name_images = os.listdir(path_pred)
-        self.path_preds = [os.path.join(path_pred, p) for p in self.name_images]
-        super().__init__(len(self.path_preds))
-        with open(os.path.join(path, 'result.json'), "r") as f:
-            self.result = json.load(f)
-        
-        self.id_images = self.__get_id_image(self.result["images"], self.name_images)
-        self.segs_for_id = [self.__get_json_segs(self.result["annotations"], i) for i in self.id_images]
-        LABELS_FILES = dict()
-        for l in self.result["categories"]:
-            LABELS_FILES[l["id"]] = l["name"]
-        
-        
-        self.trues = [{
-            "bbox": [seg["bbox"] for seg in segs] ,
-            "category_id": [LABELS[LABELS_FILES[seg["category_id"]]] for seg in segs]
-        } for segs in self.segs_for_id]
-        
-    
+    def extract_image_true(self, json_dataset):
+        id_to_index = dict()
+        for index, image_d in enumerate(json_dataset["images"]):
+            id_to_index[image_d["id"]] = index
+            image_d["annotations_true"] = []
+            
+        for true_block in json_dataset["annotations"]:
+            image_id = true_block["image_id"]
+            json_dataset["images"][image_id]["annotations_true"].append({
+                "category_id": true_block["category_id"],
+                "bbox": true_block["bbox"],
+            })
 
-    def get_i_true(self):
-        return self.trues[self.i]
-
-    def get_i_pred(self):
-        return self.path_preds[self.i]
-    
-    def __get_id_image(self, json_images, name_images):
-        id_images = []
-        for img in name_images:
-            for image_d in json_images:
-                img_code = image_d["file_name"].split('/')[1]
-                if img_code == img:
-                    id_images.append(image_d["id"])
-        return id_images
-    
-    def __get_json_segs(self, json_segs, id_image):
-        segs = []
-        for seg in json_segs:
-            if seg["image_id"] == id_image:
-                segs.append(seg)
-        
-        return segs
         
