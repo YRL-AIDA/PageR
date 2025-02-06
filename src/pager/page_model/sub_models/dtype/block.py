@@ -69,6 +69,7 @@ class Block(ABC):
         self.label = text
 
     def get_text(self):
+        self.sort_words()
         str_ = ""
         for word in self.words:
             str_ += word.text + ' '

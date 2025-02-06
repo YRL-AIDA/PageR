@@ -2,6 +2,7 @@ from ..base_sub_model import BaseSubModel, BaseExtractor, BaseConverter
 from typing import Dict, List
 import docx
 from ..dtype import Block
+from docx.enum.style import WD_STYLE_TYPE
 
 
 class MSWordModel(BaseSubModel):
@@ -78,23 +79,18 @@ class MSWordModel(BaseSubModel):
 class PhisicalToMSWord(BaseConverter):
     def convert(self, input_model: BaseSubModel, output_model: BaseSubModel)-> None:
         blocks: List[Block] = input_model.blocks
-        
-        for block in blocks:
-            bl = output_model.doc.add_paragraph(block["text"])
-            bl.style = block["label"]
-
+        output_model.doc = docx.Document()
+        styles = output_model.doc.styles
         LABELS = {
-            "text": {"name":"text", "size": 16, "bold": False, "italic": False},
-            "header": {"name":"header", "size": 20, "bold": True, "italic": False},
-            "list": {"name":"list", "size": 16, "bold": False, "italic": True},
-            "table": {"name":"table", "size": 12, "bold": False, "italic": False},
-            "figure": {"name":"figure", "size": 10, "bold": False, "italic": False},
+            "text": "Normal",
+            "header": "Heading 1",
+            "list": "List",
+            "table": "Normal",
+            # "figure": "Normal",
         }
-        for key, st in LABELS.items():
-            output_model.doc.styles[key].font.name = st["name"]
-            output_model.doc.styles[key].font.size = st["size"]
-            output_model.doc.styles[key].font.bold = st["bold"]
-            output_model.doc.styles[key].font.italic = st["italic"]
+        for block in blocks:
+            if block.label != "figure":
+                output_model.doc.add_paragraph(block.get_text()).style = styles[LABELS[block.label]]
     
 
 

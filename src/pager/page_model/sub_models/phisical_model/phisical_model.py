@@ -9,7 +9,8 @@ class PhisicalModel(BaseSubModel):
         self.blocks: List[Block] = []
     
     def from_dict(self, input_model_dict: Dict):
-        pass
+        for block_dict in input_model_dict["blocks"]:
+            self.blocks.append(Block(block_dict))
 
     def to_dict(self) -> Dict:
         return {"blocks": [block.to_dict() for block in self.blocks]}
