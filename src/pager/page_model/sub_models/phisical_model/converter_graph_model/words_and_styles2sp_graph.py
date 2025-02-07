@@ -14,7 +14,7 @@ class Word2Vec():
     
     def __call__(self, words):
         if len(words) == 0:
-            return np.array([])
+            return np.array([[]])
         inputs = self.tokenizer(words, return_tensors="pt", padding=True)
         outputs = self.model(**inputs)
         return outputs.last_hidden_state.mean(dim=1).detach().numpy()[:, :SIZE_VEC]
@@ -34,7 +34,7 @@ class WordsAndStylesToSpG(BaseConverter):
         return [x, y, *vec]
     
     def get_vec_words(self, words, styles, with_text=False):
-        styles_vec = [self._get_vec_styles_word(w, styles) for w in words] 
+        styles_vec = [self._get_vec_styles_word(w, styles) for w in words] if len(words) != 0 else np.array([[]])
         if not with_text:
             return styles_vec
         text_vec = self.word2vec([ w.content for w in words])
