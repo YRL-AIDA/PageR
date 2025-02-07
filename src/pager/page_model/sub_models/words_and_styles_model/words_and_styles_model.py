@@ -78,10 +78,13 @@ class PdfToWordsAndStyles(BaseConverter):
 class ImageToWordsAndStyles(BaseConverter):
     def __init__(self, conf=None):
         self.conf = {"lang": "eng+rus", "psm": 4, "oem": 3, "k": 1}
-        if conf is not None:
-            for key, value in conf.items():
-                if key in self.conf.items():
-                    self.conf[key] = value
+
+        if conf is None:
+            return
+        
+        for key, value in conf.items():
+            if key in self.conf.keys():
+                self.conf[key] = value
 
 
     def convert(self, input_model: BaseSubModel, output_model: BaseSubModel)-> None:
