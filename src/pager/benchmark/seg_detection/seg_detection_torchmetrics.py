@@ -21,12 +21,12 @@ IOU_INTERVAL = np.arange(0.5, 1.0, 0.05)
 COUNT_IOU_INTERVAL = len(IOU_INTERVAL)
 
 class SegDetectionBenchmark(BaseBenchmark):
-    def __init__(self, path_dataset, page_model, path_images=None, path_json=None):
+    def __init__(self, path_dataset, page_model, path_images=None, path_json=None, name=""):
         self.path_dataset = path_dataset
         self.page_model = page_model
         self.path_images = path_images
         self.path_json = path_json
-        super().__init__()
+        super().__init__(name)
 
     def start(self):
         if self.path_json is None:
@@ -58,24 +58,8 @@ class SegDetectionBenchmark(BaseBenchmark):
         metric = MeanAveragePrecision(box_format="xywh")
         metric.update(preds, target)   
         rez = metric.compute()
-        print(rez)
+        # print(rez)
         self.loger(f"mAP@IoU[0.50:0.95] = {rez['map']:.4f}")
-        # for k, theta in enumerate(IOU_INTERVAL):
-        #     for i, iou in enumerate(IoU):
-        #         TPplusTP[i, k] = sum(np.array(iou) >= theta)
-       
-        # for i in range(COUNT_CLASS):
-        #     Precision[i] = TPplusTP[i] / TPplusFP[i] if TPplusFP[i] != 0 else 0.0
-        #     Recall[i] = TPplusTP[i] / TPplusFN[i] if TPplusFN[i] != 0 else 0.0
-        # AP = np.zeros(COUNT_CLASS)
-        # for i in range(COUNT_CLASS):
-        #     p = Precision[i]
-        #     r = Recall[i]
-        #     ind = np.argsort(r)
-        #     AP[i] = np.trapezoid(p[ind], x=r[ind])
-        # for name, ind in LABELS.items():
-        #     self.loger(f"AP@IoU[0.50:0.95] ({name}) = {AP[ind]:.4f}")
-        # self.loger(f"mAP@IoU[0.50:0.95] = {np.mean(AP):.4f}") 
 
         time_ = np.mean([image["time"] for image in json_dataset["images"]])
         self.loger(f"mean time: {time_ : .4f} sec.")

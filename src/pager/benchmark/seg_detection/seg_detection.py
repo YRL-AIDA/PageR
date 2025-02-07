@@ -18,12 +18,12 @@ IOU_INTERVAL = np.arange(0.5, 1.0, 0.05)
 COUNT_IOU_INTERVAL = len(IOU_INTERVAL)
 
 class SegDetectionBenchmark(BaseBenchmark):
-    def __init__(self, path_dataset, page_model, path_images=None, path_json=None):
+    def __init__(self, path_dataset, page_model, path_images=None, path_json=None, name=""):
         self.path_dataset = path_dataset
         self.page_model = page_model
         self.path_images = path_images
         self.path_json = path_json
-        super().__init__()
+        super().__init__(name)
 
     def start(self):
         if self.path_json is None:

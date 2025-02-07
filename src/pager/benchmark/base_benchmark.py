@@ -3,10 +3,10 @@ from datetime import date
 
 
 class BaseBenchmark(ABC):
-    def __init__(self):
+    def __init__(self, name):
         self.name = f"{str(date.today())}" 
         self.loger = LogerBenchmark(f'{self.name}.txt')
-        self.loger("S T A R T")
+        self.loger(f"S T A R T ({name})")
         self.start()
         
     def __str__(self):
