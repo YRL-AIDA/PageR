@@ -150,11 +150,14 @@ class WordsAndStylesToGLAMBlocks(EdgeSegNodeClassConverter):
             
     def segmenter(self, graph) -> List[int]:
         X, sp_A, i = get_tensor_from_graph(graph)
+        if len(i[0]) == 0:
+            self.tmp = np.array([[0.0, 1.0, 0.0, 0.0, 0.0] for x in range(X.shape[0])])
+            return np.array([])
         Node_emb = self.models[0](X, sp_A)
-        self.tmp = Node_emb
+        self.tmp = Node_emb.detach().numpy()
         Omega = torch.cat([Node_emb[i[0]],Node_emb[i[1]], X[i[0]], X[i[1]]],dim=1)
-        E_pred = self.models[1](Omega)
-        rez = np.zeros(E_pred.shape)
+        E_pred = self.models[1](Omega).detach().numpy()
+        rez = np.zeros_like(E_pred)
         rez[E_pred>0.5] = 1
         return rez
         
@@ -167,7 +170,7 @@ class WordsAndStylesToGLAMBlocks(EdgeSegNodeClassConverter):
             block_nodes = []
             for i, word in enumerate(words):
                 if block.segment.is_intersection(word.segment):
-                    block_nodes.append(self.tmp[i].detach().numpy())
+                    block_nodes.append(self.tmp[i])
             
             class_ = int(np.argmax(np.array(block_nodes).mean(axis=0)))
             label = self.name_class[class_]

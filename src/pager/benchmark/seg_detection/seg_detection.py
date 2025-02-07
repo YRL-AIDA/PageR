@@ -6,10 +6,12 @@ import time
 import numpy as np
 LABELS = {
             "text": 0,
+            "title": 1,
             "header": 1,
-            "list": 2, 
+            "list": 2,
             "table": 3,
             "figure": 4,
+            "no_struct":4,
         }
 COUNT_CLASS = 5
 IOU_INTERVAL = np.arange(0.5, 1.0, 0.05)
@@ -137,8 +139,9 @@ class SegDetectionBenchmark(BaseBenchmark):
                               block["x_bottom_right"]-block["x_top_left"],
                               block["y_bottom_right"]-block["y_top_left"]],
              } for block in phis["blocks"]], time_
-            
-        for image_d in json_dataset["images"]:
+        N = len(json_dataset["images"])
+        for i, image_d in enumerate(json_dataset["images"]):
+            print(f"{(i+1)/N*100:.2f}%", end="\r")
             path = os.path.join(self.path_dataset if self.path_images is None else self.path_images, image_d["file_name"])
             an, time_ =  get_annotations_from_page(path)
             image_d["annotations_pred"] = an
@@ -151,7 +154,7 @@ class SegDetectionBenchmark(BaseBenchmark):
             image_d["annotations_true"] = []
             
         for true_block in json_dataset["annotations"]:
-            image_id = true_block["image_id"]
+            image_id = id_to_index[true_block["image_id"]]
             json_dataset["images"][image_id]["annotations_true"].append({
                 "category_id": true_block["category_id"],
                 "bbox": true_block["bbox"],

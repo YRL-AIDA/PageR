@@ -29,6 +29,10 @@ class WordsToDBSCANBlocks(BaseConverter):
             for i in range(n):
                 word_chars_index.append(j)
                 char_coordinate.append((x0 + i*dx, y))
+        if len(char_coordinate) < 2:
+            if len(word_list) == 0:
+                return []
+            return [self.get_block_from_words(word_list)]
         mean_h = np.mean(list_h)
         clusters = DBSCAN(eps=3*mean_h).fit(char_coordinate)
         m = max(clusters.labels_)
@@ -41,16 +45,17 @@ class WordsToDBSCANBlocks(BaseConverter):
                     if not tmp_word in word_clust_list:
                         word_clust_list.append(tmp_word)
             if len(word_clust_list) != 0:    
-                segment = ImageSegment(0, 0, 1, 1)
-                segment.set_segment_max_segments([word.segment for word in word_clust_list])
-                block = Block(segment.get_segment_2p())
-                # TODO: Решить проблему с типами в блоке (+1)
-                words_ = [word.to_dict()['segment'] for word in word_clust_list]
-                for word_, word in zip(words_, word_clust_list):
-                    word_["text"] = word.content
-                block.set_words_from_dict(words_)
-                block.set_label("text")
-                blocks.append(block)
-            
+                blocks.append(self.get_block_from_words(word_clust_list)) 
         return blocks
-        
+    
+    def get_block_from_words(self, word_list: List[StyleWord]) -> Block:
+        segment = ImageSegment(0, 0, 1, 1)
+        segment.set_segment_max_segments([word.segment for word in word_list])
+        block = Block(segment.get_segment_2p())
+        # TODO: Решить проблему с типами в блоке (+1)
+        words_ = [word.to_dict()['segment'] for word in word_list]
+        for word_, word in zip(words_, word_list):
+            word_["text"] = word.content
+        block.set_words_from_dict(words_)
+        block.set_label("text")
+        return block

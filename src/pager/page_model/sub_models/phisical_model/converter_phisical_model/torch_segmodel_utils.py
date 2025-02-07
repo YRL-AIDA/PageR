@@ -77,6 +77,8 @@ def get_segmenter(params):
 
 def torch_classification_edges(models, graph, k=0.51):
     i = graph["A"]
+    if len(i[0]) == 0:
+        return np.array([])
     v_in = [rev_dist(e) for e in graph["edges_feature"]]
     x = graph["nodes_feature"]
     N = len(x)
@@ -85,8 +87,8 @@ def torch_classification_edges(models, graph, k=0.51):
     
     H_end = models[0](X, sp_A)
     Omega = torch.cat([H_end[i[0]], H_end[i[1]]],dim=1)
-    E_pred = models[1](Omega)
-    a = np.zeros(E_pred.shape)
+    E_pred = models[1](Omega).detach().numpy()
+    a = np.zeros_like(E_pred)
     a[E_pred>k] = 1.0
     return a
    
