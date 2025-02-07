@@ -13,6 +13,8 @@ class Word2Vec():
         self.model = BertModel.from_pretrained(model_name)
     
     def __call__(self, words):
+        if len(words) == 0:
+            return np.array([])
         inputs = self.tokenizer(words, return_tensors="pt", padding=True)
         outputs = self.model(**inputs)
         return outputs.last_hidden_state.mean(dim=1).detach().numpy()[:, :SIZE_VEC]
