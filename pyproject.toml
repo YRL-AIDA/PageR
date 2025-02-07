@@ -21,7 +21,8 @@ dependencies = [
   'scipy',
   'transformers',
   'torch',
-  'torch-geometric'
+  'torch-geometric',
+  'torchmetrics'
 ]
 
 version = '0.0.1' 
