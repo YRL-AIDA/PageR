@@ -150,9 +150,13 @@ class WordsAndStylesToGLAMBlocks(EdgeSegNodeClassConverter):
             
     def segmenter(self, graph) -> List[int]:
         X, sp_A, i = get_tensor_from_graph(graph)
+        N = X.shape[0]
         if len(i[0]) == 0:
-            self.tmp = np.array([[0.0, 1.0, 0.0, 0.0, 0.0] for x in range(X.shape[0])])
+            self.tmp = np.array([[0.0, 1.0, 0.0, 0.0, 0.0] for _ in range(N)])
             return np.array([])
+        if N == 1:
+            self.tmp = np.array([[0.0, 1.0, 0.0, 0.0, 0.0]])
+            return np.array([0 for _ in i[0]])
         Node_emb = self.models[0](X, sp_A)
         self.tmp = Node_emb.detach().numpy()
         Omega = torch.cat([Node_emb[i[0]],Node_emb[i[1]], X[i[0]], X[i[1]]],dim=1)
