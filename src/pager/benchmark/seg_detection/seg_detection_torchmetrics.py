@@ -48,17 +48,18 @@ class SegDetectionBenchmark(BaseBenchmark):
     
         target = [dict(     
                 boxes=torch.tensor([an["bbox"] for an in  img["annotations_true"]]) ,
-                scores=torch.tensor([1 for an in  img["annotations_true"]]),
                 labels=torch.tensor([an["category_id"] for an in  img["annotations_true"]]),
                 ) for img in json_dataset["images"]]
         preds = [dict(     
                 boxes=torch.tensor([an["bbox"] for an in  img["annotations_pred"]]) ,
+                scores=torch.tensor([1.0 for an in  img["annotations_pred"]]),
                 labels=torch.tensor([an["category_id"] for an in  img["annotations_pred"]]),
                 ) for img in json_dataset["images"]]
-        metric = MeanAveragePrecision()
-        rez = metric(preds, target).compute()   
+        metric = MeanAveragePrecision(box_format="xywh")
+        metric.update(preds, target)   
+        rez = metric.compute()
         print(rez)
-        self.logger(rez)
+        self.loger(f"mAP@IoU[0.50:0.95] = {rez['map']:.4f}")
         # for k, theta in enumerate(IOU_INTERVAL):
         #     for i, iou in enumerate(IoU):
         #         TPplusTP[i, k] = sum(np.array(iou) >= theta)

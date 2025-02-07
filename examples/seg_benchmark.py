@@ -1,4 +1,4 @@
-from pager.benchmark.seg_detection.seg_detection import  SegDetectionBenchmark
+from pager.benchmark.seg_detection.seg_detection_torchmetrics import  SegDetectionBenchmark
 import os
 from pager import (PageModel, PageModelUnit,
                    ImageModel, ImageToWordsAndStyles,

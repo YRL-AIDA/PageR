@@ -22,7 +22,7 @@ dependencies = [
   'transformers',
   'torch',
   'torch-geometric',
-  'torchmetrics'
+  'torchmetrics[detection]'
 ]
 
 version = '0.0.1' 
