@@ -74,6 +74,8 @@ if __name__ == '__main__':
                                 "path_edge_linear": GLAM_EDGE_MODEL,
                                 "H1": [128, 128, 128, 128, 128],
                                 "H2": [128],
+                                "node_featch": 37,
+                                "edge_featch": 1,
                                 "seg_k": 0.5
                         })})
     ])

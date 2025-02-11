@@ -131,6 +131,8 @@ class WordsAndStylesToGLAMBlocks(EdgeSegNodeClassConverter):
         params = {
             "H1": conf["H1"],
             "H2": conf["H2"],
+            "node_featch": conf["node_featch"],
+            "edge_featch": conf["edge_featch"],
             "path_node_gnn": conf["path_node_gnn"],
             "path_edge_linear": conf["path_edge_linear"]
         }
@@ -139,7 +141,8 @@ class WordsAndStylesToGLAMBlocks(EdgeSegNodeClassConverter):
         self.graph_converter = WordsAndStylesToSpGraph4N({"with_text": True})
         
         self.name_class = ["figure", "text", "header", "list", "table"]
-        models = [NodeGLAM(37, params["H1"], 5), EdgeGLAM(2*37+2*5, params["H2"], 1)]
+        models = [NodeGLAM(params["node_featch"], params["H1"], 5), 
+                  EdgeGLAM(2*params["node_featch"]+2*5+params["edge_featch"], params["H2"], 1)]
         self.models = load_weigths(models, conf["path_node_gnn"], conf["path_edge_linear"])
     
     def convert(self, input_model, output_model)-> None:
@@ -149,7 +152,7 @@ class WordsAndStylesToGLAMBlocks(EdgeSegNodeClassConverter):
         self.set_output_block(output_model, words, graph)
             
     def segmenter(self, graph) -> List[int]:
-        X, sp_A, i = get_tensor_from_graph(graph)
+        X, Y, sp_A, i = get_tensor_from_graph(graph)
         N = X.shape[0]
         if len(i[0]) == 0:
             self.tmp = np.array([[0.0, 1.0, 0.0, 0.0, 0.0] for _ in range(N)])
@@ -159,7 +162,7 @@ class WordsAndStylesToGLAMBlocks(EdgeSegNodeClassConverter):
             return np.array([0 for _ in i[0]])
         Node_emb = self.models[0](X, sp_A)
         self.tmp = Node_emb.detach().numpy()
-        Omega = torch.cat([Node_emb[i[0]],Node_emb[i[1]], X[i[0]], X[i[1]]],dim=1)
+        Omega = torch.cat([Node_emb[i[0]],Node_emb[i[1]], X[i[0]], X[i[1]], Y],dim=1)
         E_pred = self.models[1](Omega).detach().numpy()
         rez = np.zeros_like(E_pred)
         rez[E_pred>0.5] = 1

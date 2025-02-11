@@ -3,26 +3,17 @@ from torch_geometric.nn import BatchNorm, TAGConv
 from torch.nn import Linear
 from torch.nn.functional import relu
 
-def get_tensor_from_graph(graph):
-    def class_node(n):
-        rez = [0, 0, 0, 0, 0]
-        if n!= -1:
-            rez[n] = 1
-        return rez
-    def rev_dist(a):
-        if a==0:
-            return 0
-        else:
-            return 1/a
-        
+def get_tensor_from_graph(graph):    
     i = graph["A"]
-    v_in = [rev_dist(e) for e in graph["edges_feature"]]
+    v_in = [1 for e in graph["edges_feature"]]
+    y = graph["edges_feature"]
     x = graph["nodes_feature"]
     N = len(x)
     
     X = torch.tensor(data=x, dtype=torch.float32)
+    Y = torch.tensor(data=y, dtype=torch.float32)
     sp_A = torch.sparse_coo_tensor(indices=i, values=v_in, size=(N, N), dtype=torch.float32)
-    return X, sp_A, i
+    return X, Y, sp_A, i
 
 def load_weigths(models, path_node_gnn, path_edge_linear):
     models[0].load_state_dict(torch.load(path_node_gnn, weights_only=True))

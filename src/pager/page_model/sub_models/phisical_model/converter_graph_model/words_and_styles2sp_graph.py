@@ -1,9 +1,10 @@
 from ...base_sub_model import BaseSubModel, BaseConverter
 from ..segment_clusterizer import KMeanClusterizer, DelaunayClusterizer
 import numpy as np
-from typing import Dict
+from typing import Dict, List
 from transformers import BertTokenizer, BertModel
 import torch
+from ...dtype import ImageSegment
 
 SIZE_VEC = 32
 class Word2Vec():
@@ -51,9 +52,9 @@ class WordsAndStylesToSpGraph4N(WordsAndStylesToSpG):
 
 
     def convert(self, input_model: BaseSubModel, output_model: BaseSubModel)-> None:
-        words = input_model.words
+        words= input_model.words
         styles = input_model.styles
-        segments = [w.segment for w in words]
+        segments: List[ImageSegment]  = [w.segment for w in words]
         graph4n = self.kmean_clusterizer.get_index_neighbors_segment(segments)
         distans = self.kmean_clusterizer.get_distans(graph4n, segments)
         edges = [[], []]
@@ -63,7 +64,10 @@ class WordsAndStylesToSpGraph4N(WordsAndStylesToSpG):
                 if not (i in edges[1] and j in edges[0]): # i-j еще нет, проверка что нет j-i
                     edges[0].append(i)
                     edges[1].append(j)
-                    edges_feature.append(distans[i][k])
+                    edges_feature.append([
+                        distans[i][k],
+                        segments[i].get_angle_center(segments[k]),
+                        ])
         output_model.A = np.array(edges)
         output_model.nodes_feature = np.array(self.get_vec_words(words, styles, self.with_text))
         output_model.edges_feature = np.array(edges_feature)
