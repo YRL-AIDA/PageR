@@ -59,7 +59,7 @@ class SegDetectionBenchmark(BaseBenchmark):
         metric.update(preds, target)   
         rez = metric.compute()
         # print(rez)
-        self.loger(f"mAP@IoU[0.50:0.95] = {rez['map']:.4f}")
+        self.loger(f"mAP@IoU[0.50:0.95] = {rez['map']:.8f}")
 
         time_ = np.mean([image["time"] for image in json_dataset["images"]])
         self.loger(f"mean time: {time_ : .4f} sec.")
