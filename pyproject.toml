@@ -19,6 +19,7 @@ dependencies = [
   'tensorflow',
   'python-docx',
   'scipy',
+  'scikit-learn',
   'transformers',
   'torch',
   'torch-geometric',
