@@ -36,6 +36,17 @@ class WordsAndStylesModel(BaseSubModel):
         self.words = []
         self.styles = []
 
+    def show(self):
+        print(f"count words: {len(self.words)}")
+        for word in self.words:
+            word.segment.plot()
+        print(f"count styles: {len(self.styles)}")
+        print(f"first style:")
+        st = self.styles[0].to_dict(is_vec=True)
+        print(np.array(st['font2vec']))
+        print(f"end style:")
+        st = self.styles[-1].to_dict(is_vec=True)
+        print(np.array(st['font2vec']))
 
 class PdfToWordsAndStyles(BaseConverter):
     def convert(self, input_model: BaseSubModel, output_model: BaseSubModel)-> None:
