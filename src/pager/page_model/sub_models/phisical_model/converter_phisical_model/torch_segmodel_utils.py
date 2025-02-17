@@ -47,10 +47,10 @@ def get_models(params):
     return node_gnn, edge_linear
 
 def rev_dist(a):
-    if a==0:
+    if a[0]==0:
         return 0
     else:
-        return 1/a
+        return 1/a[0]
 
 def get_tensor_from_graph(graph):
     i = graph["A"]
