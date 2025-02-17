@@ -1,12 +1,16 @@
 
 import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import argparse
 
 from pager import (PageModel, PageModelUnit,
                    ImageModel, ImageToWordsAndStyles,
                    WordsAndStylesModel, PhisicalModel, 
-                   WordsAndStylesToGNNBlocks)
+                   WordsAndStylesToGNNpLinearBlocks
+                   )
+from dotenv import load_dotenv
+load_dotenv()
+GNN_MODEL = os.environ["PATH_TORCH_SEG_GNN_MODEL"]
+LINEAR_MODEL = os.environ["PATH_TORCH_SEG_LINEAR_MODEL"]
 
 page = PageModel(page_units=[
         PageModelUnit(id="image_model", 
@@ -16,11 +20,15 @@ page = PageModel(page_units=[
         PageModelUnit(id="words_and_styles_model", 
                       sub_model=WordsAndStylesModel(), 
                       extractors=[], 
-                      converters={"image_model": ImageToWordsAndStyles()}),
+                      converters={"image_model": ImageToWordsAndStyles(conf= {"k": 4})}),
         PageModelUnit(id="phisical_model", 
                       sub_model=PhisicalModel(), 
                       extractors=[], 
-                      converters={"words_and_styles_model": WordsAndStylesToGNNBlocks()})
+                      converters={"words_and_styles_model": WordsAndStylesToGNNpLinearBlocks(conf={
+                          "path_node_gnn": GNN_MODEL,
+                          "path_edge_linear": LINEAR_MODEL,
+                          "seg_k": 0.5
+                      })})
         ])
 
 

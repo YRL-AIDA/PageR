@@ -1,5 +1,3 @@
-from .segmodel_utils import get_model as get_model_seg, classification_edges 
-from .classmodel_utils import get_model as get_model_class, classification_blocks
 from .torch_segmodel_utils import get_segmenter as get_models_seg, torch_classification_edges 
 from .glam_model import load_weigths, NodeGLAM, EdgeGLAM, get_tensor_from_graph
 
@@ -91,21 +89,6 @@ class EdgeSegNodeClassConverter(BaseConverter):
         pass
         
 
-class WordsAndStylesToGNNBlocks(EdgeSegNodeClassConverter):
-    def __init__(self, conf:Dict = {}) -> None:
-        super().__init__(conf)
-        path_seg_model = conf['path_seg_model'] if "path_seg_model" in conf.keys() else os.environ["PATH_SEG_MODEL"] 
-        path_class_model = conf['path_class_model'] if "path_class_model" in conf.keys() else  os.environ["PATH_CLASS_MODEL"]
-        self.model_seg = get_model_seg(path_seg_model) 
-        self.model_class = get_model_class(path_class_model) 
-        self.seg_k = conf['seg_k'] if "seg_k" in conf.keys() else 0.5
-
-    def segmenter(self, graph) -> List[int]:
-        return classification_edges(self.model_seg, graph, self.seg_k)
-    
-    def classifier(self, graph) -> int:
-        # return classification_blocks(self.model_class, graph)
-        return 1
 
 
 class WordsAndStylesToGNNpLinearBlocks(EdgeSegNodeClassConverter):
