@@ -23,7 +23,8 @@ dependencies = [
   'transformers',
   'torch',
   'torch-geometric',
-  'torchmetrics[detection]'
+  'torchmetrics[detection]',
+  'python-dotenv'
 ]
 
 version = '0.0.1' 

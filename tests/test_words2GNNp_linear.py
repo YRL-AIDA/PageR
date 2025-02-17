@@ -6,6 +6,8 @@ from pager import (PageModel, PageModelUnit,
 from pager.page_model.sub_models.dtype import ImageSegment
 from pager.metrics.uoi import segmenter_UoI as UoI, AP_and_AR_from_TP_FP_FN, TP_FP_FN_UoI
 import os 
+from dotenv import load_dotenv
+load_dotenv()
 
 GNN_MODEL = os.environ["PATH_TORCH_SEG_GNN_MODEL"]
 LINEAR_MODEL = os.environ["PATH_TORCH_SEG_LINEAR_MODEL"]
