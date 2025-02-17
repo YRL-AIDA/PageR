@@ -7,6 +7,9 @@ from pager import (PageModel, PageModelUnit,
 from pager import WordsAndStylesToGNNpLinearBlocks
 from pager import WordsAndStylesToGLAMBlocks
 from pager import WordsToDBSCANBlocks
+
+from dotenv import load_dotenv
+load_dotenv()
 GNN_MODEL = os.environ["PATH_TORCH_SEG_GNN_MODEL"]
 LINEAR_MODEL = os.environ["PATH_TORCH_SEG_LINEAR_MODEL"]
 

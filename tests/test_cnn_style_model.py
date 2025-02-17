@@ -1,6 +1,8 @@
 import unittest
 from pager import PageModel, PageModelUnit, WordsAndStylesModel, ImageModel, ImageToWordsAndCNNStyles
 import os
+from dotenv import load_dotenv
+load_dotenv()
 
 PATH_STYLE_MODEL = os.environ["PATH_STYLE_MODEL"]
 class TestWords2PhisModel(unittest.TestCase):

@@ -10,6 +10,8 @@ from ...dtype import ImageSegment, Block, Graph
 import os
 import torch
 import numpy as np
+from dotenv import load_dotenv
+load_dotenv()
 
 class EdgeSegNodeClassConverter(BaseConverter):
     def __init__(self, conf:Dict = {}) -> None:
