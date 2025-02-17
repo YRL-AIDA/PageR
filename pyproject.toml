@@ -16,7 +16,6 @@ dependencies = [
   'numpy',
   'opencv-python',
   'matplotlib',
-  'tensorflow',
   'python-docx',
   'scipy',
   'scikit-learn',

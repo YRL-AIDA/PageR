@@ -20,12 +20,6 @@ print(model_dir)
 path = os.path.join(os.path.dirname(pager_dir), 'ispras_tbl_extr.jar')
 JAR_PDF_PARSER = get_path(path, f'path JAR_PDF_PARSER (default: {path})')
 
-path = os.path.join(model_dir, 'segmodel')
-PATH_SEG_MODEL = get_path(path, f'path PATH_SEG_MODEL (default: {path})')
-
-path = os.path.join(model_dir, 'classmodel')
-PATH_CLASS_MODEL = get_path(path, f'path PATH_CLASS_MODEL (default: {path})')
-
 path = os.path.join(model_dir,  'seg_gnn')
 PATH_TORCH_SEG_GNN_MODEL = get_path(path, f'path PATH_TORCH_SEG_GNN_MODEL (default: {path})')
 
@@ -44,8 +38,6 @@ PATH_TORCH_GLAM_EDGE_MODEL = get_path(path, f'path PATH_TORCH_GLAM_EDGE_MODEL (d
 
 # словарь Python
 config = {'JAR_PDF_PARSER': JAR_PDF_PARSER,
-        'PATH_SEG_MODEL': PATH_SEG_MODEL,
-        'PATH_CLASS_MODEL': PATH_CLASS_MODEL,
         'PATH_TORCH_SEG_GNN_MODEL':PATH_TORCH_SEG_GNN_MODEL, 
         'PATH_TORCH_SEG_LINEAR_MODEL': PATH_TORCH_SEG_LINEAR_MODEL,
         'PATH_STYLE_MODEL': PATH_STYLE_MODEL,
