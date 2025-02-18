@@ -5,8 +5,9 @@ from typing import Dict, List
 from transformers import BertTokenizer, BertModel
 import torch
 from ...dtype import ImageSegment
-
 SIZE_VEC = 32
+BERT_COUNT_WORD_AT_ONCE= 250
+
 class Word2Vec():
     def __init__(self):
         model_name = "bert-base-multilingual-cased"  # Многоязычная модель BERT
@@ -16,9 +17,22 @@ class Word2Vec():
     def __call__(self, words):
         if len(words) == 0:
             return np.array([[]])
-        inputs = self.tokenizer(words, return_tensors="pt", padding=True)
-        outputs = self.model(**inputs)
-        return outputs.last_hidden_state.mean(dim=1).detach().numpy()[:, :SIZE_VEC]
+        k = len(words)//BERT_COUNT_WORD_AT_ONCE
+        over = len(words)%BERT_COUNT_WORD_AT_ONCE
+        output_array = np.zeros((len(words), SIZE_VEC))
+        for i in range(0, k):
+            a = i*BERT_COUNT_WORD_AT_ONCE
+            b = (i+1)*BERT_COUNT_WORD_AT_ONCE
+            part_words = words[a:b]
+            inputs = self.tokenizer(part_words, return_tensors="pt", padding=True)
+            outputs = self.model(**inputs)
+            output_array[a:b] = outputs.last_hidden_state.mean(dim=1).detach().numpy()[:, :SIZE_VEC]
+        if over != 0:
+            part_words = words[-over:]
+            inputs = self.tokenizer(part_words, return_tensors="pt", padding=True)
+            outputs = self.model(**inputs)
+            output_array[-over:] = outputs.last_hidden_state.mean(dim=1).detach().numpy()[:, :SIZE_VEC]
+        return output_array
 
 class WordsAndStylesToSpG(BaseConverter):
     def __init__(self) -> None:
