@@ -29,11 +29,14 @@ PATH_TORCH_SEG_LINEAR_MODEL = get_path(path, f'path PATH_TORCH_SEG_LINEAR_MODEL 
 path = os.path.join(model_dir,  'style_classmodel_20250121')
 PATH_STYLE_MODEL = get_path(path, f'path PATH_STYLE_MODEL (default: {path})')
 
-path = os.path.join(model_dir,  'glam_128_node_gnn')
+path = os.path.join(model_dir,  'glam_node_model_20250219')
 PATH_TORCH_GLAM_NODE_MODEL = get_path(path, f'path PATH_TORCH_GLAM_NODE_MODEL (default: {path})')
 
-path = os.path.join(model_dir,  'glam_128_edge_linear')
+path = os.path.join(model_dir,  'glam_edge_model_20250219')
 PATH_TORCH_GLAM_EDGE_MODEL = get_path(path, f'path PATH_TORCH_GLAM_EDGE_MODEL (default: {path})')
+
+path = os.path.join(model_dir,  'glam_config_model_20250219.json')
+PATH_TORCH_GLAM_CONF_MODEL = get_path(path, f'path PATH_TORCH_GLAM_CONF_MODEL (default: {path})')
 
 
 # словарь Python
@@ -42,7 +45,8 @@ config = {'JAR_PDF_PARSER': JAR_PDF_PARSER,
         'PATH_TORCH_SEG_LINEAR_MODEL': PATH_TORCH_SEG_LINEAR_MODEL,
         'PATH_STYLE_MODEL': PATH_STYLE_MODEL,
         'PATH_TORCH_GLAM_NODE_MODEL': PATH_TORCH_GLAM_NODE_MODEL,
-        'PATH_TORCH_GLAM_EDGE_MODEL': PATH_TORCH_GLAM_EDGE_MODEL
+        'PATH_TORCH_GLAM_EDGE_MODEL': PATH_TORCH_GLAM_EDGE_MODEL,
+        'PATH_TORCH_GLAM_CONF_MODEL': PATH_TORCH_GLAM_CONF_MODEL
 }
 
         

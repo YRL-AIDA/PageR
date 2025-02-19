@@ -16,8 +16,8 @@ def get_tensor_from_graph(graph):
     return X, Y, sp_A, i
 
 def load_weigths(models, path_node_gnn, path_edge_linear):
-    models[0].load_state_dict(torch.load(path_node_gnn, weights_only=True))
-    models[1].load_state_dict(torch.load(path_edge_linear, weights_only=True))
+    models[0].load_state_dict(torch.load(path_node_gnn, weights_only=True, map_location=torch.device('cpu')))
+    models[1].load_state_dict(torch.load(path_edge_linear, weights_only=True, map_location=torch.device('cpu')))
     return models
 
 class NodeGLAM(torch.nn.Module):

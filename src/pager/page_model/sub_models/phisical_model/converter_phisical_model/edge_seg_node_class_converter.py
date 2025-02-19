@@ -4,7 +4,7 @@ from .glam_model import load_weigths, NodeGLAM, EdgeGLAM, get_tensor_from_graph
 from ..converter_graph_model import SpGraph4NModel, WordsAndStylesToSpGraph4N
 from ...base_sub_model import BaseSubModel, BaseConverter
 from typing import Dict, List
-from ...dtype import ImageSegment, Block, Graph
+from ...dtype import ImageSegment, Block, Graph, Word
 import os
 import torch
 import numpy as np
@@ -46,7 +46,16 @@ class EdgeSegNodeClassConverter(BaseConverter):
             words_ = [word.to_dict()['segment'] for word in words_r]
             for word_, word in zip(words_, words_r):
                 word_["text"] = word.content
-            
+            #TODO: Нужно сделать, чтоб перебирались все варианты, пока ни разу не зайдет
+            skip = False
+            for old_block in output_model.blocks:
+                if old_block.segment.is_intersection(block.segment):
+                    old_block.segment.set_segment_max_segments([old_block.segment, block.segment])
+                    old_block.words += [Word(w) for w in words_]
+                    old_block.sort_words()
+                    skip = True
+            if skip:
+                continue
             block.set_words_from_dict(words_)
             block.sort_words()
             output_model.blocks.append(block)
