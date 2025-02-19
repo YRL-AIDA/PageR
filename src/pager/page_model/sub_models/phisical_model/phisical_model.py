@@ -29,7 +29,7 @@ class PhisicalModel(BaseSubModel):
             "list": "g",
             "text": "b",
             "header": "orange",
-            "no_stryct": "r",
+            "figure": "r",
             "table": "y",
         }
         for block in self.blocks:

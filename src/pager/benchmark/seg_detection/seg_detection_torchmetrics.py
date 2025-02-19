@@ -16,6 +16,13 @@ LABELS = {
             "figure": 4,
             "no_struct":4,
         }
+PUBLAYNET_LABELS = {
+    "text": "text",
+    "header": "title",
+    "list": "list",
+    "table": "table",
+    "figure": "figure",
+}
 COUNT_CLASS = 5
 IOU_INTERVAL = np.arange(0.5, 1.0, 0.05)
 COUNT_IOU_INTERVAL = len(IOU_INTERVAL)
@@ -71,7 +78,7 @@ class SegDetectionBenchmark(BaseBenchmark):
             page_model.extract()
             time_ = time.time() - start
             phis = page_model.to_dict()
-            return [{"category_id": self.NAME_CATEGORY_ID[block["label"]],
+            return [{"category_id": self.NAME_CATEGORY_ID[PUBLAYNET_LABELS[block["label"]]],
                      "bbox": [block["x_top_left"],
                               block["y_top_left"], 
                               block["x_bottom_right"]-block["x_top_left"],

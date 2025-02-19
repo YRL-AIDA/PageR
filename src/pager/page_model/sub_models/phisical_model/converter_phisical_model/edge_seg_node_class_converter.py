@@ -163,7 +163,7 @@ class WordsAndStylesToGLAMBlocks(EdgeSegNodeClassConverter):
             for i, word in enumerate(words):
                 if block.segment.is_intersection(word.segment):
                     block_nodes.append(self.tmp[i])
-            
+            block.tmp = np.array(block_nodes)
             class_ = int(np.argmax(np.array(block_nodes).mean(axis=0)))
             label = self.name_class[class_]
             block.set_label(label)
