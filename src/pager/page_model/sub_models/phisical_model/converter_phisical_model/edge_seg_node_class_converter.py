@@ -136,7 +136,7 @@ class WordsAndStylesToGLAMBlocks(EdgeSegNodeClassConverter):
         
         self.name_class = ["figure", "text", "header", "list", "table"]
         models = [NodeGLAM(params["node_featch"], params["H1"], 5), 
-                  EdgeGLAM(2*params["node_featch"]+2*5+params["edge_featch"], params["H2"], 1)]
+                  EdgeGLAM(2*params["node_featch"]+2*params["H1"][-1]+params["edge_featch"], params["H2"], 1)]
         self.models = load_weigths(models, conf["path_node_gnn"], conf["path_edge_linear"])
     
     def convert(self, input_model, output_model)-> None:
@@ -154,8 +154,8 @@ class WordsAndStylesToGLAMBlocks(EdgeSegNodeClassConverter):
         if N == 1:
             self.tmp = np.array([[0.0, 1.0, 0.0, 0.0, 0.0]])
             return np.array([0 for _ in i[0]])
-        Node_emb = self.models[0](X, sp_A)
-        self.tmp = Node_emb.detach().numpy()
+        Node_emb, Node_class = self.models[0](X, sp_A)
+        self.tmp = Node_class.detach().numpy()
         Omega = torch.cat([Node_emb[i[0]],Node_emb[i[1]], X[i[0]], X[i[1]], Y],dim=1)
         E_pred = self.models[1](Omega).detach().numpy()
         rez = np.zeros_like(E_pred)

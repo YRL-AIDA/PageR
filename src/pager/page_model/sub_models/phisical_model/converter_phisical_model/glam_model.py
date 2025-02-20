@@ -30,7 +30,8 @@ class NodeGLAM(torch.nn.Module):
         self.linear2 = Linear(h[1], h[2]) 
         self.tag2 = TAGConv(h[2], h[3])
         self.linear3 = Linear(h[3]+input_, h[4])
-        self.linear4 =Linear(h[4], output_)
+        self.linear4 =Linear(h[4], h[5])
+        self.classifer = Linear(h[5], output_)
 
     
     def forward(self, x: torch.Tensor, edge_index: torch.Tensor) -> torch.Tensor:
@@ -48,8 +49,10 @@ class NodeGLAM(torch.nn.Module):
         a = self.linear3(a)
         a = self.activation(a)
         a = self.linear4(a)
-        a = torch.softmax(a, dim=-1)
-        return a
+
+        cl = self.classifer(self.activation(a))
+        # a = torch.softmax(a, dim=-1)
+        return a, cl
 
 class EdgeGLAM(torch.nn.Module):
     def __init__(self, input_, h, output_):
