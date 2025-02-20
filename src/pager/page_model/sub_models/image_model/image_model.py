@@ -2,6 +2,7 @@ from ..base_sub_model import BaseSubModel
 from typing import Dict
 import numpy as np
 import cv2
+import matplotlib.pyplot as plt
 
 
 class ImageModel(BaseSubModel):
@@ -28,3 +29,6 @@ class ImageModel(BaseSubModel):
         img_bgr = cv2.imdecode(chunk_arr, cv2.IMREAD_COLOR)
         img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
         return img_rgb
+
+    def show(self):
+        plt.imshow(self.img)

@@ -1,34 +1,49 @@
 
 import os
 import argparse
-
+import json 
 from pager import (PageModel, PageModelUnit,
                    ImageModel, ImageToWordsAndStyles,
                    WordsAndStylesModel, PhisicalModel, 
-                   WordsAndStylesToGNNpLinearBlocks
+                   WordsAndStylesToGNNpLinearBlocks,
+                   ImageToWordsAndCNNStyles,
+                   WordsAndStylesToGLAMBlocks
                    )
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(override=True)
 GNN_MODEL = os.environ["PATH_TORCH_SEG_GNN_MODEL"]
 LINEAR_MODEL = os.environ["PATH_TORCH_SEG_LINEAR_MODEL"]
 
-page = PageModel(page_units=[
+GLAM_NODE_MODEL = os.getenv("PATH_TORCH_GLAM_NODE_MODEL")
+GLAM_EDGE_MODEL = os.getenv("PATH_TORCH_GLAM_EDGE_MODEL")
+PATH_STYLE_MODEL = os.environ["PATH_STYLE_MODEL"]
+
+with open(os.environ["PATH_TORCH_GLAM_CONF_MODEL"], "r") as f:
+    conf_glam = json.load(f)
+
+conf_glam["path_node_gnn"] = GLAM_NODE_MODEL
+conf_glam["path_edge_linear"] =  GLAM_EDGE_MODEL
+
+page =  PageModel(page_units=[
         PageModelUnit(id="image_model", 
-                      sub_model=ImageModel(), 
-                      extractors=[], 
-                      converters={}),
+                        sub_model=ImageModel(), 
+                        extractors=[], 
+                        converters={}),
         PageModelUnit(id="words_and_styles_model", 
-                      sub_model=WordsAndStylesModel(), 
-                      extractors=[], 
-                      converters={"image_model": ImageToWordsAndStyles(conf= {"k": 4})}),
+                        sub_model=WordsAndStylesModel(), 
+                        extractors=[], 
+                        converters={"image_model": ImageToWordsAndCNNStyles(
+                            conf={"path_model": PATH_STYLE_MODEL,
+                                  "lang": "rus+eng", 
+                                  "psm": 4, 
+                                  "oem": 3, 
+                                  "k": 4 })}),
         PageModelUnit(id="phisical_model", 
-                      sub_model=PhisicalModel(), 
-                      extractors=[], 
-                      converters={"words_and_styles_model": WordsAndStylesToGNNpLinearBlocks(conf={
-                          "path_node_gnn": GNN_MODEL,
-                          "path_edge_linear": LINEAR_MODEL,
-                          "seg_k": 0.5
-                      })})
+                        sub_model=PhisicalModel(), 
+                        extractors=[], 
+                        converters={
+                                "words_and_styles_model": WordsAndStylesToGLAMBlocks(conf_glam)
+                        })
         ])
 
 
@@ -42,3 +57,8 @@ phis = page.to_dict()
 
 str_ = "\n"*5+"-"*30+"\n"+"\n".join([f"{i} - block ({b['label']}): \t {b['text']}" for i, b in enumerate(phis['blocks'])]) + "\n"+"-"*30
 print(str_) 
+
+import matplotlib.pyplot as plt
+page.page_units[0].sub_model.show()
+page.page_units[2].sub_model.show()
+plt.show()

@@ -4,7 +4,7 @@ from .glam_model import load_weigths, NodeGLAM, EdgeGLAM, get_tensor_from_graph
 from ..converter_graph_model import SpGraph4NModel, WordsAndStylesToSpGraph4N
 from ...base_sub_model import BaseSubModel, BaseConverter
 from typing import Dict, List
-from ...dtype import ImageSegment, Block, Graph
+from ...dtype import ImageSegment, Block, Graph, Word
 import os
 import torch
 import numpy as np
@@ -46,7 +46,16 @@ class EdgeSegNodeClassConverter(BaseConverter):
             words_ = [word.to_dict()['segment'] for word in words_r]
             for word_, word in zip(words_, words_r):
                 word_["text"] = word.content
-            
+            #TODO: Нужно сделать, чтоб перебирались все варианты, пока ни разу не зайдет
+            skip = False
+            for old_block in output_model.blocks:
+                if old_block.segment.is_intersection(block.segment):
+                    old_block.segment.set_segment_max_segments([old_block.segment, block.segment])
+                    old_block.words += [Word(w) for w in words_]
+                    old_block.sort_words()
+                    skip = True
+            if skip:
+                continue
             block.set_words_from_dict(words_)
             block.sort_words()
             output_model.blocks.append(block)
@@ -127,7 +136,7 @@ class WordsAndStylesToGLAMBlocks(EdgeSegNodeClassConverter):
         
         self.name_class = ["figure", "text", "header", "list", "table"]
         models = [NodeGLAM(params["node_featch"], params["H1"], 5), 
-                  EdgeGLAM(2*params["node_featch"]+2*5+params["edge_featch"], params["H2"], 1)]
+                  EdgeGLAM(2*params["node_featch"]+2*params["H1"][-1]+params["edge_featch"], params["H2"], 1)]
         self.models = load_weigths(models, conf["path_node_gnn"], conf["path_edge_linear"])
     
     def convert(self, input_model, output_model)-> None:
@@ -145,8 +154,8 @@ class WordsAndStylesToGLAMBlocks(EdgeSegNodeClassConverter):
         if N == 1:
             self.tmp = np.array([[0.0, 1.0, 0.0, 0.0, 0.0]])
             return np.array([0 for _ in i[0]])
-        Node_emb = self.models[0](X, sp_A)
-        self.tmp = Node_emb.detach().numpy()
+        Node_emb, Node_class = self.models[0](X, sp_A)
+        self.tmp = Node_class.detach().numpy()
         Omega = torch.cat([Node_emb[i[0]],Node_emb[i[1]], X[i[0]], X[i[1]], Y],dim=1)
         E_pred = self.models[1](Omega).detach().numpy()
         rez = np.zeros_like(E_pred)
@@ -163,7 +172,7 @@ class WordsAndStylesToGLAMBlocks(EdgeSegNodeClassConverter):
             for i, word in enumerate(words):
                 if block.segment.is_intersection(word.segment):
                     block_nodes.append(self.tmp[i])
-            
+            block.tmp = np.array(block_nodes)
             class_ = int(np.argmax(np.array(block_nodes).mean(axis=0)))
             label = self.name_class[class_]
             block.set_label(label)

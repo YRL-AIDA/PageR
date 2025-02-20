@@ -3,7 +3,7 @@ from typing import Dict, List
 from ...dtype import Word
 from ..segment_clusterizer import KMeanClusterizer
 import numpy as np
-
+import matplotlib.pyplot as plt
 
 class SpGraph4NModel(BaseSubModel):
     def __init__(self) -> None:
@@ -25,6 +25,19 @@ class SpGraph4NModel(BaseSubModel):
         self.A = None
         self.nodes_feature  = None
         self.edges_feature = None
+
+    def show(self):
+        
+        for indexs in zip(self.A[0], self.A[1]):
+            i, j = indexs
+            #TODO: автоматически подтянуть длину вектора
+            xi = self.nodes_feature[i][32]
+            yi = self.nodes_feature[i][33]
+            xj = self.nodes_feature[j][32]
+            yj = self.nodes_feature[j][33]
+            plt.scatter(xi, yi, c="b")
+            plt.scatter(xj, yj, c="b")
+            plt.plot([xi, xj], [yi, yj], "r")
 
 class WordsToSpGraph4N(BaseConverter):
     def __init__(self) -> None:

@@ -1,5 +1,6 @@
 from pager.benchmark.seg_detection.seg_detection_torchmetrics import  SegDetectionBenchmark
 import os
+import json
 from pager import (PageModel, PageModelUnit,
                    ImageModel, ImageToWordsAndStyles,
                    WordsAndStylesModel, PhisicalModel, ImageToWordsAndCNNStyles,
@@ -9,13 +10,19 @@ from pager import WordsAndStylesToGLAMBlocks
 from pager import WordsToDBSCANBlocks
 
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(override=True)
 GNN_MODEL = os.environ["PATH_TORCH_SEG_GNN_MODEL"]
 LINEAR_MODEL = os.environ["PATH_TORCH_SEG_LINEAR_MODEL"]
 
-GLAM_NODE_MODEL = os.environ["PATH_TORCH_GLAM_NODE_MODEL"]
-GLAM_EDGE_MODEL = os.environ["PATH_TORCH_GLAM_EDGE_MODEL"]
+GLAM_NODE_MODEL = os.getenv("PATH_TORCH_GLAM_NODE_MODEL")
+GLAM_EDGE_MODEL = os.getenv("PATH_TORCH_GLAM_EDGE_MODEL")
 PATH_STYLE_MODEL = os.environ["PATH_STYLE_MODEL"]
+
+with open(os.environ["PATH_TORCH_GLAM_CONF_MODEL"], "r") as f:
+    conf_glam = json.load(f)
+
+conf_glam["path_node_gnn"] = GLAM_NODE_MODEL
+conf_glam["path_edge_linear"] =  GLAM_EDGE_MODEL
 
 if __name__ == '__main__':
     pages = {
@@ -72,16 +79,9 @@ if __name__ == '__main__':
                         sub_model=PhisicalModel(), 
                         extractors=[], 
                         converters={
-                                "words_and_styles_model": WordsAndStylesToGLAMBlocks(conf={
-                                "path_node_gnn": GLAM_NODE_MODEL,
-                                "path_edge_linear": GLAM_EDGE_MODEL,
-                                "H1": [128, 128, 128, 128, 128],
-                                "H2": [128],
-                                "node_featch": 37,
-                                "edge_featch": 1,
-                                "seg_k": 0.5
-                        })})
-    ])
+                                "words_and_styles_model": WordsAndStylesToGLAMBlocks(conf_glam)
+                        })
+        ])
     }
     
     path_dataset = "seg_data"
