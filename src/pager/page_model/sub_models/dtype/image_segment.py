@@ -35,6 +35,14 @@ class ImageSegment(ABC):
     def get_width(self):
         return self.x_bottom_right - self.x_top_left
 
+    @property
+    def height(self):
+        return self.get_height()
+    
+    @property
+    def width(self):
+        return self.get_width()
+
     def get_center(self):
         x_c = round((self.x_top_left + self.x_bottom_right) / 2)
         y_c = round((self.y_top_left + self.y_bottom_right) / 2)
