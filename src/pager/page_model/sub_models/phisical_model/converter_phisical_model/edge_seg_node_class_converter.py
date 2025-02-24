@@ -9,6 +9,7 @@ import os
 import torch
 import numpy as np
 from dotenv import load_dotenv
+from ...utils import merge_segment
 load_dotenv()
 
 class EdgeSegNodeClassConverter(BaseConverter):
@@ -46,20 +47,36 @@ class EdgeSegNodeClassConverter(BaseConverter):
             words_ = [word.to_dict()['segment'] for word in words_r]
             for word_, word in zip(words_, words_r):
                 word_["text"] = word.content
-            #TODO: Нужно сделать, чтоб перебирались все варианты, пока ни разу не зайдет
-            skip = False
-            for old_block in output_model.blocks:
-                if old_block.segment.is_intersection(block.segment):
-                    old_block.segment.set_segment_max_segments([old_block.segment, block.segment])
-                    old_block.words += [Word(w) for w in words_]
-                    old_block.sort_words()
-                    skip = True
-            if skip:
-                continue
+            # #TODO: Нужно сделать, чтоб перебирались все варианты, пока ни разу не зайдет
+            # skip = False
+            # for old_block in output_model.blocks:
+            #     if old_block.segment.is_intersection(block.segment):
+            #         old_block.segment.set_segment_max_segments([old_block.segment, block.segment])
+            #         old_block.words += [Word(w) for w in words_]
+            #         old_block.sort_words()
+            #         skip = True
+            # if skip:
+            #     continue
             block.set_words_from_dict(words_)
-            block.sort_words()
+            
             output_model.blocks.append(block)
-        
+
+        index_blocks = merge_segment([block.segment for block in output_model.blocks])
+        count_block = max(index_blocks)+1
+        new_blocks = []
+        for i in range(count_block):
+            segment = ImageSegment(0, 0, 1, 1)
+            blocks = [output_model.blocks[k] for k, j in enumerate(index_blocks) if i==j]
+            segment.set_segment_max_segments([b.segment for b in blocks])
+            block = Block(segment.get_segment_2p())
+            print("block", i)
+            print([len(b.words) for b in blocks])
+            print(sum([1 for b in blocks for w in b.words]))
+            block.words = [w for b in blocks for w in b.words]
+            block.sort_words()
+            new_blocks.append(block)
+
+        output_model.blocks = new_blocks
         self.set_label_output_block(output_model, words, graph)
         
     def set_label_output_block(self, output_model, words, graph):
