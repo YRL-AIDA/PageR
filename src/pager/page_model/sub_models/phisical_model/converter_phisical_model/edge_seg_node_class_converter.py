@@ -69,9 +69,6 @@ class EdgeSegNodeClassConverter(BaseConverter):
             blocks = [output_model.blocks[k] for k, j in enumerate(index_blocks) if i==j]
             segment.set_segment_max_segments([b.segment for b in blocks])
             block = Block(segment.get_segment_2p())
-            print("block", i)
-            print([len(b.words) for b in blocks])
-            print(sum([1 for b in blocks for w in b.words]))
             block.words = [w for b in blocks for w in b.words]
             block.sort_words()
             new_blocks.append(block)
