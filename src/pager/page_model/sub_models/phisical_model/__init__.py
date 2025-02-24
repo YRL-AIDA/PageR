@@ -7,3 +7,4 @@ from .converter_graph_model import (WordsAndStylesToSpGraph4N,
                           PhisicalToGraph4N, DistExtractor, AngExtractor,
                           NodeDistExtractot, NodeAngExtractot)
 from .converter_DBSCAN import WordsToDBSCANBlocks
+from .read_order import *

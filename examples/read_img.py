@@ -7,7 +7,8 @@ from pager import (PageModel, PageModelUnit,
                    WordsAndStylesModel, PhisicalModel, 
                    WordsAndStylesToGNNpLinearBlocks,
                    ImageToWordsAndCNNStyles,
-                   WordsAndStylesToGLAMBlocks
+                   WordsAndStylesToGLAMBlocks,
+                   TrianglesSortBlock
                    )
 from dotenv import load_dotenv
 load_dotenv(override=True)
@@ -40,7 +41,7 @@ page =  PageModel(page_units=[
                                   "k": 4 })}),
         PageModelUnit(id="phisical_model", 
                         sub_model=PhisicalModel(), 
-                        extractors=[], 
+                        extractors=[TrianglesSortBlock()], 
                         converters={
                                 "words_and_styles_model": WordsAndStylesToGLAMBlocks(conf_glam)
                         })
