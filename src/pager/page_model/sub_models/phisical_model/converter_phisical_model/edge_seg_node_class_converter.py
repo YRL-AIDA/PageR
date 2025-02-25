@@ -190,3 +190,58 @@ class WordsAndStylesToGLAMBlocks(EdgeSegNodeClassConverter):
             class_ = int(np.argmax(np.array(block_nodes).mean(axis=0)))
             label = self.name_class[class_]
             block.set_label(label)
+
+
+
+# TEST_MLP
+
+class MLPClassifier(WordsAndStylesToGLAMBlocks):
+    def __init__(self, conf):
+        super().__init__(conf)
+        import pickle
+        with open(conf["path_mlp_classifier"], "rb") as f:
+            self.mlp_classfier = pickle.load(f)
+        
+    def classifier(self, graph) -> int:  
+        seg_nodes = np.mean(graph["nodes_feature"], axis=0)
+        seg_edges = np.array(graph["edges_feature"])
+        
+        ed = seg_edges.transpose()
+        if len(ed) < 1:
+            return 1
+        ang_edge = ed[1]
+        dist_edge = 1/(ed[0]+1)
+        
+        hist_ang = np.histogram(ang_edge, bins=np.linspace(0, 1, 30))[0]
+        hist_dist = np.histogram(dist_edge, bins=np.linspace(0, 1, 10))[0]
+    
+        return np.argmax(self.mlp_classfier.predict([np.concat([seg_nodes, hist_ang, hist_dist])])[0])
+
+    def set_label_output_block(self, output_model, words, graph):
+        # CLASSIFIER +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        subgraphs = []
+        for block in output_model.blocks:
+            subgraph = {
+                "A": [[], []],
+                "nodes_feature": [],
+                "edges_feature": [],
+            }
+
+            block_nodes = []
+            for i, word in enumerate(words):
+                if block.segment.is_intersection(word.segment):
+                    block_nodes.append(i)
+                    subgraph["nodes_feature"].append(graph["nodes_feature"][i])
+
+            for i, (n1, n2) in enumerate(zip(graph["A"][0], graph["A"][1])):
+                if n1 in block_nodes and n2 in block_nodes:
+                    subgraph["A"][0].append(block_nodes.index(n1))
+                    subgraph["A"][1].append(block_nodes.index(n2))
+                    subgraph["edges_feature"].append(graph["edges_feature"][i])
+
+            subgraphs.append(subgraph) 
+        for block, sg in zip(output_model.blocks, subgraphs):
+            class_ = self.classifier(sg)
+            # class_ = 1
+            label = self.name_class[class_]
+            block.set_label(label)
