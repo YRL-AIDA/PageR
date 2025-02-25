@@ -11,6 +11,8 @@ class SpGraph4NModel(BaseSubModel):
         self.A = None
         self.nodes_feature  = None
         self.edges_feature = None
+        self.true_edges = None
+        self.true_nodes = None
 
     def from_dict(self, input_model_dict: Dict):
         pass
@@ -27,17 +29,39 @@ class SpGraph4NModel(BaseSubModel):
         self.edges_feature = None
 
     def show(self):
-        
-        for indexs in zip(self.A[0], self.A[1]):
+        def get_color(i):
+            if i == -1:
+                return "black"
+            elif i == 0:
+                return "aqua"
+            elif i == 1:
+                return "gold"
+            elif i == 2:
+                return "lime"
+            elif i == 3:
+                return "violet"
+            elif i == 4:
+                return "teal"
+            
+        def plot_index(indexs, colors=["b", "b", "r"]):
             i, j = indexs
             #TODO: автоматически подтянуть длину вектора
             xi = self.nodes_feature[i][32]
             yi = self.nodes_feature[i][33]
             xj = self.nodes_feature[j][32]
             yj = self.nodes_feature[j][33]
-            plt.scatter(xi, yi, c="b")
-            plt.scatter(xj, yj, c="b")
-            plt.plot([xi, xj], [yi, yj], "r")
+            plt.scatter(xi, yi, c=colors[0])
+            plt.scatter(xj, yj, c=colors[1])
+            plt.plot([xi, xj], [yi, yj], colors[2])
+        if self.true_edges is None:
+            for indexs in zip(self.A[0], self.A[1]):
+                plot_index(indexs)
+        else:
+            for k, indexs in enumerate(zip(self.A[0], self.A[1] )):
+                i, j = indexs
+                plot_index(indexs, [get_color(self.true_nodes[i]), 
+                                    get_color(self.true_nodes[j]), "g" if self.true_edges[k] == 1 else "r"])
+
 
 class WordsToSpGraph4N(BaseConverter):
     def __init__(self) -> None:
