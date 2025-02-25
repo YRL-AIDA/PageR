@@ -7,22 +7,21 @@ import numpy as np
 import torch
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
 
-LABELS = {
-            "text": 0,
-            "title": 1,
-            "header": 1,
-            "list": 2,
-            "table": 3,
-            "figure": 4,
-            "no_struct":4,
-        }
-PUBLAYNET_LABELS = {
-    "text": "text",
-    "header": "title",
-    "list": "list",
-    "table": "table",
-    "figure": "figure",
-}
+
+def get_id_labels(label:str):
+    label = label.lower()
+    if label in ("text", ):
+        return 0
+    elif label in ("header", "title"):
+        return 1
+    elif label in ("list", ):
+        return 2
+    elif label in ("table", ):
+        return 3
+    elif label in ("figure", "no_struct"):
+        return 4
+
+
 COUNT_CLASS = 5
 IOU_INTERVAL = np.arange(0.5, 1.0, 0.05)
 COUNT_IOU_INTERVAL = len(IOU_INTERVAL)
@@ -45,13 +44,12 @@ class SegDetectionBenchmark(BaseBenchmark):
             json_dataset = json.load(f)
         
         self.CATEGORY = dict()
-        self.NAME_CATEGORY_ID = dict()
         for category in json_dataset["categories"]:
             self.CATEGORY[category["id"]] = category["name"]
-            self.NAME_CATEGORY_ID[category["name"]] = category["id"]
-
-        self.extract_image_pred(json_dataset, self.page_model)
+            
         self.extract_image_true(json_dataset)
+        self.extract_image_pred(json_dataset, self.page_model)
+        
     
         target = [dict(     
                 boxes=torch.tensor([an["bbox"] for an in  img["annotations_true"]]) ,
@@ -65,30 +63,37 @@ class SegDetectionBenchmark(BaseBenchmark):
         metric = MeanAveragePrecision(box_format="xywh")
         metric.update(preds, target)   
         rez = metric.compute()
-        # print(rez)
+        print(rez)
         self.loger(f"mAP@IoU[0.50:0.95] = {rez['map']:.8f}")
 
         time_ = np.mean([image["time"] for image in json_dataset["images"]])
         self.loger(f"mean time: {time_ : .4f} sec.")
 
     def extract_image_pred(self, json_dataset, page_model):
-        def get_annotations_from_page(path):
+        def in_not_content(block, content_block):
+            return block["x_top_left"] >= content_block["x_bottom_right"] or \
+                   block["y_top_left"] >= content_block["y_bottom_right"] or \
+                   block["x_bottom_right"] <= content_block["x_top_left"] or \
+                   block["y_bottom_right"] <= content_block["y_top_left"]
+        
+        
+        def get_annotations_from_page(path, content_block ):
             page_model.read_from_file(path)
             start = time.time()
             page_model.extract()
             time_ = time.time() - start
             phis = page_model.to_dict()
-            return [{"category_id": self.NAME_CATEGORY_ID[PUBLAYNET_LABELS[block["label"]]],
+            return [{"category_id": get_id_labels(block["label"]),
                      "bbox": [block["x_top_left"],
                               block["y_top_left"], 
                               block["x_bottom_right"]-block["x_top_left"],
                               block["y_bottom_right"]-block["y_top_left"]],
-             } for block in phis["blocks"]], time_
+             } for block in phis["blocks"] if not in_not_content(block, content_block)], time_
         N = len(json_dataset["images"])
         for i, image_d in enumerate(json_dataset["images"]):
             print(f"{(i+1)/N*100:.2f}%", end="\r")
             path = os.path.join(self.path_dataset if self.path_images is None else self.path_images, image_d["file_name"])
-            an, time_ =  get_annotations_from_page(path)
+            an, time_ =  get_annotations_from_page(path, image_d["content_block"] )
             image_d["annotations_pred"] = an
             image_d["time"] = time_
 
@@ -101,8 +106,16 @@ class SegDetectionBenchmark(BaseBenchmark):
         for true_block in json_dataset["annotations"]:
             image_id = id_to_index[true_block["image_id"]]
             json_dataset["images"][image_id]["annotations_true"].append({
-                "category_id": true_block["category_id"],
+                "category_id": get_id_labels(self.CATEGORY[true_block["category_id"]]),
                 "bbox": true_block["bbox"],
             })
 
-        
+        for image_d in json_dataset["images"]:
+            x0 = min([block["bbox"][0] for block in image_d["annotations_true"]])
+            y0 = min([block["bbox"][1] for block in image_d["annotations_true"]])
+            x1 = max([block["bbox"][0]+block["bbox"][2] for block in image_d["annotations_true"]])
+            y1 = max([block["bbox"][1]+block["bbox"][3] for block in image_d["annotations_true"]])
+            image_d["content_block"] = {"x_top_left":x0,
+                                        "y_top_left":y0, 
+                                        "x_bottom_right":x1,
+                                        "y_bottom_right":y1}
