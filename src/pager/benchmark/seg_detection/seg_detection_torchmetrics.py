@@ -8,34 +8,36 @@ import torch
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
 import cv2
 
-def get_id_labels(label:str):
-    label = label.lower()
-    if label in ("text", ):
-        return 0
-    elif label in ("header", "title"):
-        return 1
-    elif label in ("list", ):
-        return 2
-    elif label in ("table", ):
-        return 3
-    elif label in ("figure", "no_struct"):
-        return 4
-
-
 COUNT_CLASS = 5
 IOU_INTERVAL = np.arange(0.5, 1.0, 0.05)
 COUNT_IOU_INTERVAL = len(IOU_INTERVAL)
 
 class SegDetectionBenchmark(BaseBenchmark):
-    def __init__(self, path_dataset, page_model, path_images=None, path_json=None, name="",save_dir=None, count_image=None):
+    def __init__(self, path_dataset, page_model, path_images=None, path_json=None, name="",save_dir=None, count_image=None, only_seg=False):
         self.path_dataset = path_dataset
         self.page_model = page_model
         self.path_images = path_images
         self.path_json = path_json
         self.save_dir = save_dir
         self.count_image = count_image
+        self.only_seg = only_seg
         super().__init__(name)
-
+        
+    def get_id_labels(self, label:str):
+        if self.only_seg:
+            return 0
+        label = label.lower()
+        if label in ("text", ):
+            return 0
+        elif label in ("header", "title"):
+            return 1
+        elif label in ("list", ):
+            return 2
+        elif label in ("table", ):
+            return 3
+        elif label in ("figure", "no_struct"):
+            return 4
+            
     def start(self):
         if self.path_json is None:
             json_dataset_path = [file for file in  os.listdir(self.path_dataset) if file.split(".")[-1] == "json"][0]
@@ -93,7 +95,7 @@ class SegDetectionBenchmark(BaseBenchmark):
             page_model.extract()
             time_ = time.time() - start
             phis = page_model.to_dict()
-            return [{"category_id": get_id_labels(block["label"]),
+            return [{"category_id": self.get_id_labels(block["label"]),
                      "bbox": [block["x_top_left"],
                               block["y_top_left"], 
                               block["x_bottom_right"]-block["x_top_left"],
@@ -116,7 +118,7 @@ class SegDetectionBenchmark(BaseBenchmark):
         for true_block in json_dataset["annotations"]:
             image_id = id_to_index[true_block["image_id"]]
             json_dataset["images"][image_id]["annotations_true"].append({
-                "category_id": get_id_labels(self.CATEGORY[true_block["category_id"]]),
+                "category_id": self.get_id_labels(self.CATEGORY[true_block["category_id"]]),
                 "bbox": true_block["bbox"],
             })
 
