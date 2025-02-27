@@ -88,7 +88,7 @@ class PdfToWordsAndStyles(BaseConverter):
 
 class ImageToWordsAndStyles(BaseConverter):
     def __init__(self, conf=None):
-        self.conf = {"lang": "eng+rus", "psm": 4, "oem": 3, "k": 1}
+        self.conf = {"lang": "eng+rus", "psm": 4, "oem": 3, "k": 1, "onetone_delete":False}
 
         if conf is None:
             return

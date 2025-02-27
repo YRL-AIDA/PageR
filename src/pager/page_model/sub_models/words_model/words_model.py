@@ -3,7 +3,7 @@ from typing import Dict
 import pytesseract
 import cv2
 from ..dtype import Word
-
+import numpy as np
 import json
 
 class WordsModel(BaseSubModel):
@@ -37,7 +37,7 @@ class ImageToWords(BaseConverter):
         output_model.set_words_from_dict(word_list)
 
 
-    def extract_from_img(self, img, conf={"lang": "eng+rus", "psm": 4, "oem": 3, "k": 1}):
+    def extract_from_img(self, img, conf={"lang": "eng+rus", "psm": 4, "oem": 3, "k": 1, "onetone_delete": False}):
         dim = (conf["k"]*img.shape[1], conf["k"]*img.shape[0])
         img_ = cv2.resize(img, dim, interpolation = cv2.INTER_AREA)
         tesseract_bboxes = pytesseract.image_to_data(
@@ -47,12 +47,20 @@ class ImageToWords(BaseConverter):
         word_list = []
         for index_bbox, level in enumerate(tesseract_bboxes["level"]):
             if level == 5:
+                text = tesseract_bboxes["text"][index_bbox]
+                x0 = round(tesseract_bboxes["left"][index_bbox]/conf["k"])
+                y0 = round(tesseract_bboxes["top"][index_bbox]/conf["k"])
+                w = round(tesseract_bboxes["width"][index_bbox]/conf["k"])
+                h = round(tesseract_bboxes["height"][index_bbox]/conf["k"])
+                # TODO: сделать фильтр ширины, поменять однотонный фильтер
+                if conf["onetone_delete"] and np.var(img[y0:y0+h, x0:x0+w]) < 20:
+                    continue
                 word_list.append({
-                    "text": tesseract_bboxes["text"][index_bbox],
-                    "x_top_left": round(tesseract_bboxes["left"][index_bbox]/conf["k"]),
-                    "y_top_left": round(tesseract_bboxes["top"][index_bbox]/conf["k"]),
-                    "width": round(tesseract_bboxes["width"][index_bbox]/conf["k"]),
-                    "height": round(tesseract_bboxes["height"][index_bbox]/conf["k"]),
+                    "text": text,
+                    "x_top_left": x0,
+                    "y_top_left": y0,
+                    "width": w,
+                    "height": h,
                 })
         
         word_list = self.size_filter(word_list)
