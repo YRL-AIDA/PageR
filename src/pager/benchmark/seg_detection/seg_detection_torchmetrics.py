@@ -37,8 +37,8 @@ class SegDetectionBenchmark(BaseBenchmark):
             return 3
         elif label in ("figure", "no_struct"):
             return 4
-            
-    def start(self):
+
+    def get_json_dataset(self):
         if self.path_json is None:
             json_dataset_path = [file for file in  os.listdir(self.path_dataset) if file.split(".")[-1] == "json"][0]
             path_ = os.path.join(self.path_dataset, json_dataset_path)
@@ -46,7 +46,9 @@ class SegDetectionBenchmark(BaseBenchmark):
             path_ = self.path_json
         with open(path_) as f:
             json_dataset = json.load(f)
-        
+        return json_dataset
+    
+    def extract_from_json(self, json_dataset):
         self.CATEGORY = dict()
         for category in json_dataset["categories"]:
             self.CATEGORY[category["id"]] = category["name"]
@@ -55,12 +57,14 @@ class SegDetectionBenchmark(BaseBenchmark):
             self.count_image = len(json_dataset["images"])
         self.extract_image_true(json_dataset)
         self.extract_image_pred(json_dataset, self.page_model)
-        if self.save_dir is not None:
-            os.mkdir(self.save_dir)
-            for img in json_dataset["images"]:
-                save_path = os.path.join(self.save_dir, img["file_name"])
-                self.save_rez_image(img, save_path)
 
+    def save_result_pred(self, json_dataset):
+        os.mkdir(self.save_dir)
+        for img in json_dataset["images"][:self.count_image]:
+            save_path = os.path.join(self.save_dir, img["file_name"])
+            self.save_rez_image(img, save_path)
+    
+    def main_metric(self, json_dataset):
         target = [dict(     
                 boxes=torch.tensor([an["bbox"] for an in  img["annotations_true"]]) ,
                 labels=torch.tensor([an["category_id"] for an in  img["annotations_true"]]),
@@ -75,6 +79,15 @@ class SegDetectionBenchmark(BaseBenchmark):
         rez = metric.compute()
         print(rez)
         self.loger(f"mAP@IoU[0.50:0.95] = {rez['map']:.8f}")
+
+    def start(self):
+        json_dataset = self.get_json_dataset()
+        self.extract_from_json(json_dataset)
+        
+        if self.save_dir is not None:
+            self.save_result_pred(json_dataset)
+
+        self.main_metric(json_dataset)
 
         time_ = np.mean([image["time"] for image in json_dataset["images"][:self.count_image]])
         self.loger(f"mean time: {time_ : .4f} sec.")
