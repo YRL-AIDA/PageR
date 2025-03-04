@@ -33,11 +33,26 @@ class BaseConverter(ABC):
         pass
 
 
+
 class BaseExtractor(ABC):
     @abstractmethod
     def extract(self, model: BaseSubModel) -> None:
         pass
+from typing import List
 
+class AddArgsFromModelExtractor(BaseExtractor):
+    def __init__(self, models: List[BaseSubModel]):
+        self.models = models
+        
+    def extract(self, model: BaseSubModel) -> None:
+        for m in self.models:
+            new_args = list(m.__dict__.keys())
+            exist_arg = list(model.__dict__.keys())
+            for new_arg in new_args:
+                if not (new_arg in exist_arg):
+                    model.__dict__[new_arg] = m.__dict__[new_arg]
+
+            
 class BasePrinter(ABC):
     pass
 
