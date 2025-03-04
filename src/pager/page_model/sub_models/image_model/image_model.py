@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 class ImageModel(BaseSubModel):
     def __init__(self) -> None:
         super().__init__()
-        self.img: np.ndarray
+        self.img: np.ndarray = None
 
     def from_dict(self, input_model_dict: Dict):
         pass
