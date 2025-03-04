@@ -59,12 +59,7 @@ class PdfToWordsAndStyles(BaseConverter):
         styles = []
         words = []
         for word in words_json:
-            tmp_style = {       
-                "size": word["font_size"],
-                "font_type": word["font_type"],
-                "italic": word["italic"],
-                "width": 1.0 if word["bold"] else 0.0
-            }
+            tmp_style = self.get_style_from_word(word)
             
             index_style = self._get_style(tmp_style, styles)           
             if index_style == -1:
@@ -85,6 +80,13 @@ class PdfToWordsAndStyles(BaseConverter):
                 return i
         return -1
 
+    def get_style_from_word(self, word):
+        return {       
+                "size": word["font_size"],
+                "font_type": word["font_type"],
+                "italic": word["italic"],
+                "width": 1.0 if word["bold"] else 0.0
+            }
 
 class ImageToWordsAndStyles(BaseConverter):
     def __init__(self, conf=None):
@@ -112,11 +114,9 @@ class ImageToWordsAndStyles(BaseConverter):
             
             seg = ImageSegment(dict_p_size=word)
             word_img = cv2.cvtColor(seg.get_segment_from_img(img), cv2.COLOR_RGB2GRAY)/255
-            
 
-            tmp_style = {       
-                "font2vec": self.get_style_from_word_img(word_img)
-            }
+            tmp_style =  self.get_style_from_word_img(word_img)
+
             index_style = self._get_style(tmp_style, styles, delta_ = 0.1)           
             if index_style == -1:
                 styles.append(tmp_style)
@@ -152,7 +152,7 @@ class ImageToWordsAndStyles(BaseConverter):
             np.argmax(diff_vertical)/h,
             np.argmin(diff_vertical)/h
         ]
-        return vec_style
+        return {"font2vec":vec_style}
     
 class ImageToWordsAndCNNStyles(ImageToWordsAndStyles):
     def __init__(self, conf=None):
@@ -160,4 +160,47 @@ class ImageToWordsAndCNNStyles(ImageToWordsAndStyles):
         self.model = get_model(conf["path_model"])
     
     def get_style_from_word_img(self, word_img):
-        return classifier_image_word(self.model, word_img).detach().numpy().tolist()
+        return {"font2vec":classifier_image_word(self.model, word_img).detach().numpy().tolist()}
+
+
+SANS = ["sans", 'agency', 'grotesk', 'christian',
+ 'andalé', 'antique', 'aptos', 'arial',
+ 'arial', 'austria', 'itc', 'avenir',
+ 'bahnschrift', 'bank', 'bell',  'benguiat',
+ 'breeze', 'calibri', 'candara',  'cantarell',
+ 'caractères',  'century', 'charcoal', 'chicago',
+ 'adobe', 'clearview', 'comic',  'consolas',
+ 'corbel', 'ff', 'dejavu',  'din',
+ 'drogowskaz',  'droid', 'dubai',  'eras',
+ 'eurostile', 'fira',  'folio',
+ 'franklin',  'frutiger', 'futura', 'geneva',
+ 'gerstner', 'gill', 'gotham', 'grand',
+ 'haettenschweiler',  'handel', 'harmonyos', 'helvetica',
+ 'highway', 'ibm', 'impact', 'interstate',
+ 'roboto', 'johnston', 'kabel', 'karrik',
+ 'klavika', 'lato', 'liberation',  'franklin',
+ 'linux', 'lucida', 'lucida', 'fs',
+ 'ff', 'ms', 'montserrat', 'myriad',
+ 'national', 'news', 'neuzeit', 'nokia',
+ 'noto', 'nunito', 'ocr-b', 'open',
+ 'optima', 'overpass', 'mark', 'radis',
+ 'rail', 'roboto', 'san', 'ff',
+ 'segoe',  'microsoft', 'seravek',  'skia',
+ 'oneplus', 'snv', 'nikolas', 'source',
+ 'sweden', 'syntax', 'tahoma', 'thesis',
+ 'tiresias', 'trade', 'transport', 'tratex',
+ 'trebuchet', 'twentieth', 'ubuntu', 'unica',
+ 'univers', 'vag', 'bitstream', 'vercetti',
+ 'verdana', 'whitney']
+class PDFToWordsAndCNNStyles(PdfToWordsAndStyles):
+    
+    def get_style_from_word(self, word):
+        name  = word["font_type"].lower()
+        mono = 0 if "mono" in name else 1
+        serif = 1
+        for ind in SANS:
+            if ind in name:
+                serif = 0 
+                break
+        bold = 2 if word["bold"] else 1
+        return {"font2vec": [serif, mono, bold] }
