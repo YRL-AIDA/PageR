@@ -14,20 +14,22 @@ class SegDetectionBenchmark(TorchSegDetectionBenchmark):
     def main_metric(self, json_dataset):
         # return super().main_metric(json_dataset)
         if self.only_seg:
-            COUNT_CLASS = 1
+            count_class = 1
+        else:
+            count_class = COUNT_CLASS
 
-        TPplusFN = np.zeros(COUNT_CLASS)
-        TPplusFP = np.zeros(COUNT_CLASS)
-        TPplusTP = np.zeros((COUNT_CLASS, COUNT_IOU_INTERVAL))
-        IoU = [[] for _ in range(COUNT_CLASS)]
+        TPplusFN = np.zeros((count_class))
+        TPplusFP = np.zeros((count_class))
+        TPplusTP = np.zeros((count_class, COUNT_IOU_INTERVAL))
+        IoU = [[] for _ in range(count_class)]
 
-        Recall = np.zeros((COUNT_CLASS, COUNT_IOU_INTERVAL))
-        Precision = np.zeros((COUNT_CLASS, COUNT_IOU_INTERVAL))
-        F1 = np.zeros((COUNT_CLASS, COUNT_IOU_INTERVAL))
+        Recall = np.zeros((count_class, COUNT_IOU_INTERVAL))
+        Precision = np.zeros((count_class, COUNT_IOU_INTERVAL))
+        F1 = np.zeros((count_class, COUNT_IOU_INTERVAL))
         
         for image in json_dataset["images"][:self.count_image]:
             TPplusFP_one_image, TPplusFN_one_image, IoU_one_image = self.calculate_metrics(image)
-            for i in range(COUNT_CLASS):
+            for i in range(count_class):
                 TPplusFP[i] += TPplusFP_one_image[i]
                 TPplusFN[i] += TPplusFN_one_image[i]
                 IoU[i] += IoU_one_image[i]
@@ -36,20 +38,23 @@ class SegDetectionBenchmark(TorchSegDetectionBenchmark):
             for i, iou in enumerate(IoU):
                 TPplusTP[i, k] = sum(np.array(iou) >= theta)
         
-        for i in range(COUNT_CLASS):
+        for i in range(count_class):
             Precision[i] = TPplusTP[i] / TPplusFP[i] if TPplusFP[i] != 0 else 0.0
             Recall[i] = TPplusTP[i] / TPplusFN[i] if TPplusFN[i] != 0 else 0.0
         
-        for i in range(COUNT_CLASS):
+        for i in range(count_class):
+            self.loger(f"class {i} =======")
             for k, theta in enumerate(IOU_INTERVAL):
-                self.loger(f"Precision (IoU={theta}): {Precision[i, k] : .8f}")
-        for i in range(COUNT_CLASS):
+                self.loger(f"Precision (IoU={theta:.2f}): {Precision[i, k] : .8f}")
+        for i in range(count_class):
+            self.loger(f"class {i} =======")
             for k, theta in enumerate(IOU_INTERVAL):
-                self.loger(f"Recall (IoU={theta}): {Recall[i, k] : .8f}")
-        for i in range(COUNT_CLASS):
+                self.loger(f"Recall (IoU={theta:.2f}): {Recall[i, k] : .8f}")
+        for i in range(count_class):
+            self.loger(f"class {i} =======")
             for k, theta in enumerate(IOU_INTERVAL):
                 f1 = 2*Precision[i, k]*Recall[i, k]/(Precision[i, k]+Recall[i, k]) if Precision[i, k]+Recall[i, k] != 0 else 0.0
-                self.loger(f"F1 (IoU={theta}): {f1: .8f}")
+                self.loger(f"F1 (IoU={theta:.2f}): {f1: .8f}")
         
         super().main_metric(json_dataset)
     
