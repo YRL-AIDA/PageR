@@ -7,15 +7,18 @@ import numpy as np
 import torch
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
 import cv2
+from ...page_model.sub_models.dtype.image_segment import PositionException
 
 COUNT_CLASS = 5
 IOU_INTERVAL = np.arange(0.5, 1.0, 0.05)
 COUNT_IOU_INTERVAL = len(IOU_INTERVAL)
 
 class SegDetectionBenchmark(BaseBenchmark):
-    def __init__(self, path_dataset, page_model, path_images=None, path_json=None, name="",save_dir=None, count_image=None, only_seg=False):
+    def __init__(self, path_dataset, page_model, path_images=None, path_pdfs=None,
+                 path_json=None, name="",save_dir=None, count_image=None, only_seg=False):
         self.path_dataset = path_dataset
         self.page_model = page_model
+        self.path_pdfs = path_pdfs
         self.path_images = path_images
         self.path_json = path_json
         self.save_dir = save_dir
@@ -56,7 +59,7 @@ class SegDetectionBenchmark(BaseBenchmark):
         if self.count_image is None:
             self.count_image = len(json_dataset["images"])
         self.extract_image_true(json_dataset)
-        self.extract_image_pred(json_dataset, self.page_model)
+        self.extract_image_pred(json_dataset)
 
     def save_result_pred(self, json_dataset):
         os.mkdir(self.save_dir)
@@ -92,7 +95,7 @@ class SegDetectionBenchmark(BaseBenchmark):
         time_ = np.mean([image["time"] for image in json_dataset["images"][:self.count_image]])
         self.loger(f"mean time: {time_ : .4f} sec.")
 
-    def extract_image_pred(self, json_dataset, page_model):
+    def extract_image_pred(self, json_dataset):
         def in_not_content(block, content_block):
             xc = (block["x_top_left"]+block["x_bottom_right"])/2
             yc = (block["y_top_left"]+block["y_bottom_right"])/2
@@ -103,11 +106,11 @@ class SegDetectionBenchmark(BaseBenchmark):
         
         
         def get_annotations_from_page(path, content_block ):
-            page_model.read_from_file(path)
+            self.page_model.read_from_file(path)
             start = time.time()
-            page_model.extract()
+            self.page_model.extract()
             time_ = time.time() - start
-            phis = page_model.to_dict()
+            phis = self.page_model.to_dict()
             return [{"category_id": self.get_id_labels(block["label"]),
                      "bbox": [block["x_top_left"],
                               block["y_top_left"], 
@@ -117,7 +120,7 @@ class SegDetectionBenchmark(BaseBenchmark):
         N = self.count_image
         for i, image_d in enumerate(json_dataset["images"][:self.count_image]):
             print(f"{(i+1)/N*100:.2f}%", end="\r")
-            path = os.path.join(self.path_dataset if self.path_images is None else self.path_images, image_d["file_name"])
+            path = self.get_file(image_d["file_name"]) 
             an, time_ =  get_annotations_from_page(path, image_d["content_block"] )
             image_d["annotations_pred"] = an
             image_d["time"] = time_
@@ -177,3 +180,12 @@ class SegDetectionBenchmark(BaseBenchmark):
 
         mtrx = cv2.cvtColor(mtrx, cv2.COLOR_RGB2BGR)
         cv2.imwrite(save_path, mtrx)
+
+    def get_file(self, name):
+        if self.path_pdfs is not None:
+            return os.path.join(self.path_pdfs, name[:-4]+".pdf")
+        elif self.path_images is not None:
+            return os.path.join(self.path_images, name) 
+        else:
+            return os.path.join(self.path_dataset, name)
+        

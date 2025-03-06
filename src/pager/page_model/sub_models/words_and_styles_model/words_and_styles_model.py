@@ -59,16 +59,17 @@ class PdfToWordsAndStyles(BaseConverter):
         styles = []
         words = []
         for word in words_json:
-            tmp_style = self.get_style_from_word(word)
-            
-            index_style = self._get_style(tmp_style, styles)           
-            if index_style == -1:
-                styles.append(tmp_style)
-                index_style = len(styles) - 1 
-            words.append({"style_id": index_style,
-                          "content": word["text"],
-                          "segment": word,
-                          "type_align": None})
+            if word["height"] > 0 and word["width"] > 0:
+                tmp_style = self.get_style_from_word(word)
+                
+                index_style = self._get_style(tmp_style, styles)           
+                if index_style == -1:
+                    styles.append(tmp_style)
+                    index_style = len(styles) - 1 
+                words.append({"style_id": index_style,
+                            "content": word["text"],
+                            "segment": word,
+                            "type_align": None})
         for i, style in enumerate(styles):
             style["id"] = i
         return [StyleWord(word) for word in words], [Style(style) for style in styles]

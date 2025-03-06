@@ -6,6 +6,15 @@ import os
 from dotenv import load_dotenv
 load_dotenv(override=True)
 
+NULL_PAGE = {
+    "number": -1,
+    "tables": [],
+    "images": [],
+    "width": None,
+    "height": None,
+    "words": []
+}
+
 class PDFModel(BaseSubModel):
     def __init__(self) -> None:
         super().__init__()
@@ -17,11 +26,11 @@ class PDFModel(BaseSubModel):
         pass
 
     def to_dict(self) -> Dict:
-        return self.json["pages"][self.num_page]
+        return self.json["pages"][self.num_page] if "pages" in self.json.keys() else NULL_PAGE
 
     def read_from_file(self, path_file: str) -> None:
         self.json = self.__read(path_file)
-        self.count_page = len(self.json['pages'])
+        self.count_page = len(self.json['pages']) if "pages" in self.json.keys() else 0
 
     def clean_model(self)-> None:
         self.json = {}
@@ -59,6 +68,7 @@ class PDFModel(BaseSubModel):
             return json_
         except json.JSONDecodeError as e:
             print(e, "<stdout = ", str_, ">")
+            return dict()
 
 
 class NotThisNumberPage(Exception):

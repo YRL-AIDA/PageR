@@ -61,6 +61,9 @@ class EdgeSegNodeClassConverter(BaseConverter):
             
             output_model.blocks.append(block)
 
+        if len(output_model.blocks) == 0:
+            return 
+        
         index_blocks = merge_segment([block.segment for block in output_model.blocks])
         count_block = max(index_blocks)+1
         new_blocks = []
