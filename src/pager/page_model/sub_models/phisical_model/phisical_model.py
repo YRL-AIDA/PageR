@@ -23,7 +23,7 @@ class PhisicalModel(BaseSubModel):
     def clean_model(self):
         self.blocks = []
     
-    def show(self):
+    def show(self, with_label=True):
         print(f"count blocks: {len(self.blocks)}")
         colors = {
             "list": "g",
@@ -33,4 +33,4 @@ class PhisicalModel(BaseSubModel):
             "table": "y",
         }
         for block in self.blocks:
-            block.segment.plot(color=colors[block.label], text=block.label)
+            block.segment.plot(color=colors[block.label] if with_label else "r", text=block.label if with_label else "")
