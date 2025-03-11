@@ -29,6 +29,7 @@ class PDFModel(BaseSubModel):
         return self.json["pages"][self.num_page] if "pages" in self.json.keys() else NULL_PAGE
 
     def read_from_file(self, path_file: str) -> None:
+        self.path = path_file
         self.json = self.__read(path_file)
         self.count_page = len(self.json['pages']) if "pages" in self.json.keys() else 0
 

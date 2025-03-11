@@ -13,6 +13,7 @@ requires-python = '>=3.9'
 
 dependencies = [
   'pytesseract',
+  'pdf2image',
   'numpy',
   'opencv-python',
   'matplotlib',
