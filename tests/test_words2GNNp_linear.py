@@ -1,13 +1,13 @@
 import unittest
 from pager import (PageModel, PageModelUnit,
-                   ImageModel, ImageToWordsAndStyles,
+                   ImageModel, Image2WordsAndStylesStatVec,
                    WordsAndStylesModel, PhisicalModel, 
                    WordsAndStylesToGNNpLinearBlocks)
 from pager.page_model.sub_models.dtype import ImageSegment
 from pager.metrics.uoi import segmenter_UoI as UoI, AP_and_AR_from_TP_FP_FN, TP_FP_FN_UoI
 import os 
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(override=True)
 
 GNN_MODEL = os.environ["PATH_TORCH_SEG_GNN_MODEL"]
 LINEAR_MODEL = os.environ["PATH_TORCH_SEG_LINEAR_MODEL"]
@@ -20,7 +20,7 @@ class TestWordsToGNNpLinearBlocks(unittest.TestCase):
         PageModelUnit(id="words_and_styles_model", 
                       sub_model=WordsAndStylesModel(), 
                       extractors=[], 
-                      converters={"image_model": ImageToWordsAndStyles()}),
+                      converters={"image_model": Image2WordsAndStylesStatVec()}),
         PageModelUnit(id="phisical_model", 
                       sub_model=PhisicalModel(), 
                       extractors=[], 

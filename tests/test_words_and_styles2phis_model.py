@@ -1,44 +1,29 @@
 import unittest
-from pager import (PageModel, PageModelUnit,
-                   ImageModel, ImageToWordsAndStyles,
-                   WordsAndStylesModel, PhisicalModel,
-                   WordsAndStylesToGNNpLinearBlocks)
+# from pager import (PageModel, PageModelUnit,
+#                    ImageModel, Image2WordsAndStylesStatVec,
+#                    WordsAndStylesModel, PhisicalModel,
+#                    WordsAndStylesToGNNpLinearBlocks)
+from pager import Image2Phis
 from pager.page_model.sub_models.dtype import ImageSegment
 from pager.metrics.uoi import segmenter_UoI as UoI, AP_and_AR_from_TP_FP_FN, TP_FP_FN_UoI
 import os
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(override=True)
 GNN_MODEL = os.environ["PATH_TORCH_SEG_GNN_MODEL"]
 LINEAR_MODEL = os.environ["PATH_TORCH_SEG_LINEAR_MODEL"]
 
 class TestWordsAndStyles2PhisModel(unittest.TestCase):
 
-    page = PageModel(page_units=[
-        PageModelUnit(id="image_model", 
-                      sub_model=ImageModel(), 
-                      extractors=[], 
-                      converters={}),
-        PageModelUnit(id="words_and_styles_model", 
-                      sub_model=WordsAndStylesModel(), 
-                      extractors=[], 
-                      converters={"image_model": ImageToWordsAndStyles(conf= {"k": 4})}),
-        PageModelUnit(id="phisical_model", 
-                      sub_model=PhisicalModel(), 
-                      extractors=[], 
-                      converters={"words_and_styles_model": WordsAndStylesToGNNpLinearBlocks(conf={
-                          "path_node_gnn": GNN_MODEL,
-                          "path_edge_linear": LINEAR_MODEL,
-                          "seg_k": 0.5
-                      })})
-        ])
+    page = Image2Phis()
 
-    page.read_from_file('files/segment_test.png')
+    page.read_from_file(os.path.join('files','segment_test.png'))
     page.extract()
     phis = page.to_dict()    
 
-    page.read_from_file('files/UoI.png')
+    page.read_from_file(os.path.join('files','UoI.png'))
     page.extract()
     phis2 = page.to_dict()
+ 
     seg_pred = [ImageSegment(dict_2p=b)for b in phis2['blocks']]
     seg_true = [ImageSegment(410, 50, 710, 110),
                     ImageSegment(30, 150, 410, 300),
@@ -47,7 +32,7 @@ class TestWordsAndStyles2PhisModel(unittest.TestCase):
         
     AP, AR = AP_and_AR_from_TP_FP_FN(*TP_FP_FN_UoI(seg_pred, seg_true))
     UoI_rez = UoI(seg_pred, seg_true)
-    name_class = ["no_struct", "text", "header", "list", "table"]
+    name_class = ["figure", "text", "header", "list", "table"]
     def test_count_blocks(self) -> None:
         str_ = "/n".join([f"{i} - block: \t {b['text']}" for i, b in enumerate(self.phis['blocks'])])
         self.assertGreaterEqual(len(self.phis['blocks']), 3, str_)

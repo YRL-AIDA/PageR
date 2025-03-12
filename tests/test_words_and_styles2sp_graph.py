@@ -1,11 +1,15 @@
 import unittest
 from pager import (PageModel, PageModelUnit,
-                   ImageModel, ImageToWordsAndStyles,
+                   ImageModel, Image2WordsAndStyles,
                    WordsAndStylesModel, WordsAndStylesToSpGraph4N,
                           WordsAndStylesToSpDelaunayGraph, 
                    SpGraph4NModel)
 from pager.page_model.sub_models.dtype import ImageSegment
 import numpy as np
+from dotenv import load_dotenv
+import os
+load_dotenv(override=True)
+STYLE_MODEL = os.environ["PATH_STYLE_MODEL"]
 
 class TestWordsAndStyles2PhisModel(unittest.TestCase):
     page_4n = PageModel(page_units=[
@@ -16,7 +20,7 @@ class TestWordsAndStyles2PhisModel(unittest.TestCase):
         PageModelUnit(id="words_and_styles_model", 
                       sub_model=WordsAndStylesModel(), 
                       extractors=[], 
-                      converters={"image_model": ImageToWordsAndStyles()}),
+                      converters={"image_model": Image2WordsAndStyles({"path_model": STYLE_MODEL})}),
         PageModelUnit(id="graph_model", 
                       sub_model=SpGraph4NModel(), 
                       extractors=[], 
@@ -30,7 +34,7 @@ class TestWordsAndStyles2PhisModel(unittest.TestCase):
         PageModelUnit(id="words_and_styles_model", 
                       sub_model=WordsAndStylesModel(), 
                       extractors=[], 
-                      converters={"image_model": ImageToWordsAndStyles()}),
+                      converters={"image_model": Image2WordsAndStyles({"path_model": STYLE_MODEL})}),
         PageModelUnit(id="graph_model", 
                       sub_model=SpGraph4NModel(), 
                       extractors=[], 
@@ -48,13 +52,13 @@ class TestWordsAndStyles2PhisModel(unittest.TestCase):
     def test_size_nodes_feature_4n(self) -> None:
         N, M = np.array(self.g1['nodes_feature']).shape
         self.assertEqual(N, 12, f"Count nodes = {N}")
-        # WORD=32 + STYLE=7 + POSITION=2
-        self.assertEqual(M, 32+7+2, f"Count nodes = {M}")
+        # WORD=32 + STYLE=3 + POSITION=2
+        self.assertEqual(M, 32+3+2, f"Count nodes = {M}")
 
     def test_size_nodes_feature_delaunay(self) -> None:
         N, M = np.array(self.g2['nodes_feature']).shape
         self.assertEqual(N, 12, f"Count nodes = {N}")
-        # WORD=32 + STYLE=7 + POSITION=2
-        self.assertEqual(M, 32+7+2, f"Count nodes = {M}")
+        # WORD=32 + STYLE=3 + POSITION=2
+        self.assertEqual(M, 32+3+2, f"Count nodes = {M}")
 
         
