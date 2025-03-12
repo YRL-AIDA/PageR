@@ -1,5 +1,5 @@
 from ..base_sub_model import BaseSubModel, BaseExtractor, BaseConverter
-from ..dtype import ImageSegment, Block, StyleWord
+from ..dtype import ImageSegment, Block, Word
 from typing import List
 from sklearn.cluster import DBSCAN
 import numpy as np
@@ -7,13 +7,13 @@ import numpy as np
 
 class WordsToDBSCANBlocks(BaseConverter):
     def convert(self, input_model: BaseSubModel, output_model: BaseSubModel)-> None:
-        word_list: List[StyleWord] = input_model.words
+        word_list: List[Word] = input_model.words
 
         blocks = self.get_blocks_from_words(word_list)
         for block in blocks:
             output_model.blocks.append(block)
        
-    def get_blocks_from_words(self, word_list: List[StyleWord]) -> List[Block]:
+    def get_blocks_from_words(self, word_list: List[Word]) -> List[Block]:
         word_chars_index = []
         char_coordinate = []
         list_h = []
@@ -48,7 +48,7 @@ class WordsToDBSCANBlocks(BaseConverter):
                 blocks.append(self.get_block_from_words(word_clust_list)) 
         return blocks
     
-    def get_block_from_words(self, word_list: List[StyleWord]) -> Block:
+    def get_block_from_words(self, word_list: List[Word]) -> Block:
         segment = ImageSegment(0, 0, 1, 1)
         segment.set_segment_max_segments([word.segment for word in word_list])
         block = Block(segment.get_segment_2p())

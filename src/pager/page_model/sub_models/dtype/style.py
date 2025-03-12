@@ -68,3 +68,9 @@ class Style:
             "label": self.label
         }
         return dict_style
+
+    def __eq__(self, value):
+        for key in ["size", 'font_type', 'italic', 'width', 'color', 'label', 'font2vec']:
+            if self.__dict__["size"] != value.__dict__["size"]:
+                return False
+        return True

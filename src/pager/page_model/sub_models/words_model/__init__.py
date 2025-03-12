@@ -1,1 +1,1 @@
-from .words_model import WordsModel, ImageToWords
+from .words_model import WordsModel

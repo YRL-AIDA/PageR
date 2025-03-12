@@ -1,4 +1,5 @@
 from .base_sub_model import BaseSubModel, BaseConverter, BaseExtractor, BaseLoger, BasePrinter, AddArgsFromModelExtractor
+from .converters import *
 
 from .image_model import *
 from .pdf_model import *
