@@ -12,7 +12,7 @@ class PDF2Words(BaseConverter):
     def get_words(self, words_json):
         words = []
         for word in words_json:
-            if word["height"] < 0 or word["width"] < 0:
+            if word["height"] < 1 or word["width"] < 1:
                 continue
             # tmp_style = self.get_style_from_word(word)
             # index_style = self._get_style(tmp_style, styles)           
