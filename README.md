@@ -10,6 +10,11 @@
 - [OCR-Tesseract](https://tesseract-ocr.github.io/tessdoc/Installation.html)
 - [Java-PDF-Parser](https://github.com/YRL-AIDA/Java-PDF-Parser/tree/main)
 
+Предварительная установка poppler для mac 
+ ```
+ brew install poppler
+ ```
+
 ```
 python set_config.py
 python -m pip install .
