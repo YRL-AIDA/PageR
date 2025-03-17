@@ -23,8 +23,12 @@ class TestPhisicalModel(unittest.TestCase):
             self.assertEqual(block["label"], true_label[i])
 
     def test_start_end_words(self) -> None:
-        word_start = self.blocks[3]["words"][0]    
+        word_start = self.blocks[3]["words"][0] 
+        for key, val in word_start["segment"].items():
+            word_start[key] = val
         word_end = self.blocks[3]["words"][-1]
+        for key, val in word_end["segment"].items():
+            word_end[key] = val
         true_word_start = {
                 'x_top_left': 46,
                 'x_bottom_right': 110,

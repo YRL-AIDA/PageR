@@ -1,5 +1,5 @@
 import unittest
-from pager import PageModel, PageModelUnit, ImageModel, WordsModel, ImageToWords
+from pager import PageModel, PageModelUnit, ImageModel, WordsModel, Image2Words
 
 class TestImage2Words(unittest.TestCase):
     page = PageModel(page_units=[
@@ -10,7 +10,7 @@ class TestImage2Words(unittest.TestCase):
         PageModelUnit(id="words_model", 
                       sub_model=WordsModel(), 
                       extractors=[], 
-                      converters={"image_model": ImageToWords()})
+                      converters={"image_model": Image2Words()})
         ])
 
 

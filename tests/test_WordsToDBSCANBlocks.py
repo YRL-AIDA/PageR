@@ -1,11 +1,14 @@
 import unittest
 from pager import (PageModel, PageModelUnit,
-                   ImageModel, ImageToWordsAndStyles,
+                   ImageModel, Image2WordsAndStyles,
                    WordsAndStylesModel, PhisicalModel, 
                    WordsToDBSCANBlocks)
 from pager.page_model.sub_models.dtype import ImageSegment
 from pager.metrics.uoi import segmenter_UoI as UoI, AP_and_AR_from_TP_FP_FN, TP_FP_FN_UoI
-
+from dotenv import load_dotenv
+import os
+load_dotenv(override=True)
+STYLE_MODEL = os.environ["PATH_STYLE_MODEL"]
 class TestWordsToDBSCANBlocks(unittest.TestCase):
     page = PageModel(page_units=[
         PageModelUnit(id="image_model", 
@@ -15,7 +18,7 @@ class TestWordsToDBSCANBlocks(unittest.TestCase):
         PageModelUnit(id="words_and_styles_model", 
                       sub_model=WordsAndStylesModel(), 
                       extractors=[], 
-                      converters={"image_model": ImageToWordsAndStyles()}),
+                      converters={"image_model": Image2WordsAndStyles({"path_model": STYLE_MODEL})}),
         PageModelUnit(id="phisical_model", 
                       sub_model=PhisicalModel(), 
                       extractors=[], 

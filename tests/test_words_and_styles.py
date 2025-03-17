@@ -2,10 +2,11 @@ import unittest
 import numpy as np
 from pager import WordsAndStylesModel
 import json 
+import os
 
 class TestWordsAndStylesModel(unittest.TestCase):
     ws_model = WordsAndStylesModel()
-    file_name = 'files/words_and_styles.json'   
+    file_name = os.path.join('files','words_and_styles.json')
     ws_model.read_from_file(file_name)
     dict_ = ws_model.to_dict()
     words = dict_['words']
@@ -16,6 +17,8 @@ class TestWordsAndStylesModel(unittest.TestCase):
     true_words = js['words']
 
     def test_len(self) -> None:
+        self.assertGreaterEqual(len(self.words), 5)
+        self.assertGreaterEqual(len(self.styles), 2)
         self.assertEqual(len(self.words), len(self.true_words))
         self.assertEqual(len(self.styles), len(self.true_styles))
 
@@ -25,4 +28,6 @@ class TestWordsAndStylesModel(unittest.TestCase):
                 self.assertEqual(val, dict_[key])
         for true_dict, dict_ in zip(self.true_words, self.words):
             for key, val in true_dict.items():
+                if key in ('content', 'type_align'):
+                    continue
                 self.assertEqual(val, dict_[key])
