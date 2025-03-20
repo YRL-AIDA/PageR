@@ -43,8 +43,9 @@ class PageModel:
     
     def extract(self):
         for page_unit in self.page_units:
-            for id_model, conv in page_unit.converters.items():
-                page_unit.sub_model.clean_model()
+            for i, (id_model, conv) in enumerate(page_unit.converters.items()):
+                if i == 0:
+                    page_unit.sub_model.clean_model()
                 conv.convert(self.page_units[self.keys[id_model]].sub_model, page_unit.sub_model)
             
             for extr in page_unit.extractors:
