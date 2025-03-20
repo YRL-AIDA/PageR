@@ -5,17 +5,18 @@ import json
 from dotenv import load_dotenv
 load_dotenv(override=True)
 
-GLAM_NODE_MODEL = os.getenv("PATH_TORCH_GLAM_NODE_MODEL")
-GLAM_EDGE_MODEL = os.getenv("PATH_TORCH_GLAM_EDGE_MODEL")
-PATH_STYLE_MODEL = os.environ["PATH_STYLE_MODEL"]
 
-with open(os.environ["PATH_TORCH_GLAM_CONF_MODEL"], "r") as f:
-    conf_glam = json.load(f)
-conf_glam["path_node_gnn"] = GLAM_NODE_MODEL
-conf_glam["path_edge_linear"] =  GLAM_EDGE_MODEL
 
 class Image2Phis(PageModel):
     def __init__(self):
+        GLAM_NODE_MODEL = os.getenv("PATH_TORCH_GLAM_NODE_MODEL")
+        GLAM_EDGE_MODEL = os.getenv("PATH_TORCH_GLAM_EDGE_MODEL")
+        PATH_STYLE_MODEL = os.getenv("PATH_STYLE_MODEL")
+
+        with open(os.getenv("PATH_TORCH_GLAM_CONF_MODEL"), "r") as f:
+            conf_glam = json.load(f)
+        conf_glam["path_node_gnn"] = GLAM_NODE_MODEL
+        conf_glam["path_edge_linear"] =  GLAM_EDGE_MODEL
         super().__init__(page_units=[
         PageModelUnit(id="image_model", 
                         sub_model=ImageModel(), 
