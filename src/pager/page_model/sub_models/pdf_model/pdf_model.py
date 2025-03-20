@@ -18,7 +18,7 @@ NULL_PAGE = {
 class PDFModel(BaseSubModel):
     def __init__(self) -> None:
         super().__init__()
-        self.json: Dict
+        self.pdf_json: Dict
         self.count_page: int
         self.num_page: int = 0
 
@@ -26,15 +26,15 @@ class PDFModel(BaseSubModel):
         pass
 
     def to_dict(self) -> Dict:
-        return self.json["pages"][self.num_page] if "pages" in self.json.keys() else NULL_PAGE
+        return self.pdf_json["pages"][self.num_page] if "pages" in self.pdf_json.keys() else NULL_PAGE
 
     def read_from_file(self, path_file: str) -> None:
         self.path = path_file
-        self.json = self.__read(path_file)
-        self.count_page = len(self.json['pages']) if "pages" in self.json.keys() else 0
+        self.pdf_json = self.__read(path_file)
+        self.count_page = len(self.pdf_json['pages']) if "pages" in self.pdf_json.keys() else 0
 
     def clean_model(self)-> None:
-        self.json = {}
+        self.pdf_json = {}
         self.count_page = None
         self.num_page = 0
     
