@@ -7,3 +7,4 @@ from .img2words_and_styles import Image2WordsAndStyles, Image2WordsAndStylesStat
 
 from .pdf2words_and_styles import PDF2WordsAndStyles
 
+from .pdf2only_fig_blocks import PDF2OnlyFigBlocks
