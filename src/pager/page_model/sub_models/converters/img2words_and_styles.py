@@ -37,4 +37,13 @@ class Image2WordsAndStylesStatVec(Image2WordsAndStyles):
             np.argmin(diff_vertical)/h
         ]
         return Style({"id":None, "font2vec":vec_style})
-        
+
+import warnings
+
+class ImageToWordsAndCNNStyles(Image2WordsAndStyles):
+    def __init__(self, conf=None):
+        warnings.warn("use Image2WordsAndStyles (ImageToWordsAndCNNStyles deleting)")
+        super().__init__(conf)
+       
+
+    
