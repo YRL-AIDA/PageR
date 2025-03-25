@@ -28,7 +28,7 @@ class SegDetectionBenchmark(TorchSegDetectionBenchmark):
         F1 = np.zeros((count_class, COUNT_IOU_INTERVAL))
         
         for image in json_dataset["images"][:self.count_image]:
-            TPplusFP_one_image, TPplusFN_one_image, IoU_one_image = self.calculate_metrics(image)
+            TPplusFP_one_image, TPplusFN_one_image, IoU_one_image = self.calculate_metrics(image, count_class)
             for i in range(count_class):
                 TPplusFP[i] += TPplusFP_one_image[i]
                 TPplusFN[i] += TPplusFN_one_image[i]
@@ -58,9 +58,9 @@ class SegDetectionBenchmark(TorchSegDetectionBenchmark):
         
         super().main_metric(json_dataset)
     
-    def calculate_metrics(self, image):
-        annotation_true = [[] for i in range(COUNT_CLASS)]
-        annotation_pred = [[] for i in range(COUNT_CLASS)]
+    def calculate_metrics(self, image, count_class):
+        annotation_true = [[] for i in range(count_class)]
+        annotation_pred = [[] for i in range(count_class)]
 
         for block_true in image["annotations_true"]:
             annotation_true[block_true["category_id"]].append(block_true["bbox"])
@@ -70,9 +70,9 @@ class SegDetectionBenchmark(TorchSegDetectionBenchmark):
 
         TPplusFN = np.array([len(a) for a in annotation_true])
         TPplusFP = np.array([len(a) for a in annotation_pred])
-        IoU = [[] for i in range(COUNT_CLASS)]
+        IoU = [[] for i in range(count_class)]
 
-        for i in range(COUNT_CLASS):
+        for i in range(count_class):
             for bloc_pred in annotation_pred[i]:
                 iou = np.max([self.calculate_iou(bloc_pred, block_true) for block_true in annotation_true[i]] + [0.0])
                                                                                                  # ^ если пусто, то 0.0
