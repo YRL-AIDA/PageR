@@ -65,7 +65,7 @@ class SegDetectionBenchmark(BaseBenchmark):
         os.mkdir(self.save_dir)
         for img in json_dataset["images"][:self.count_image]:
             save_path = os.path.join(self.save_dir, img["file_name"])
-            self.save_rez_image(img, save_path)
+            self.save_rez_image(img, save_path, one_class=self.only_seg)
     
     def main_metric(self, json_dataset):
         target = [dict(     
@@ -80,7 +80,6 @@ class SegDetectionBenchmark(BaseBenchmark):
         metric = MeanAveragePrecision(box_format="xywh")
         metric.update(preds, target)  
         rez = metric.compute()
-        print(rez)
         self.loger(f"mAP@IoU[0.50:0.95] = {rez['map']:.8f}")
 
     def start(self):
@@ -148,8 +147,8 @@ class SegDetectionBenchmark(BaseBenchmark):
                                         "x_bottom_right":x1,
                                         "y_bottom_right":y1}
             
-    def save_rez_image(self, img, save_path):
-        def rect(mtrx, block, typeLine=4):
+    def save_rez_image(self, img, save_path, one_class=False):
+        def rect(mtrx, block, typeLine=4, line_size=0, c=None):
             colors = [
                 (255, 0,   0),
                 (255, 255, 0),
@@ -162,21 +161,28 @@ class SegDetectionBenchmark(BaseBenchmark):
             w=int(block["bbox"][2]) 
             h =int(block["bbox"][3])
             x1, y1 = x0 + w - 1, y0 + h -1
-            color = colors[block["category_id"]]
-            mtrx[y0, [x for x in range(x0, x1) if x%4 < typeLine]] = color
-            mtrx[y1, [x for x in range(x0, x1) if x%4 < typeLine]] = color
-            mtrx[[y for y in range(y0, y1) if y%4 < typeLine], x0] = color
-            mtrx[[y for y in range(y0, y1) if y%4 < typeLine], x1] = color
+            color = colors[block["category_id"]] if c is None else c
+           
+            mtrx[y0-line_size:y0+line_size+1, [x for x in range(x0, x1) if x%4 < typeLine]] = color
+            mtrx[y1-line_size:y1+line_size+1, [x for x in range(x0, x1) if x%4 < typeLine]] = color
+            mtrx[[y for y in range(y0, y1) if y%4 < typeLine], x0-line_size:x0+line_size+1] = color
+            mtrx[[y for y in range(y0, y1) if y%4 < typeLine], x1-line_size:x1+line_size+1] = color
         image_path = os.path.join(self.path_dataset if self.path_images is None else self.path_images, img["file_name"])
         mtrx = cv2.imread(image_path)
         mtrx = cv2.cvtColor(mtrx, cv2.COLOR_BGR2RGB)
         true_blocks = img["annotations_true"]
         pred_blocks = img["annotations_pred"]
         
-        for block in true_blocks:
-            rect(mtrx, block)
-        for block in pred_blocks:
-            rect(mtrx, block, typeLine=2)
+        if one_class:
+            for block in true_blocks:
+                rect(mtrx, block, line_size=1, c=(0, 255, 0))
+            for block in pred_blocks:
+                rect(mtrx, block, c=(255, 0, 0))
+        else:
+            for block in true_blocks:
+                rect(mtrx, block)
+            for block in pred_blocks:
+                rect(mtrx, block, typeLine=2)
 
         mtrx = cv2.cvtColor(mtrx, cv2.COLOR_RGB2BGR)
         cv2.imwrite(save_path, mtrx)

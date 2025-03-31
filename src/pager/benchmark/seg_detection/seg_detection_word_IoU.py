@@ -72,7 +72,8 @@ class SegDetectionBenchmark(SegDetectionBenchmarkF1):
                             pred_blocks[i]["word_ids"].append(j)
                             exist_block.append(i)
                             break 
-            return [pred_blocks[i] for i in list(set(exist_block))], time_
+            rez = [pred_blocks[i] for i in list(set(exist_block))]
+            return rez, time_
         
         N = self.count_image
         for i, image_d in enumerate(json_dataset["images"][:self.count_image]):
@@ -81,6 +82,23 @@ class SegDetectionBenchmark(SegDetectionBenchmarkF1):
             an, time_ =  get_annotations_from_page(path, image_d)
             image_d["annotations_pred"] = an
             image_d["time"] = time_
+
+            new_pred = []
+            for an in image_d["annotations_pred"]:
+                if len(an['word_ids']) != 0:
+                    new_pred.append(an)
+            image_d["annotations_pred"] = new_pred
+
+            new_true = []
+            for an in image_d["annotations_true"]:
+                if len(an['word_ids']) != 0:
+                    new_true.append(an)
+            image_d["annotations_true"] = new_true
+
+           
+
+
+        
 
 
         
@@ -105,7 +123,7 @@ class SegDetectionBenchmark(SegDetectionBenchmarkF1):
 
         for block_pred in image["annotations_pred"]:    
             annotation_pred[block_pred["category_id"]].append(block_pred["word_ids"])
-
+        print("AN, true:", image["annotations_true"])
         TPplusFN = np.array([len(a) for a in annotation_true])
         TPplusFP = np.array([len(a) for a in annotation_pred])
         IoU = [[] for i in range(count_class)]
