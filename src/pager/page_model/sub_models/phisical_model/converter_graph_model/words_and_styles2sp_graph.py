@@ -5,14 +5,20 @@ from typing import Dict, List
 from transformers import BertTokenizer, BertModel
 import torch
 from ...dtype import ImageSegment
+import os
+from dotenv import load_dotenv
+load_dotenv(override=True)
+
 SIZE_VEC = 32
 BERT_COUNT_WORD_AT_ONCE= 250
+
+device = torch.device('cuda:0' if torch.cuda.device_count() != 0 else 'cpu') if os.environ['DEVICE'] == 'gpu' else torch.device('cpu')
 
 class Word2Vec():
     def __init__(self):
         model_name = "bert-base-multilingual-cased"  # Многоязычная модель BERT
         self.tokenizer = BertTokenizer.from_pretrained(model_name)
-        self.model = BertModel.from_pretrained(model_name)
+        self.model = BertModel.from_pretrained(model_name).to(device)
     
     def __call__(self, words):
         if len(words) == 0:
@@ -24,14 +30,14 @@ class Word2Vec():
             a = i*BERT_COUNT_WORD_AT_ONCE
             b = (i+1)*BERT_COUNT_WORD_AT_ONCE
             part_words = words[a:b]
-            inputs = self.tokenizer(part_words, return_tensors="pt", padding=True)
+            inputs = self.tokenizer(part_words, return_tensors="pt", padding=True).to(device)
             outputs = self.model(**inputs)
-            output_array[a:b] = outputs.last_hidden_state.mean(dim=1).detach().numpy()[:, :SIZE_VEC]
+            output_array[a:b] = outputs.last_hidden_state.mean(dim=1).detach().cpu().numpy()[:, :SIZE_VEC]
         if over != 0:
             part_words = words[-over:]
-            inputs = self.tokenizer(part_words, return_tensors="pt", padding=True)
+            inputs = self.tokenizer(part_words, return_tensors="pt", padding=True).to(device)
             outputs = self.model(**inputs)
-            output_array[-over:] = outputs.last_hidden_state.mean(dim=1).detach().numpy()[:, :SIZE_VEC]
+            output_array[-over:] = outputs.last_hidden_state.mean(dim=1).detach().cpu().numpy()[:, :SIZE_VEC]
         return output_array
 
 class WordsAndStylesToSpG(BaseConverter):
@@ -57,10 +63,11 @@ class WordsAndStylesToSpG(BaseConverter):
 
 
 class WordsAndStylesToSpGraph4N(WordsAndStylesToSpG):
-    def __init__(self, conf=None) -> None:
+    def __init__(self, conf=None, add_text=True) -> None:
         super().__init__()
         self.kmean_clusterizer = KMeanClusterizer()
         self.with_text = False
+        self.add_text = add_text
         if conf is not None:
             self.with_text = conf["with_text"] if "with_text" in conf.keys() else False
 
@@ -83,14 +90,21 @@ class WordsAndStylesToSpGraph4N(WordsAndStylesToSpG):
                         segments[i].get_angle_center(segments[k]),
                         ])
         output_model.A = np.array(edges)
-        output_model.nodes_feature = np.array(self.get_vec_words(words, styles, self.with_text))
-        output_model.edges_feature = np.array(edges_feature)
+        #TODO: TEST !!!!
+
+        if self.add_text:
+            output_model.nodes_feature = np.array(self.get_vec_words(words, styles, self.with_text))
+            output_model.edges_feature = np.array(edges_feature)
+        else:
+            output_model.nodes_feature = np.array([]) #np.array(self.get_vec_words(words, styles, self.with_text))
+            output_model.edges_feature = np.array([]) #np.array(edges_feature)
     
 class WordsAndStylesToSpDelaunayGraph(WordsAndStylesToSpG):
-    def __init__(self, conf=None) -> None:
+    def __init__(self, conf=None, add_text=True) -> None:
         super().__init__()
         self.delaunay_clusterizer = DelaunayClusterizer()
         self.with_text = False
+        self.add_text = add_text
         if conf is not None:
             self.with_text = conf["with_text"] if "with_text" in conf.keys() else False
 
@@ -108,5 +122,11 @@ class WordsAndStylesToSpDelaunayGraph(WordsAndStylesToSpG):
                     edges[1].append(j)
                     edges_feature.append(distans[i][j])
         output_model.A = np.array(edges)
-        output_model.nodes_feature = np.array(self.get_vec_words(words, styles, self.with_text))
-        output_model.edges_feature = np.array(edges_feature)
+        #TODO: TEST !!!!
+
+        if self.add_text:
+            output_model.nodes_feature = np.array(self.get_vec_words(words, styles, self.with_text))
+            output_model.edges_feature = np.array(edges_feature)
+        else:
+            output_model.nodes_feature = np.array([]) #np.array(self.get_vec_words(words, styles, self.with_text))
+            output_model.edges_feature = np.array([]) #np.array(edges_feature)

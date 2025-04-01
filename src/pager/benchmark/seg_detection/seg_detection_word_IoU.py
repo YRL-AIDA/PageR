@@ -123,7 +123,7 @@ class SegDetectionBenchmark(SegDetectionBenchmarkF1):
 
         for block_pred in image["annotations_pred"]:    
             annotation_pred[block_pred["category_id"]].append(block_pred["word_ids"])
-        print("AN, true:", image["annotations_true"])
+
         TPplusFN = np.array([len(a) for a in annotation_true])
         TPplusFP = np.array([len(a) for a in annotation_pred])
         IoU = [[] for i in range(count_class)]
