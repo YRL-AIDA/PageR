@@ -82,7 +82,7 @@ class WordsAndStylesToSpGraph4N(WordsAndStylesToSpG):
         edges_feature = []
         for i, nodes in enumerate(graph4n):
             for k, j in enumerate(nodes):
-                if not (i in edges[1] and j in edges[0]): # i-j еще нет, проверка что нет j-i
+                if not ((i in edges[1] and j in edges[0]) or (j in edges[1] and i in edges[0])): # i-j еще нет, проверка что нет j-i
                     edges[0].append(i)
                     edges[1].append(j)
                     edges_feature.append([
