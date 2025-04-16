@@ -3,7 +3,7 @@ import os
 import argparse
 import json 
 from pager import (PageModel, PageModelUnit,
-                   ImageModel, ImageToWordsAndStyles,
+                   ImageModel, Image2WordsAndStyles,
                    WordsAndStylesModel, PhisicalModel, 
                    WordsAndStylesToGNNpLinearBlocks,
                    ImageToWordsAndCNNStyles,
@@ -11,12 +11,15 @@ from pager import (PageModel, PageModelUnit,
                    TrianglesSortBlock
                    )
 from dotenv import load_dotenv
+from pager.page_model.glam_model_20250415 import get_final_model
+
 load_dotenv(override=True)
 GNN_MODEL = os.environ["PATH_TORCH_SEG_GNN_MODEL"]
 LINEAR_MODEL = os.environ["PATH_TORCH_SEG_LINEAR_MODEL"]
 
 GLAM_NODE_MODEL = os.getenv("PATH_TORCH_GLAM_NODE_MODEL")
 GLAM_EDGE_MODEL = os.getenv("PATH_TORCH_GLAM_EDGE_MODEL")
+GLAM_MODEL = os.getenv("PATH_TORCH_GLAM_MODEL")
 PATH_STYLE_MODEL = os.environ["PATH_STYLE_MODEL"]
 
 with open(os.environ["PATH_TORCH_GLAM_CONF_MODEL"], "r") as f:
@@ -48,7 +51,7 @@ page =  PageModel(page_units=[
                         })
         ])
 
-
+page = get_final_model({"GLAM_MODEL": GLAM_MODEL})
 parser = argparse.ArgumentParser()
 parser.add_argument('-i', type=str, nargs='?', required=True)
 args = parser.parse_args()
@@ -62,5 +65,5 @@ print(str_)
 
 import matplotlib.pyplot as plt
 page.page_units[0].sub_model.show()
-page.page_units[2].sub_model.show()
+page.page_units[3].sub_model.show()
 plt.show()

@@ -35,6 +35,9 @@ PATH_TORCH_GLAM_NODE_MODEL = get_path(path, f'path PATH_TORCH_GLAM_NODE_MODEL (d
 path = os.path.join(model_dir,  'glam_edge_model_20250221')
 PATH_TORCH_GLAM_EDGE_MODEL = get_path(path, f'path PATH_TORCH_GLAM_EDGE_MODEL (default: {path})')
 
+path = os.path.join(model_dir,  'glam_model_20250415')
+PATH_TORCH_GLAM_MODEL = get_path(path, f'path PATH_TORCH_GLAM_MODEL (default: {path})')
+
 path = os.path.join(model_dir,  'glam_config_model_20250221.json')
 PATH_TORCH_GLAM_CONF_MODEL = get_path(path, f'path PATH_TORCH_GLAM_CONF_MODEL (default: {path})')
 
@@ -46,6 +49,7 @@ config = {'JAR_PDF_PARSER': JAR_PDF_PARSER,
         'PATH_STYLE_MODEL': PATH_STYLE_MODEL,
         'PATH_TORCH_GLAM_NODE_MODEL': PATH_TORCH_GLAM_NODE_MODEL,
         'PATH_TORCH_GLAM_EDGE_MODEL': PATH_TORCH_GLAM_EDGE_MODEL,
+        'PATH_TORCH_GLAM_MODEL': PATH_TORCH_GLAM_MODEL,
         'PATH_TORCH_GLAM_CONF_MODEL': PATH_TORCH_GLAM_CONF_MODEL,
         'DEVICE': 'cpu'
 }
