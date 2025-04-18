@@ -29,6 +29,6 @@ page.extract()
 phis = page.to_dict()    
 
 
-page.page_units[0].sub_model.show()
+page.page_units[1].sub_model.show()
 page.page_units[2].sub_model.show()
 plt.show()
