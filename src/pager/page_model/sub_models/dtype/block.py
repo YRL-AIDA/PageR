@@ -1,5 +1,7 @@
 from abc import ABC
 from typing import List
+import numpy as np
+import matplotlib .pyplot as plt
 # from ..paragraph import Paragraph
 from .image_segment import ImageSegment
 from .word import Word
@@ -89,3 +91,32 @@ class BlockWithoutWords(Exception):
 
     def __str__(self) -> str:
         return "Count words in block is Zero"
+
+
+class TableBlock(Block):
+    def __init__(self, dict_block, img_table, dict_grid, dict_cells):
+        super().__init__(dict_block)
+        self.img_table = img_table
+        self.grid = dict_grid
+        self.cells = dict_cells
+    
+    def to_dict(self):
+        block_dict = self.segment.get_segment_2p()
+        block_dict["text"] = self.get_text()
+        if self.label is not None:
+            block_dict["label"] = self.label
+        block_dict["words"] = [word.to_dict() for word in self.words]
+        block_dict["cells"] = self.cells
+        block_dict["grid"] = self.grid
+        return block_dict
+    
+    def show(self):
+        seg = self.segment.get_segment_2p()
+        x0 = seg['x_top_left']
+        x1 = seg['x_bottom_right']
+        y0 = seg['y_top_left']
+        y1 = seg['y_bottom_right']
+        for c in self.grid['columns']:
+            plt.plot([x0+c, x0+c], [y0, y1])
+        for r in self.grid['rows']:
+            plt.plot([x0, x1], [y0+r, y0+r])
