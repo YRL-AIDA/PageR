@@ -1,6 +1,7 @@
 from ..base_sub_model import BaseConverter
 from ..image_model import ImageModel
 from ..words_model import WordsModel
+import re
 import pytesseract
 import cv2
 import numpy as np
@@ -16,7 +17,15 @@ class Image2Words(BaseConverter):
 
     def convert(self, input_model: ImageModel, output_model: WordsModel)-> None:
         word_list = self.extract_from_img(input_model.img)
-        output_model.set_words_from_dict(word_list)
+        words = []
+        others = []
+        for w in word_list:
+            if re.match(r'^\s*$', w["text"]):
+                others.append(w)
+            else:
+                words.append(w)
+        output_model.set_words_from_dict(words)
+        output_model.set_others_from_dict(others)
 
 
     def extract_from_img(self, img):
