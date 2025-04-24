@@ -25,7 +25,7 @@ class PDF2WordsAndStyles(ImageAndWords2WordsAndStyles):
         for i, style_ in enumerate(styles):
             if style_.font_type == style.font_type:
                 return i
-        style.font2vec = classifier_image_word(self.model, style.img_font).detach().numpy().tolist()
+        style.font2vec = self.classifier_image_word(style.img_font)
         del style.img_font
         return -1
     
