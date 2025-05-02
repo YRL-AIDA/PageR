@@ -117,8 +117,8 @@ class KMeanClusterizer(BaseSegmentClusterizer):
             if new_index_w < 0 or new_index_w >= index_w_max:
                 return k
             new_index_h = index_h
-            new_index_h0 = max(0, index_h - level)
-            new_index_h1 = min(index_h_max - 1 , index_h + level) 
+            new_index_h0 = max(0, index_h - 1) #max(0, index_h - level)
+            new_index_h1 = min(index_h_max - 1 , index_h + 1)  #min(index_h_max - 1 , index_h + level) 
             for new_index_h in range(new_index_h0, new_index_h1+1):
                 neighbors += self.get_segment_hash_cell(hash_matrix, new_index_h, new_index_w)
              
@@ -128,8 +128,8 @@ class KMeanClusterizer(BaseSegmentClusterizer):
             new_index_w = index_w
             if new_index_h < 0 or new_index_h >= index_h_max:
                 return k
-            new_index_w0 = max(0, index_w - level)
-            new_index_w1 = min(index_w_max - 1, index_w + level)
+            new_index_w0 = max(0, index_w - 1) #max(0, index_w - level)
+            new_index_w1 = min(index_w_max - 1, index_w + 1)#min(index_w_max - 1, index_w + level)
             for new_index_w in range(new_index_w0, new_index_w1+1):
                 neighbors += self.get_segment_hash_cell(hash_matrix, new_index_h, new_index_w)
              
