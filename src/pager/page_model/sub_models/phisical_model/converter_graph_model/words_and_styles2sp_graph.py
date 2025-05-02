@@ -78,17 +78,22 @@ class WordsAndStylesToSpGraph4N(WordsAndStylesToSpG):
         segments: List[ImageSegment]  = [w.segment for w in words]
         graph4n = self.kmean_clusterizer.get_index_neighbors_segment(segments)
         distans = self.kmean_clusterizer.get_distans(graph4n, segments)
+        edges_set = set()
         edges = [[], []]
         edges_feature = []
         for i, nodes in enumerate(graph4n):
             for k, j in enumerate(nodes):
-                if not ((i in edges[1] and j in edges[0]) or (j in edges[1] and i in edges[0])): # i-j еще нет, проверка что нет j-i
-                    edges[0].append(i)
-                    edges[1].append(j)
-                    edges_feature.append([
-                        distans[i][k],
-                        segments[i].get_angle_center(segments[k]),
-                        ])
+                edge = (min(i, j), max(i, j))
+                if edge in edges_set:
+                    continue
+                edges_set.add(edge)
+                
+                edges[0].append(i)
+                edges[1].append(j)
+                edges_feature.append([
+                    distans[i][k],
+                    segments[i].get_angle_center(segments[j]),
+                    ])
         output_model.A = np.array(edges)
         #TODO: TEST !!!!
 
