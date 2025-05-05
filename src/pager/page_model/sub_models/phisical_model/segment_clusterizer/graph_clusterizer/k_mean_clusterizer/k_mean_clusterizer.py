@@ -183,11 +183,74 @@ class KMeanClusterizer(BaseSegmentClusterizer):
         return min_index
 
     def get_neighbor_fun(self, segments, k, hash_matrix, fun_hashkey, max_level, vec):
-        for level in range(max_level):
-            min_index_seg = self.get_segment_index_level(segments, k, hash_matrix, fun_hashkey, level, vec)
-            if min_index_seg != k:
-                return min_index_seg
-        return k
+        def get_dist(kseg:ImageSegment, vec):
+            xc_, yc_ = kseg.get_center()
+            xl_, xr_ = kseg.x_top_left, kseg.x_bottom_right
+            yt_, yb_ = kseg.y_top_left, kseg.y_bottom_right
+            if vec=="left":
+                dx = xl-xr_ 
+            elif vec=="right":
+                dx = xl_-xr
+            else:
+                dx =abs(xc_-xc)
+            if dx < 0:
+                return np.inf
+
+            if vec=="top":
+                dy = yt-yb_
+            elif vec=="bottom":
+                dy = yt_-yb
+            else:
+                dy = abs(yc_-yc)
+            if dy < 0:
+                return np.inf
+            return (dx**2+dy**2)**0.5
+            
+        kseg = segments[k]
+        
+        xc, yc = kseg.get_center()
+        xl, xr = kseg.x_top_left, kseg.x_bottom_right
+        yt, yb = kseg.y_top_left, kseg.y_bottom_right
+        
+        index_h, index_w = fun_hashkey(kseg)
+        index_h_max = len(hash_matrix)-1
+        index_w_max = len(hash_matrix[0])-1
+        neighbors = [n for n in hash_matrix[index_h][index_w] if n!=k]
+        h0, h1 = max(0, index_h-1), min(index_h_max, index_h+1)
+        H0, H1 = max(0, index_h-max_level), min(index_h_max, index_h+max_level)
+        w0, w1 = max(0, index_w-max_level), min(index_w_max, index_w+max_level)
+    
+        
+        if vec=="right":
+            for w in range(index_w+1, w1+1):
+                for h in range(h0, h1+1):
+                    neighbors+=hash_matrix[h][w]
+        elif vec=="left":
+            for w in range(w0, index_w):
+                for h in range(h0, h1+1):
+                    neighbors+=hash_matrix[h][w]
+        elif  vec=="top":
+            for w in range(w0, w1+1):
+                for h in range(H0, index_h+1):
+                    neighbors+=hash_matrix[h][w]
+        elif vec=="bottom":
+            for w in range(w0, w1+1):
+                for h in range(index_h, H1+1):
+                    neighbors+=hash_matrix[h][w]
+        
+        if len(neighbors) == 0:
+            return k
+        
+        dists = [get_dist(segments[i], vec) for i in neighbors]
+        if min(dists) == np.inf:
+            return k
+        return neighbors[np.argmin(dists)]
+        
+        # for level in range(max_level):
+        #     min_index_seg = self.get_segment_index_level(segments, k, hash_matrix, fun_hashkey, level, vec)
+        #     if min_index_seg != k:
+        #         return min_index_seg
+        # return k
 
     def get_distans(self, neighbors, segments):
         distans = []
