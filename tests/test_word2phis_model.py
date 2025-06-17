@@ -1,5 +1,5 @@
 import unittest
-from pager import PageModel, PageModelUnit, WordsModel, PhisicalModel, WordsToOneBlock
+from pager import PageModel, PageModelUnit, WordsModel, PhisicalModel, Words2OneBlock
 
 class TestWords2PhisModel(unittest.TestCase):
     page = PageModel(page_units=[
@@ -10,7 +10,7 @@ class TestWords2PhisModel(unittest.TestCase):
         PageModelUnit(id="phisical_model", 
                       sub_model=PhisicalModel(), 
                       extractors=[], 
-                      converters={"words_model": WordsToOneBlock()})
+                      converters={"words_model": Words2OneBlock()})
         ])
 
     page.read_from_file('files/words.json')

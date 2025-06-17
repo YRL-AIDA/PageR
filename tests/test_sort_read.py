@@ -1,11 +1,11 @@
 import unittest
 import os
-from pager import PageModel, PageModelUnit, PhisicalModel, WordsModel, WordsToOneBlock
+from pager import PageModel, PageModelUnit, PhisicalModel, WordsModel, Words2OneBlock
 from pager.page_model.sub_models.dtype.block import Block
 
 class TestSort(unittest.TestCase):
     phis_model = PageModel([PageModelUnit("words", WordsModel(), extractors=[], converters={}),
-                            PageModelUnit("block", PhisicalModel(), extractors=[], converters={"words": WordsToOneBlock()})])
+                            PageModelUnit("block", PhisicalModel(), extractors=[], converters={"words": Words2OneBlock()})])
     
     def test_sort_read1(self):
         block = self._get_block(os.path.join('files', 'unsorted_words.json'))
