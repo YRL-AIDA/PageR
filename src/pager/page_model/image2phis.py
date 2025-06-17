@@ -1,5 +1,7 @@
 from .page_model import PageModel, PageModelUnit
 from .sub_models import ImageModel, WordsAndStylesModel, PhisicalModel, Image2WordsAndStyles, TrianglesSortBlock,WordsAndStylesToGLAMBlocks
+from .sub_models.extractors import TableExtractor
+from .sub_models.base_sub_model import AddArgsFromModelExtractor
 import os
 import json
 from dotenv import load_dotenv
@@ -17,9 +19,10 @@ class Image2Phis(PageModel):
             conf_glam = json.load(f)
         conf_glam["path_node_gnn"] = GLAM_NODE_MODEL
         conf_glam["path_edge_linear"] =  GLAM_EDGE_MODEL
+        image_model = ImageModel()
         super().__init__(page_units=[
         PageModelUnit(id="image_model", 
-                        sub_model=ImageModel(), 
+                        sub_model=image_model, 
                         extractors=[], 
                         converters={}),
         PageModelUnit(id="words_and_styles_model", 
@@ -34,7 +37,9 @@ class Image2Phis(PageModel):
                                   "k": 4})}),
         PageModelUnit(id="phisical_model", 
                         sub_model=PhisicalModel(), 
-                        extractors=[TrianglesSortBlock()], 
+                        extractors=[TrianglesSortBlock(),
+                                    AddArgsFromModelExtractor([image_model]),
+                                    TableExtractor()], 
                         converters={
                                 "words_and_styles_model": WordsAndStylesToGLAMBlocks(conf_glam)
                         })

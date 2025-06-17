@@ -12,6 +12,10 @@ from ...page_model.sub_models import PhisicalModel, WordsAndStylesToGLAMBlocks,W
 from ..sub_models import WordsAndStylesModel, SpGraph4NModel, WordsAndStylesToSpGraph4N, WordsAndStylesToSpDelaunayGraph
 from ..sub_models.dtype import ImageSegment, Word
 from ..sub_models.phisical_model import TrianglesSortBlock
+
+from ..sub_models.base_sub_model import AddArgsFromModelExtractor
+from ..sub_models.extractors import TableExtractor
+
 # from ..sub_models.converters import PDF2Img, PDF2OnlyFigBlocks
 import numpy as np
 import os
@@ -291,9 +295,9 @@ class Json2Blocks(WordsAndStylesToGLAMBlocks):
 
 def get_img2phis(conf):
     conf_words_and_styles = {"path_model": PATH_STYLE_MODEL,"lang": "eng+rus", "psm": 4, "oem": 3,"onetone_delete": True, "k": 4 }
-
+    img_model = ImageModel()
     unit_image = PageModelUnit(id="image", 
-                               sub_model=ImageModel(), 
+                               sub_model=img_model, 
                                converters={}, 
                                extractors=[])
     unit_ws = PageModelUnit(id="words_and_styles", 
@@ -307,7 +311,9 @@ def get_img2phis(conf):
 
     unit_phis = PageModelUnit(id="phisical_model", 
                         sub_model=PhisicalModel(), 
-                        extractors=[TrianglesSortBlock()], 
+                        extractors=[TrianglesSortBlock(),
+                                    AddArgsFromModelExtractor([img_model]),
+                                    TableExtractor()], 
                         converters={"json_model": Json2Blocks(conf=conf), 
                                     # "pdf": PDF2OnlyFigBlocks()
                                     })
