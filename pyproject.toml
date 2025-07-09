@@ -24,7 +24,10 @@ dependencies = [
   'torch',
   'torch-geometric',
   'torchmetrics[detection]',
-  'python-dotenv'
+  'python-dotenv',
+  'fastapi',
+  'uvicorn',
+  'python-multipart'
 ]
 
 version = '0.0.1' 
