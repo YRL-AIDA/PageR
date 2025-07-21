@@ -1,0 +1,70 @@
+{
+  "document": "text_header_table.pdf",
+  "pages": [
+    { 
+      "number": 0,
+      "height": 841.8897705078125,
+      "width": 595.303955078125,
+      "words": [
+        {
+          "normal": false,
+          "x_top_left": 56,
+          "y_top_left": 75,
+          "font_size": 18,
+          "width": 92,
+          "text": "Заголовок",
+          "bold": true,
+          "italic": false,
+          "font_type": "BAAAAA+LiberationSans-Bold",
+          "height": 10
+        }],
+      "tables": [
+        {
+          "x_top_left": 53,
+          "y_top_left": 618,
+          "width": 485,
+          "rows":  [
+            [
+              {
+                "cell_blocks": [
+                  {
+                    "x_top_left": 210,
+                    "y_top_left": 625,
+                    "width": 46,
+                    "start": 0,
+                    "end": 30,
+                    "height": 6
+                  },
+                  {
+                    "x_top_left": 259,
+                    "y_top_left": 625,
+                    "width": 6,
+                    "start": 31,
+                    "end": 61,
+                    "height": 6
+                  }
+                ],
+                "text": "Колонка 2"
+              }
+            ]
+          ],
+          "height": 58,
+          "order": 10037,
+          "cell_properties": [
+            [
+              {
+                "row_span": 1,
+                "invisible": 0,
+                "col_span": 1
+              }
+            ]
+          ]
+        }
+      ],
+      "images": []
+      
+      
+    }
+  ]
+    
+}
