@@ -1,5 +1,6 @@
 from ..base_sub_model import BaseConverter
 from ..dtype import Word, Style
+from ..exceptions import ConteinImage
 from ..words_and_styles_model import WordsAndStylesModel
 from ..words_model import WordsModel
 from .model_scripts.model_20250121 import classifier_image_word, get_model
@@ -52,9 +53,3 @@ class ImageAndWords2WordsAndStyles(BaseConverter):
         
         
     
-class ConteinImage(Exception):
-    def __init__(self):
-        pass
-
-    def __str__(self):
-        return f"Model 'WordsModel' not have image"
