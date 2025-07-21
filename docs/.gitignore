@@ -1,0 +1,42 @@
+# Sphinx-специфичные исключения
+docs/_build/           # Собранная документация
+docs/_static/.webassets-cache # Кэш статики
+docs/_templates/       # Обычно не исключаем, но если используете автосборку - добавьте
+docs/Makefile          # Автогенерируемые файлы
+docs/make.bat          # Автогенерируемые файлы
+.doctrees/             # Кэш парсинга
+
+# Автогенерируемые файлы документации
+docs/generated/        # Для autosummary/autodoc
+docs/api/              # Если генерируете API автоматически
+modules.rst            # Автогенерируемый индекс модулей
+
+# Python-специфичные исключения
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.python-version
+venv/
+env/
+.venv/
+.eggs/
+dist/
+build/
+*.egg-info/
+pip-log.txt
+
+# Системные файлы
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.sublime-*
+
+# Тестовые отчеты
+.coverage
+htmlcov/
+.coverage.*
