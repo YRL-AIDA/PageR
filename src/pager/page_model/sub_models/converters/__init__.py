@@ -13,6 +13,9 @@ from .pdf2page_blocks import PDF2PageBlocks
 
 from .words2one_block import Words2OneBlock
 
+from .img2precision_pdf import Image2PrecisionPDF
+from .img_and_words2precision_pdf import ImageAndWords2PrecisionPDF
+
 # Delete
 from .img2words_and_styles import ImageToWordsAndCNNStyles
 from .words2one_block import Words2OneBlock as WordsToOneBlock
