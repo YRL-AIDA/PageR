@@ -1,1 +1,2 @@
 from .table_extracrot import TableExtractor
+from .words_from_precision_pdf_extractor import WordsFromPrecisionPDFExtractor
