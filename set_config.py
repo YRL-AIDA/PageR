@@ -17,7 +17,7 @@ print(pager_dir)
 model_dir = os.path.join(pager_dir, 'models')
 print(model_dir)
 
-path = os.path.join(os.path.dirname(pager_dir), 'ispras_tbl_extr.jar')
+path = os.path.join(model_dir, 'precisionPDF.jar')
 JAR_PDF_PARSER = get_path(path, f'path JAR_PDF_PARSER (default: {path})')
 
 path = os.path.join(model_dir,  'seg_gnn')

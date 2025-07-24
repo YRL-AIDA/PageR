@@ -3,6 +3,8 @@ from typing import Dict
 import subprocess
 import json
 import os
+from pdf2image import convert_from_path
+
 from dotenv import load_dotenv
 load_dotenv(override=True)
 
@@ -19,7 +21,7 @@ class PrecisionPDFModel(BaseSubModel):
     def __init__(self) -> None:
         super().__init__()
         self.pdf_json: Dict
-        # self.count_page: int
+        self.count_page: int|None 
         # self.num_page: int = 0
 
     def from_dict(self, input_model_dict: Dict):
@@ -36,7 +38,7 @@ class PrecisionPDFModel(BaseSubModel):
 
     def clean_model(self)-> None:
         self.pdf_json = {}
-        # self.count_page = None
+        self.count_page = None
         # self.num_page = 0
     
     def __read(self, path, method):
@@ -55,3 +57,11 @@ class PrecisionPDFModel(BaseSubModel):
         except json.JSONDecodeError as e:
             print(e, "<stdout = ", str_, ">")
             return dict()
+
+    def save_pdf_as_imgs(self, path_dir: str):
+        for i, page in enumerate(self.pdf_json["pages"]):
+            name_file = os.path.join(path_dir, f"page_{i}.png")
+            w = int(page["width"])
+            h = int(page["height"])
+            img = convert_from_path(self.path, first_page=i+1, last_page=i+1, size=(w,h))[0]
+            img.save(name_file)
