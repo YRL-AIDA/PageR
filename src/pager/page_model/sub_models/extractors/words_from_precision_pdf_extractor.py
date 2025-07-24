@@ -12,15 +12,17 @@ class WordsFromPrecisionPDFExtractor(BaseExtractor):
             raise ConteinNumPage()
 
     def extract(self, model:WordsModel):
-        json_words = self.precision_pdf.pdf_json["pages"][self.precision_pdf.num_page]['words']
+        json_pdf = self.precision_pdf.to_dict()
+        json_words = json_pdf["pages"][self.precision_pdf.num_page]['words']
         word_list = self.get_words(json_words)
         model.words = word_list
 
-    def get_words(self, words_json):
+    def get_words(self, words_json:list[dict]):
         words = []
         for word in words_json:
-            if word["height"] < 1 or word["width"] < 1:
+            word_dict = word.copy()
+            if word_dict["height"] < 1 or word_dict["width"] < 1:
                 continue
-            word["segment"] = word 
-            words.append(Word(word))
+            word_dict["segment"] = word_dict 
+            words.append(Word(word_dict))
         return words

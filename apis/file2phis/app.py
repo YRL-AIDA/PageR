@@ -12,12 +12,20 @@ from pager import PageModel, PageModelUnit
 from pager.page_model.sub_models import PrecisionPDFModel, ImageModel, Image2PrecisionPDF
 from pager import WordsModel, WordsAndStylesModel, ImageAndWords2WordsAndStyles
 
-from pager.page_model.sub_models.extractors  import WordsFromPrecisionPDFExtractor
+from pager.page_model.sub_models.extractors  import WordsFromPrecisionPDFExtractor,PrecisionPDFRegionsFromPhisExtractor
 from pager import AddArgsFromModelExtractor
 
 from pager import PhisicalModel, TrianglesSortBlock, WordsAndStylesToGLAMBlocks
 
 NAME_DIR_IMAGES = "image_pages"
+GLAM_NODE_MODEL = os.getenv("PATH_TORCH_GLAM_NODE_MODEL")
+GLAM_EDGE_MODEL = os.getenv("PATH_TORCH_GLAM_EDGE_MODEL")
+PATH_STYLE_MODEL = os.getenv("PATH_STYLE_MODEL")
+
+with open(os.getenv("PATH_TORCH_GLAM_CONF_MODEL"), "r") as f:
+    conf_glam = json.load(f)
+conf_glam["path_node_gnn"] = GLAM_NODE_MODEL
+conf_glam["path_edge_linear"] =  GLAM_EDGE_MODEL
 
 
 logger = logging.getLogger(__name__)
@@ -31,21 +39,11 @@ app.add_middleware(
     allow_headers=["*"],  # Разрешить все заголовки
 )
 
-GLAM_NODE_MODEL = os.getenv("PATH_TORCH_GLAM_NODE_MODEL")
-GLAM_EDGE_MODEL = os.getenv("PATH_TORCH_GLAM_EDGE_MODEL")
-PATH_STYLE_MODEL = os.getenv("PATH_STYLE_MODEL")
-
-with open(os.getenv("PATH_TORCH_GLAM_CONF_MODEL"), "r") as f:
-    conf_glam = json.load(f)
-conf_glam["path_node_gnn"] = GLAM_NODE_MODEL
-conf_glam["path_edge_linear"] =  GLAM_EDGE_MODEL
-
 image_model = ImageModel()
-
 precision_pdf = PrecisionPDFModel()
 precision_pdf.num_page = 0
-
 words_model = WordsModel()
+phis_model = PhisicalModel()
 
 wimg2ws = ImageAndWords2WordsAndStyles({
     "path_model": os.environ["PATH_STYLE_MODEL"]
@@ -58,7 +56,7 @@ words_unit = PageModelUnit("words", words_model, extractors=[
 ws_unit = PageModelUnit("ws", WordsAndStylesModel(), extractors=[], converters={"words":wimg2ws})
 
 phis_unit = PageModelUnit(id="phisical_model", 
-                        sub_model=PhisicalModel(), 
+                        sub_model=phis_model, 
                         extractors=[TrianglesSortBlock(),
                                     # AddArgsFromModelExtractor([image_model]),
                                     #TableExtractor()
@@ -67,12 +65,15 @@ phis_unit = PageModelUnit(id="phisical_model",
                                 "ws": WordsAndStylesToGLAMBlocks(conf_glam)
                         })
 
+
+json_unit = PageModelUnit("json", precision_pdf, extractors=[PrecisionPDFRegionsFromPhisExtractor(phis_model)], converters={})
+
 pdf2json = PageModel(page_units=[
     PageModelUnit("pdf", precision_pdf, extractors=[], converters={}),
     words_unit,
     ws_unit,
-    phis_unit
-    
+    phis_unit,
+    json_unit
 ])
 
 img2json = PageModel(page_units=[
@@ -80,7 +81,8 @@ img2json = PageModel(page_units=[
     PageModelUnit("pdf", precision_pdf, extractors=[], converters={"image":Image2PrecisionPDF()}),
     words_unit,
     ws_unit,
-    phis_unit
+    phis_unit,
+    json_unit
 ])
 
 
@@ -106,7 +108,7 @@ async def read_pdf(file: UploadFile = File(...),
     with open(path_file, "wb") as f:
         f.write(file.file.read())
     rez = process(path_file)
-    # shutil.rmtree(path_dir)
+    shutil.rmtree(path_dir)
     return rez
 
 def processPDF(path_file) -> dict:
@@ -116,21 +118,17 @@ def processPDF(path_file) -> dict:
     name_imgs_dir = os.path.join(name_dir, NAME_DIR_IMAGES)
     os.mkdir(name_imgs_dir)
     precision_pdf.save_pdf_as_imgs(name_imgs_dir)
-
-    precision_pdf.num_page = 0
-    image_model.read_from_file(os.path.join(name_imgs_dir, f"page_{precision_pdf.num_page}.png"))
-    pdf2json.extract()
-    rez = pdf2json.to_dict()
-
-    return rez
+    for i in range(precision_pdf.count_page): 
+        precision_pdf.num_page = i
+        image_model.read_from_file(os.path.join(name_imgs_dir, f"page_{precision_pdf.num_page}.png"))
+        pdf2json.extract()
+    return pdf2json.to_dict()
 
 def processImg(path_file) -> dict:
     img2json.read_from_file(path_file)
     precision_pdf.num_page = 0
     img2json.extract()
-    rez = img2json.to_dict()
-
-    return rez
+    return img2json.to_dict()
 
 if __name__ == '__main__': 
     uvicorn.run(app=app, port=8000)

@@ -21,7 +21,7 @@ class PrecisionPDFModel(BaseSubModel):
     def __init__(self) -> None:
         super().__init__()
         self.pdf_json: Dict
-        # self.count_page: int
+        self.count_page: int|None 
         # self.num_page: int = 0
 
     def from_dict(self, input_model_dict: Dict):
@@ -38,7 +38,7 @@ class PrecisionPDFModel(BaseSubModel):
 
     def clean_model(self)-> None:
         self.pdf_json = {}
-        # self.count_page = None
+        self.count_page = None
         # self.num_page = 0
     
     def __read(self, path, method):
