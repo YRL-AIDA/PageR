@@ -30,14 +30,18 @@ class ImageAndWords2WordsAndStyles(BaseConverter):
         styles = []
         words = [Word(word.to_dict()) for word in words]
         for word in words:
-            word_img = cv2.cvtColor(word.segment.get_segment_from_img(img), cv2.COLOR_RGB2GRAY)/255
-            tmp_style =  self.get_style_from_word(word_img, word)
-            index_style = self._get_style(tmp_style, styles, delta_ = 0.1)           
-            if index_style == -1:
-                styles.append(tmp_style)
-                index_style = len(styles) - 1 
-                tmp_style.id = index_style
-            word.style_id =index_style
+            try:
+                word_img = cv2.cvtColor(word.segment.get_segment_from_img(img), cv2.COLOR_RGB2GRAY)/255
+                tmp_style =  self.get_style_from_word(word_img, word)
+                index_style = self._get_style(tmp_style, styles, delta_ = 0.1)           
+                if index_style == -1:
+                    styles.append(tmp_style)
+                    index_style = len(styles) - 1 
+                    tmp_style.id = index_style
+                word.style_id =index_style
+            except:
+                pass
+        
         return words, styles
 
     def _get_style(self, style: Style, styles: List[Style], delta_):
