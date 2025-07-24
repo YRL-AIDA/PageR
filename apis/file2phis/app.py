@@ -16,17 +16,10 @@ from pager.page_model.sub_models.extractors  import WordsFromPrecisionPDFExtract
 from pager import AddArgsFromModelExtractor
 
 from pager import PhisicalModel, TrianglesSortBlock, WordsAndStylesToGLAMBlocks
+from pager.page_model.glam_model_20250703 import get_final_model
 
 NAME_DIR_IMAGES = "image_pages"
-GLAM_NODE_MODEL = os.getenv("PATH_TORCH_GLAM_NODE_MODEL")
-GLAM_EDGE_MODEL = os.getenv("PATH_TORCH_GLAM_EDGE_MODEL")
 PATH_STYLE_MODEL = os.getenv("PATH_STYLE_MODEL")
-
-with open(os.getenv("PATH_TORCH_GLAM_CONF_MODEL"), "r") as f:
-    conf_glam = json.load(f)
-conf_glam["path_node_gnn"] = GLAM_NODE_MODEL
-conf_glam["path_edge_linear"] =  GLAM_EDGE_MODEL
-
 
 logger = logging.getLogger(__name__)
 app = FastAPI()
@@ -39,11 +32,17 @@ app.add_middleware(
     allow_headers=["*"],  # Разрешить все заголовки
 )
 
+word_glam_model = get_final_model( {"GLAM_MODEL":os.environ["PATH_TORCH_GLAM_MODEL"]})
+glam_json_unit = word_glam_model.page_units[word_glam_model.keys["json_model"]]
+phis_unit = word_glam_model.page_units[word_glam_model.keys["phisical_model"]]
+phis_model = phis_unit.sub_model
+
+
 image_model = ImageModel()
 precision_pdf = PrecisionPDFModel()
 precision_pdf.num_page = 0
 words_model = WordsModel()
-phis_model = PhisicalModel()
+# phis_model = PhisicalModel()
 
 wimg2ws = ImageAndWords2WordsAndStyles({
     "path_model": os.environ["PATH_STYLE_MODEL"]
@@ -53,17 +52,7 @@ words_unit = PageModelUnit("words", words_model, extractors=[
         WordsFromPrecisionPDFExtractor(precision_pdf),
         AddArgsFromModelExtractor([image_model])
         ], converters={})
-ws_unit = PageModelUnit("ws", WordsAndStylesModel(), extractors=[], converters={"words":wimg2ws})
-
-phis_unit = PageModelUnit(id="phisical_model", 
-                        sub_model=phis_model, 
-                        extractors=[TrianglesSortBlock(),
-                                    # AddArgsFromModelExtractor([image_model]),
-                                    #TableExtractor()
-                                    ], 
-                        converters={
-                                "ws": WordsAndStylesToGLAMBlocks(conf_glam)
-                        })
+ws_unit = PageModelUnit("words_and_styles", WordsAndStylesModel(), extractors=[], converters={"words":wimg2ws})
 
 
 json_unit = PageModelUnit("json", precision_pdf, extractors=[PrecisionPDFRegionsFromPhisExtractor(phis_model)], converters={})
@@ -72,6 +61,7 @@ pdf2json = PageModel(page_units=[
     PageModelUnit("pdf", precision_pdf, extractors=[], converters={}),
     words_unit,
     ws_unit,
+    glam_json_unit,
     phis_unit,
     json_unit
 ])
@@ -81,6 +71,7 @@ img2json = PageModel(page_units=[
     PageModelUnit("pdf", precision_pdf, extractors=[], converters={"image":Image2PrecisionPDF()}),
     words_unit,
     ws_unit,
+    glam_json_unit,
     phis_unit,
     json_unit
 ])
