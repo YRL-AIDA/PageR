@@ -25,7 +25,7 @@ class PrecisionPDFModel(BaseSubModel):
         # self.num_page: int = 0
 
     def from_dict(self, input_model_dict: Dict):
-        pass
+        self.pdf_json = input_model_dict
 
     def to_dict(self) -> Dict:
         return self.pdf_json

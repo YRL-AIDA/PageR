@@ -19,6 +19,9 @@ from .img_and_words2words_and_styles import ImageAndWords2WordsAndStyles
 
 from .img_and_words2precision_pdf import ImageAndWords2PrecisionPDF
 
+from .precision_pdf2ms_word import PrecisionPDFToMSWord
+
+
 # Delete
 from .img2words_and_styles import ImageToWordsAndCNNStyles
 from .words2one_block import Words2OneBlock as WordsToOneBlock
