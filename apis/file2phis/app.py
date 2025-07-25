@@ -19,6 +19,7 @@ from pager.page_model.sub_models.extractors  import WordsFromPrecisionPDFExtract
 from pager import AddArgsFromModelExtractor
 
 from pager import PhisicalModel, TrianglesSortBlock, WordsAndStylesToGLAMBlocks, MSWordModel, PrecisionPDFToMSWord
+from pager import Words2OneBlock
 from pager.page_model.glam_model_20250703 import get_final_model
 
 NAME_DIR_IMAGES = "image_pages"
@@ -79,6 +80,20 @@ img2json = PageModel(page_units=[
     json_unit
 ])
 
+simple_phis_unit = PageModelUnit("simple_phis", phis_model, extractors=[], converters={"words": Words2OneBlock()})
+pdf2simplejson = PageModel(page_units=[
+    PageModelUnit("pdf", precision_pdf, extractors=[], converters={}),
+    words_unit,
+    simple_phis_unit,
+    json_unit
+])
+img2simplejson = PageModel(page_units=[
+    PageModelUnit("image", image_model, extractors=[], converters={}),
+    PageModelUnit("pdf", precision_pdf, extractors=[], converters={"image":Image2PrecisionPDF()}),
+    words_unit,
+    simple_phis_unit,
+    json_unit
+])
 
 
 unit_json_precision_pdf = PageModelUnit("json_precision_pdf", PrecisionPDFModel(), extractors=[], converters={})
@@ -93,24 +108,25 @@ json2docx = PageModel(page_units=[
 async def read_pdf(file: UploadFile = File(...),
                    process:str = Form(...)):
     logger.info("start")
+    process = json.loads(process)
     path_dir = os.path.join(os.getcwd(), "tmp_dir", uuid.uuid4().hex)
     os.mkdir(path_dir)
     typefile = file.filename.split(".")[-1].lower() 
 
     if typefile in ('pdf', ):
         path_file =  os.path.join(path_dir, "file.pdf")
-        process = processPDF   
+        processFile = processPDF   
     elif typefile in ('png', 'jpeg', 'jpg'):  
         path_image_dir = os.path.join(path_dir, NAME_DIR_IMAGES)
         os.mkdir(path_image_dir)
         path_file = os.path.join(path_image_dir, f"page_0.{typefile}")
-        process = processImg
+        processFile = processImg
     else:
         return {"error": "Неизвестный тип файла"}
 
     with open(path_file, "wb") as f:
         f.write(file.file.read())
-    rez = process(path_file)
+    rez = processFile(path_file, process)
     shutil.rmtree(path_dir)
     return rez
 
@@ -141,8 +157,9 @@ async def convert_json_to_docx(task: JsonTask):
 
     
 
-def processPDF(path_file) -> dict:
-    pdf2json.read_from_file(path_file)
+def processPDF(path_file, process) -> dict:
+    filejson = pdf2simplejson if "only_text" in process and process["only_text"] else pdf2json
+    filejson.read_from_file(path_file)
     
     name_dir = os.path.dirname(path_file)
     name_imgs_dir = os.path.join(name_dir, NAME_DIR_IMAGES)
@@ -151,14 +168,15 @@ def processPDF(path_file) -> dict:
     for i in range(precision_pdf.count_page): 
         precision_pdf.num_page = i
         image_model.read_from_file(os.path.join(name_imgs_dir, f"page_{precision_pdf.num_page}.png"))
-        pdf2json.extract()
-    return pdf2json.to_dict()
+        filejson.extract()
+    return filejson.to_dict()
 
-def processImg(path_file) -> dict:
-    img2json.read_from_file(path_file)
+def processImg(path_file, process) -> dict:
+    filejson = img2simplejson if "only_text" in process and process["only_text"] else img2json
+    filejson.read_from_file(path_file)
     precision_pdf.num_page = 0
-    img2json.extract()
-    return img2json.to_dict()
+    filejson.extract()
+    return filejson.to_dict()
 
 if __name__ == '__main__': 
     uvicorn.run(app=app, port=8000)
