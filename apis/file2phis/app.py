@@ -104,6 +104,13 @@ json2docx = PageModel(page_units=[
     unit_ms_word
 ])
 
+@app.get("/health")
+async def health():
+    if False:
+        return {"status": "error"}
+    return {"status": "ok"}
+
+
 @app.post("/")
 async def read_pdf(file: UploadFile = File(...),
                    process:str = Form(...)):
