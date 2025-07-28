@@ -15,6 +15,11 @@
  brew install poppler
  ```
 
+ Предварительная установка poppler для linux
+ ```
+ apt-get install poppler-utils
+ ```
+
 ```
 python set_config.py
 python -m pip install .
