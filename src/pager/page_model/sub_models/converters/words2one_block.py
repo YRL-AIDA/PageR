@@ -5,6 +5,8 @@ from typing import List
 class Words2OneBlock(BaseConverter):
     def convert(self, input_model: BaseSubModel, output_model: BaseSubModel)-> None:
         word_list: List[Word] = input_model.words
+        if len(word_list) == 0:
+            return
         segment = ImageSegment(0, 0, 1, 1)
         segment.set_segment_max_segments([word.segment for word in word_list])
         block = Block(segment.get_segment_2p())
