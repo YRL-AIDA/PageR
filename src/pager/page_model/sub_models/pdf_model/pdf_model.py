@@ -13,12 +13,14 @@ NULL_PAGE = {
 }
 
 class PDFModel(BaseSubModel):
-    def __init__(self) -> None:
+    def __init__(self, conf=None) -> None:
         super().__init__()
         self.pdf_json: Dict
         self.count_page: int
         self.num_page: int = 0
         self.pdf_parser = PrecisionPDFModel()
+        if conf and "method" in conf.keys():
+            self.method = conf["method"]
 
 
     def from_dict(self, input_model_dict):
@@ -27,9 +29,9 @@ class PDFModel(BaseSubModel):
     def to_dict(self) -> Dict:
         return self.pdf_json["pages"][self.num_page] if "pages" in self.pdf_json.keys() else NULL_PAGE
 
-    def read_from_file(self, path_file: str) -> None:
+    def read_from_file(self, path_file: str, method=None) -> None:
         self.path = path_file
-        self.pdf_parser.read_from_file(path_file, method="w")
+        self.pdf_parser.read_from_file(path_file, method=method if method else self.method)
         self.pdf_json = self.pdf_parser.to_dict()
         self.count_page = len(self.pdf_json['pages']) if "pages" in self.pdf_json.keys() else 0
 

@@ -1,4 +1,5 @@
 from .word import Word
+from .row import Row
 from .block import Block
 from .image_segment import ImageSegment
 from .sortable_image_segment import Top2BottomLeft2RightImageSegment, Left2RightTop2BottomImageSegment

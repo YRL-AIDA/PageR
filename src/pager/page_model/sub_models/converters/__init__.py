@@ -1,5 +1,6 @@
 from .pdf2img import PDF2Img
 from .pdf2words import PDF2Words
+from .pdf2rows import PDF2Rows
 
 from .img2words import Image2Words
 

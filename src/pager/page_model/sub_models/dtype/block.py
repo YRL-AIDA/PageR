@@ -5,6 +5,7 @@ import matplotlib .pyplot as plt
 # from ..paragraph import Paragraph
 from .image_segment import ImageSegment
 from .word import Word
+from .row import Row
 from .sortable_image_segment import Top2BottomLeft2RightImageSegment
 # from ..extractors.block_extractors import BaseRandomWalkClassificator, BaseRandomDeepNodeClassificator
 
@@ -18,11 +19,15 @@ class Block(ABC):
        
         # self.paragraphs: List[Paragraph] = []
         self.words: List[Word] = []
+        self.rows: List[Row] = []
+        
         self.label = None
         if "label" in dict_block.keys():
             self.label = dict_block["label"]
         if "words" in dict_block.keys():
             self.words = [Word(word) for word in dict_block['words']]
+        if "rows" in dict_block.keys():
+            self.rows = [Row(row) for row in dict_block['rows']]
         if  "width" in dict_block.keys() or "x_bottom_right" in dict_block.keys():
             self.segment = ImageSegment(dict_p_size = dict_block) if "width" in dict_block else ImageSegment(dict_2p = dict_block)
         elif len(self.words) > 0:
@@ -54,6 +59,12 @@ class Block(ABC):
             word = Word(dict_word)
             self.words.append(word)
 
+    def set_rows_from_dict(self, list_rows: List[dict]):
+        self.rows = []
+        for dict_row in list_rows:
+            row = Row(dict_row)
+            self.rows.append(row)
+
     def sort_words(self):
         self._sort_segments([w.segment for w in self.words], self.words)
 
@@ -73,8 +84,12 @@ class Block(ABC):
     def get_text(self):
         self.sort_words()
         str_ = ""
-        for word in self.words:
-            str_ += word.text + ' '
+        if len(self.words) != 0:
+            for word in self.words:
+                str_ += word.text + ' '
+        elif len(self.rows) != 0:
+            for row in self.rows:
+                str_ += row.text + ' '
         return str_
     
     def to_dict(self):
@@ -83,6 +98,7 @@ class Block(ABC):
         if self.label is not None:
             block_dict["label"] = self.label
         block_dict["words"] = [word.to_dict() for word in self.words]
+        block_dict["rows"] = [row.to_dict() for row in self.rows]
         return block_dict
     
 class BlockWithoutWords(Exception):
