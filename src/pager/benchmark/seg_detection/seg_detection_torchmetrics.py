@@ -15,7 +15,8 @@ COUNT_IOU_INTERVAL = len(IOU_INTERVAL)
 
 class SegDetectionBenchmark(BaseBenchmark):
     def __init__(self, path_dataset, page_model, path_images=None, path_pdfs=None,
-                 path_json=None, name="",save_dir=None, count_image=None, only_seg=False):
+                 path_json=None, name="",save_dir=None, count_image=None, only_seg=False,
+                 exceptions=[]):
         self.path_dataset = path_dataset
         self.page_model = page_model
         self.path_pdfs = path_pdfs
@@ -24,6 +25,7 @@ class SegDetectionBenchmark(BaseBenchmark):
         self.save_dir = save_dir
         self.count_image = count_image
         self.only_seg = only_seg
+        self.exceptions = exceptions
         super().__init__(name)
         
     def get_id_labels(self, label:str):
@@ -49,6 +51,8 @@ class SegDetectionBenchmark(BaseBenchmark):
             path_ = self.path_json
         with open(path_) as f:
             json_dataset = json.load(f)
+
+        json_dataset = self.filter_dataset(json_dataset)
         return json_dataset
     
     def extract_from_json(self, json_dataset):
@@ -194,4 +198,11 @@ class SegDetectionBenchmark(BaseBenchmark):
             return os.path.join(self.path_images, name) 
         else:
             return os.path.join(self.path_dataset, name)
-        
+    
+    def filter_dataset(self, json_dataset):
+        is_correct_img = lambda img: len([e for e in self.exceptions if e in img["file_name"]]) == 0
+        correct_id = [img["id"] for img in json_dataset["images"] if  is_correct_img(img)]
+        json_dataset["images"] = [img for img in json_dataset["images"] if img['id'] in correct_id]
+        json_dataset["annotations"] = [block for block in json_dataset["annotations"] if block["image_id"] in correct_id]
+
+        return json_dataset
