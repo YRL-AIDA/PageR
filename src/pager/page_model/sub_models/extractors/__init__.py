@@ -1,3 +1,4 @@
 from .table_extracrot import TableExtractor
 from .words_from_precision_pdf_extractor import WordsFromPrecisionPDFExtractor
+from .rows_from_precision_pdf_extractor import RowsFromPrecisionPDFExtractor
 from .precision_pdf_regions_from_phis_extractor import PrecisionPDFRegionsFromPhisExtractor

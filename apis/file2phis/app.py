@@ -14,13 +14,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from pager import PageModel, PageModelUnit
 from pager.page_model.sub_models import PrecisionPDFModel, ImageModel, Image2PrecisionPDF
 from pager import WordsModel, WordsAndStylesModel, ImageAndWords2WordsAndStyles
+from pager import RowsModel
 
-from pager.page_model.sub_models.extractors  import WordsFromPrecisionPDFExtractor,PrecisionPDFRegionsFromPhisExtractor
+from pager.page_model.sub_models.extractors  import WordsFromPrecisionPDFExtractor, RowsFromPrecisionPDFExtractor, PrecisionPDFRegionsFromPhisExtractor
 from pager import AddArgsFromModelExtractor
 
 from pager import PhisicalModel, TrianglesSortBlock, WordsAndStylesToGLAMBlocks, MSWordModel, PrecisionPDFToMSWord
 from pager import Words2OneBlock
 from pager.page_model.glam_model_20250703 import get_final_model
+from pager.page_model.row_glam_20250811 import get_final_model as get_final_model_row
+
 
 NAME_DIR_IMAGES = "image_pages"
 PATH_STYLE_MODEL = os.getenv("PATH_STYLE_MODEL")
@@ -42,10 +45,16 @@ phis_unit = word_glam_model.page_units[word_glam_model.keys["phisical_model"]]
 phis_model = phis_unit.sub_model
 
 
+row_glam_model = get_final_model_row({"ROW_GLAM": os.environ["PATH_TORCH_ROW_GLAM"]})
+row_glam_json_unit = row_glam_model.page_units[row_glam_model.keys["json_model"]]
+row_phis_unit = row_glam_model.page_units[row_glam_model.keys["phisical_model"]]
+row_phis_model = row_phis_unit.sub_model
+
 image_model = ImageModel()
 precision_pdf = PrecisionPDFModel()
 precision_pdf.num_page = 0
 words_model = WordsModel()
+rows_model = RowsModel()
 # phis_model = PhisicalModel()
 
 wimg2ws = ImageAndWords2WordsAndStyles({
@@ -56,10 +65,16 @@ words_unit = PageModelUnit("words", words_model, extractors=[
         WordsFromPrecisionPDFExtractor(precision_pdf),
         AddArgsFromModelExtractor([image_model])
         ], converters={})
+
+rows_unit = PageModelUnit("rows", rows_model, extractors=[
+        RowsFromPrecisionPDFExtractor(precision_pdf)
+        ], converters={})
+
 ws_unit = PageModelUnit("words_and_styles", WordsAndStylesModel(), extractors=[], converters={"words":wimg2ws})
 
 
 json_unit = PageModelUnit("json", precision_pdf, extractors=[PrecisionPDFRegionsFromPhisExtractor(phis_model)], converters={})
+row_json_unit = PageModelUnit("json", precision_pdf, extractors=[PrecisionPDFRegionsFromPhisExtractor(row_phis_model)], converters={})
 
 pdf2json = PageModel(page_units=[
     PageModelUnit("pdf", precision_pdf, extractors=[], converters={}),
@@ -68,6 +83,13 @@ pdf2json = PageModel(page_units=[
     glam_json_unit,
     phis_unit,
     json_unit
+])
+pdf_row2json = PageModel(page_units=[
+    PageModelUnit("pdf", precision_pdf, extractors=[], converters={}),
+    rows_unit,
+    row_glam_json_unit,
+    row_phis_unit,
+    row_json_unit
 ])
 
 img2json = PageModel(page_units=[
@@ -165,6 +187,15 @@ async def convert_json_to_docx(task: JsonTask):
     
 
 def processPDF(path_file, process) -> dict:
+    # GLAM ROW  
+    if "glam_rows" in process:
+        if process["glam_rows"]:
+            pdf_row2json.page_units[0].sub_model.read_from_file(path_file, method="r")
+            for i in range(precision_pdf.count_page): 
+                precision_pdf.num_page = i
+                pdf_row2json.extract()
+            return pdf_row2json.to_dict()
+
     filejson = pdf2simplejson if "only_text" in process and process["only_text"] else pdf2json
     filejson.read_from_file(path_file)
     
