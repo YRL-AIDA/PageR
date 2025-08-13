@@ -187,27 +187,56 @@ async def convert_json_to_docx(task: JsonTask):
     
 
 def processPDF(path_file, process) -> dict:
-    # GLAM ROW  
-    if "glam_rows" in process:
-        if process["glam_rows"]:
-            pdf_row2json.page_units[0].sub_model.read_from_file(path_file, method="r")
-            for i in range(precision_pdf.count_page): 
-                precision_pdf.num_page = i
-                pdf_row2json.extract()
-            return pdf_row2json.to_dict()
-
-    filejson = pdf2simplejson if "only_text" in process and process["only_text"] else pdf2json
-    filejson.read_from_file(path_file)
+    IS_GLAM_ROW = "glam_rows" in process and process["glam_rows"]
+    IS_ONLY_TEXT = "only_text" in process and process["only_text"]
+    IS_AS_IMAGES = "is_images" in process and process["is_images"]
+    IS_NEED_IMAGES = not IS_GLAM_ROW or not IS_ONLY_TEXT
     
+
+    if IS_GLAM_ROW:
+        read_file = lambda file: pdf_row2json.page_units[0].sub_model.read_from_file(file, method="r")
+        filejson = pdf_row2json
+    elif IS_ONLY_TEXT:
+        read_file = lambda file: pdf2simplejson.page_units[0].sub_model.read_from_file(file, method="w")
+        filejson = pdf2simplejson
+    else:
+        read_file = lambda file: pdf2json.page_units[0].sub_model.read_from_file(file, method="w")
+        filejson = pdf2json
+
+    read_file(path_file)
+    if IS_NEED_IMAGES:
+        name_imgs_dir = save_images_from_pdf(path_file)
+    if IS_AS_IMAGES:
+        rez = precision_pdf.pdf_json
+    
+    for i in range(precision_pdf.count_page):
+        if IS_AS_IMAGES:
+            page = processImg(os.path.join(name_imgs_dir, f"page_{i}.png"), process)['pages'][0]
+            rez['pages'][i] = page 
+        else:
+            precision_pdf.num_page = i
+            if IS_NEED_IMAGES:
+                image_model.read_from_file(os.path.join(name_imgs_dir, f"page_{i}.png"))
+            filejson.extract()
+
+    if not IS_AS_IMAGES:
+        rez = filejson.to_dict()
+    return rez
+
+def save_images_from_pdf(path_file):
     name_dir = os.path.dirname(path_file)
     name_imgs_dir = os.path.join(name_dir, NAME_DIR_IMAGES)
     os.mkdir(name_imgs_dir)
     precision_pdf.save_pdf_as_imgs(name_imgs_dir)
-    for i in range(precision_pdf.count_page): 
-        precision_pdf.num_page = i
-        image_model.read_from_file(os.path.join(name_imgs_dir, f"page_{precision_pdf.num_page}.png"))
-        filejson.extract()
-    return filejson.to_dict()
+    return name_imgs_dir
+
+def processPdfImgs(path_file, process) -> dict:
+    images = os.listdir(path_file)
+    images.sort()
+    for i, image in enumerate(images):
+        page = processImg(os.path.join(path_file, image), process)
+    page['pages']
+
 
 def processImg(path_file, process) -> dict:
     filejson = img2simplejson if "only_text" in process and process["only_text"] else img2json
