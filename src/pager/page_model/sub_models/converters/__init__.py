@@ -4,6 +4,8 @@ from .pdf2rows import PDF2Rows
 
 from .img2words import Image2Words
 
+from .img2rows import Image2Rows
+
 from .img2words_and_styles import Image2WordsAndStyles, Image2WordsAndStylesStatVec
 
 from .pdf2words_and_styles import PDF2WordsAndStyles
