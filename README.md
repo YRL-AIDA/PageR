@@ -61,3 +61,13 @@ python -m pip install .
 |   |   |   ├── words_and_styles_model - блок работы со словами их стилями
 |   |   |   └── phisical_model -блок работы с физическими сегментами
 ```
+
+
+### Запустить через Docker
+
+```
+sudo docker build -t pager .
+```
+```
+sudo docker run -p 8000:3001 pager
+```

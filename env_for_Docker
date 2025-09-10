@@ -1,0 +1,10 @@
+JAR_PDF_PARSER=/app/models/precisionPDF.jar
+PATH_TORCH_SEG_GNN_MODEL=/app/models/seg_gnn
+PATH_TORCH_SEG_LINEAR_MODEL=/app/models/seg_linear
+PATH_STYLE_MODEL=/app/models/style_classmodel_20250121
+PATH_TORCH_GLAM_NODE_MODEL=/app/models/glam_node_model_20250221
+PATH_TORCH_GLAM_EDGE_MODEL=/app/models/glam_edge_model_20250221
+PATH_TORCH_GLAM_MODEL=/app/models/glam_model_20250703
+PATH_TORCH_GLAM_CONF_MODEL=/app/models/glam_config_model_20250703.json
+PATH_TORCH_ROW_GLAM=/app/models/row_glam_20250811
+DEVICE=cpu
