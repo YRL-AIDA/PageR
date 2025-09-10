@@ -22,4 +22,25 @@ class PrecisionPDFRegionsFromPhisExtractor(BaseExtractor):
                                                                "label": block.label
                                                               } 
                                                               for block in self.phis_model.blocks]
-        
+        tables =  model.pdf_json["pages"][model.num_page]['tables']
+
+        model.pdf_json["pages"][model.num_page]['regions'] += [
+            {"x_top_left": tab['x_top_left'],
+             "y_top_left": tab['y_top_left'],
+             "width": tab['width'],
+             "height":tab['height'],
+             "text": ' '.join([c['text'] for row in tab['rows'] for c in row]),
+             "label": "table"
+            } for tab in tables
+        ]
+        images = model.pdf_json["pages"][model.num_page]['images']
+
+        model.pdf_json["pages"][model.num_page]['regions'] += [
+            {"x_top_left": img['x_top_left'],
+             "y_top_left": img['y_top_left'],
+             "width": img['width'],
+             "height":img['height'],
+             "text": '',
+             "label": "figure"
+            } for img in images
+        ]
