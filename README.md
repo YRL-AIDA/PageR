@@ -69,5 +69,5 @@ python -m pip install .
 sudo docker build -t pager .
 ```
 ```
-sudo docker run -p 8000:3001 pager
+sudo docker run -it -p 8000:8000 pager
 ```

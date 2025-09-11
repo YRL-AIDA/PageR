@@ -15,16 +15,33 @@ RUN apt-get update && apt-get install -y \
     && apt-get install -y tesseract-ocr tesseract-ocr-rus \
     && rm -rf /var/lib/apt/lists/*
 
+
+ENV JAR_PDF_PARSER=/app/models/precisionPDF.jar
+ENV PATH_TORCH_SEG_GNN_MODEL=/app/models/seg_gnn
+ENV PATH_TORCH_SEG_LINEAR_MODEL=/app/models/seg_linear
+ENV PATH_STYLE_MODEL=/app/models/style_classmodel_20250121
+ENV PATH_TORCH_GLAM_NODE_MODEL=/app/models/glam_node_model_20250221
+ENV PATH_TORCH_GLAM_EDGE_MODEL=/app/models/glam_edge_model_20250221
+ENV PATH_TORCH_GLAM_MODEL=/app/models/glam_model_20250703
+ENV PATH_TORCH_GLAM_CONF_MODEL=/app/models/glam_config_model_20250703.json
+ENV PATH_TORCH_ROW_GLAM=/app/models/row_glam_20250811
+ENV DEVICE=cpu
+
 # Обновление pip
 RUN python3 -m pip install --upgrade pip
 
-# Копирование проекта и установка
-COPY . /app
 WORKDIR /app
+# Установка тяжелых библиотек
+RUN pip install --no-cache-dir torch torch-geometric torchmetrics[detection] \
+                               torchvision tokenizers transformers
+
+
+# Копирование проекта и установка
+COPY apis apis
+COPY src src
+COPY models models
+COPY pyproject.toml pyproject.toml
 RUN python3 -m pip install .
 
-# Открытие порта и запуск приложения
-EXPOSE 8000
-CMD ['mv', 'env_for_Docker', '.env']
-CMD ["python3"]
-CMD ["python3", "apis/file2phis/app.py", "--host", "0.0.0.0", "--port", "8000"]
+# # Открытие порта и запуск приложения
+CMD ["uvicorn", "apis.file2phis.app:app", "--host", "0.0.0.0", "--port", "8000"]
