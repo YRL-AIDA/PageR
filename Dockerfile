@@ -9,11 +9,12 @@ RUN apt-get update && apt-get install -y \
     ffmpeg \
     libsm6 \
     libxext6 \
+    poppler-utils \
     openjdk-17-jre \
     && add-apt-repository -y ppa:alex-p/tesseract-ocr-devel \
     && apt-get update \
     && apt-get install -y tesseract-ocr tesseract-ocr-rus \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* 
 
 
 ENV JAR_PDF_PARSER=/app/models/precisionPDF.jar
@@ -42,6 +43,6 @@ COPY src src
 COPY models models
 COPY pyproject.toml pyproject.toml
 RUN python3 -m pip install .
-
+RUN mkdir tmp_dir
 # # Открытие порта и запуск приложения
 CMD ["uvicorn", "apis.file2phis.app:app", "--host", "0.0.0.0", "--port", "8000"]
