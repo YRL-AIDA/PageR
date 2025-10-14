@@ -1,4 +1,7 @@
 import os 
+import shutil
+import sys
+
 
 def get_path(default_path, desc):
     print(desc)
@@ -12,12 +15,22 @@ def get_path(default_path, desc):
             else:
                 print('Error path')
 
+def check_dependencies():
+    required_binaries = ['java', 'tesseract']
+    for binary in required_binaries:
+        if shutil.which(binary) is None:
+            raise RuntimeError(
+                f"Требуется установить {binary}. "
+            )
+        else:
+            print(f"{binary} установлен")
+
 pager_dir = os.path.dirname(__file__)
 print(pager_dir)
 model_dir = os.path.join(pager_dir, 'models')
 print(model_dir)
 
-path = os.path.join(model_dir, 'precisionPDF.jar')
+path = os.path.join(model_dir, 'PDF2Block', 'precisionPDF.jar')
 JAR_PDF_PARSER = get_path(path, f'path JAR_PDF_PARSER (default: {path})')
 
 path = os.path.join(model_dir,  'seg_gnn')
@@ -63,3 +76,7 @@ config = {'JAR_PDF_PARSER': JAR_PDF_PARSER,
 with open(os.path.join(pager_dir, '.env'), 'w') as f:
     for key, val in config.items():
         f.write(f'{key}={val}\n')
+
+
+
+check_dependencies()

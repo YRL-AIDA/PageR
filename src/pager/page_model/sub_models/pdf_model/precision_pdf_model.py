@@ -46,6 +46,9 @@ class PrecisionPDFModel(BaseSubModel):
         comands =["java", "-jar", jar_path, "-i", path]
         if method == "w":
             comands.append("-w")
+        elif method != "r":
+            raise ValueError('Methon "r" - rows or  "w" - words')
+
         
         res = subprocess.run(comands, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if res.stderr:

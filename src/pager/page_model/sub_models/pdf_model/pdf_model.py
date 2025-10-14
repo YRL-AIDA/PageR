@@ -19,8 +19,7 @@ class PDFModel(BaseSubModel):
         self.count_page: int
         self.num_page: int = 0
         self.pdf_parser = PrecisionPDFModel()
-        if conf and "method" in conf.keys():
-            self.method = conf["method"]
+        self.method = conf["method"] if conf and "method" in conf.keys() else None
 
 
     def from_dict(self, input_model_dict):
@@ -31,7 +30,17 @@ class PDFModel(BaseSubModel):
 
     def read_from_file(self, path_file: str, method=None) -> None:
         self.path = path_file
-        self.pdf_parser.read_from_file(path_file, method=method if method else self.method)
+        # Проверка метода:
+        if method and self.method:
+            if method != self.method:
+                raise MethodConflict(self.method, method)
+
+        if not method:
+            if not self.method:
+                raise NotMethodParsing()
+            else:
+                method = self.method
+        self.pdf_parser.read_from_file(path_file, method)
         self.pdf_json = self.pdf_parser.to_dict()
         self.count_page = len(self.pdf_json['pages']) if "pages" in self.pdf_json.keys() else 0
 
@@ -65,3 +74,24 @@ class NotThisNumberPage(Exception):
         self.num = num
     def __str__(self) -> str:
         return f'Not this {self.num} page'
+
+class NotMethodParsing(Exception):
+    def __init__(self):
+        pass
+
+    def __str__(self) -> str:
+        return '''No method ('r', 'w') is specified
+    PDFModel(conf={'method': 'name_method'})
+or
+    .read_from_file(..., method='name_method')
+    '''
+
+class MethodConflict(Exception):
+    def __init__(self, method1, method2):
+        self.m1 = method1
+        self.m2 = method2
+        pass
+
+    def __str__(self) -> str:
+        return f'''self.method = '{self.m1}' and method = '{self.m2}' is conflict 
+    '''
