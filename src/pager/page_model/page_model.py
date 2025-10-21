@@ -27,14 +27,14 @@ class PageModel:
             self.keys[page_unit.id] = i
     
     def next_page(self) -> None:
-        if not page_units[0].sub_model.is_include_pages():
+        if not self.page_units[0].sub_model.is_include_pages():
             raise ModelNotIncludePage()
-        page_units[0].sub_model.next() 
+        self.page_units[0].sub_model.next() 
 
     def back_page(self) -> None:
-        if not page_units[0].sub_model.is_include_pages():
+        if not self.page_units[0].sub_model.is_include_pages():
             raise ModelNotIncludePage()
-        page_units[0].sub_model.back() 
+        self.page_units[0].sub_model.back() 
             
 
     def read_from_file(self, path) -> None:

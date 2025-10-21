@@ -52,7 +52,6 @@ class TestPDF(unittest.TestCase):
         text_ = ""
         for row in page0['blocks']:  
             text_ += " " +  row['text'][:-1] # delete \n
-        print(text_)
         ld = levenshtein_distance(text, text_)/len(text)
         self.assertLessEqual(ld, 0.01)
         

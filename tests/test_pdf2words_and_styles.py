@@ -7,7 +7,7 @@ STYLE_MODEL = os.environ["PATH_STYLE_MODEL"]
 class TestWords2PhisModel(unittest.TestCase):
     page = PageModel(page_units=[
         PageModelUnit(id="pdf_model", 
-                      sub_model=PDFModel(), 
+                      sub_model=PDFModel({'method':'w'}), 
                       extractors=[], 
                       converters={}),
         PageModelUnit(id="words_and_styles_model", 

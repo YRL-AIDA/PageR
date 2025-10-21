@@ -33,13 +33,13 @@ print(model_dir)
 path = os.path.join(model_dir, 'PDF2Block', 'precisionPDF.jar')
 JAR_PDF_PARSER = get_path(path, f'path JAR_PDF_PARSER (default: {path})')
 
-path = os.path.join(model_dir,  'seg_gnn')
-PATH_TORCH_SEG_GNN_MODEL = get_path(path, f'path PATH_TORCH_SEG_GNN_MODEL (default: {path})')
+# path = os.path.join(model_dir,  'seg_gnn')
+# PATH_TORCH_SEG_GNN_MODEL = get_path(path, f'path PATH_TORCH_SEG_GNN_MODEL (default: {path})')
 
-path = os.path.join(model_dir,  'seg_linear')
-PATH_TORCH_SEG_LINEAR_MODEL = get_path(path, f'path PATH_TORCH_SEG_LINEAR_MODEL (default: {path})')
+# path = os.path.join(model_dir,  'seg_linear')
+# PATH_TORCH_SEG_LINEAR_MODEL = get_path(path, f'path PATH_TORCH_SEG_LINEAR_MODEL (default: {path})')
 
-path = os.path.join(model_dir,  'style_classmodel_20250121')
+path = os.path.join(model_dir,  'Words2Rows','style_classmodel_20250121')
 PATH_STYLE_MODEL = get_path(path, f'path PATH_STYLE_MODEL (default: {path})')
 
 path = os.path.join(model_dir,  'glam_node_model_20250221')

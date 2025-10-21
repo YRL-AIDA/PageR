@@ -1,0 +1,63 @@
+{
+    "regions": [
+        {
+            "x_top_left": 0,
+            "x_bottom_right": 100,
+            "y_top_left": 0,
+            "y_bottom_right": 30,
+            "text": "Header",
+            "label": "header",
+            "rows": [
+                {
+                    "bold": 1.0,
+                    "italic": 0.0,
+                    "font_name": "Times New Roman",
+                    "size": 24,
+                    "text": "Header",
+                    "segment": {
+                        "x_top_left": 0,
+                        "x_bottom_right": 100,
+                        "y_top_left": 0,
+                        "y_bottom_right": 30
+                    }
+                }
+            ]
+        },
+        {
+            "x_top_left": 10,
+            "x_bottom_right": 100,
+            "y_top_left": 0,
+            "y_bottom_right": 95,
+            "text": "Длинный текст В две строки",
+            "label": "text",
+            "rows": [
+                {
+                    "bold": null,
+                    "italic": null,
+                    "font_name": "Times New Roman",
+                    "size": 18,
+                    "text": "Длинный текст",
+                    "segment": {
+                        "x_top_left": 10,
+                        "x_bottom_right": 100,
+                        "y_top_left": 50,
+                        "y_bottom_right": 65
+                    }
+                },
+                {
+                    "bold": null,
+                    "italic": null,
+                    "font_name": "Times New Roman",
+                    "size": 18,
+                    "text": "в две строки",
+                    "segment": {
+                        "x_top_left": 70,
+                        "x_bottom_right": 100,
+                        "y_top_left": 0,
+                        "y_bottom_right": 85
+                    }
+                }
+            ]
+        }
+    ]
+}

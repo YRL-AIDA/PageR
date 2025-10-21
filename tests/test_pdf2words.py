@@ -4,7 +4,7 @@ from pager.page_model.sub_models.converters import PDF2Words
 class TestWords2PhisModel(unittest.TestCase):
     page = PageModel(page_units=[
         PageModelUnit(id="pdf_model", 
-                      sub_model=PDFModel(), 
+                      sub_model=PDFModel({'method':'w'}), 
                       extractors=[], 
                       converters={}),
         PageModelUnit(id="words_model", 
