@@ -32,6 +32,8 @@ class Region(ABC):
 
     def set_rows_from_dict(self, list_rows: List[dict]):
         self.rows = [Row(row) for row in list_rows]
+        index = np.argsort([row.segment.y_top_left for row in self.rows])
+        self.rows = [self.rows[i] for i in index]
     
     def set_segment(self, dict_region):
         self.segment = ImageSegment(dict_p_size = dict_region) if "width" in dict_region else ImageSegment(dict_2p = dict_region)

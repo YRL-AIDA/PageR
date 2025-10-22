@@ -18,6 +18,12 @@ class RegionModel(BaseSubModel):
         phis_json = self._read_json(path_file)
         self.from_dict(phis_json)
 
+    def set_regions(self, regions: List[Region]):
+        if regions:
+            self.regions = regions
+        else:
+            self.regions = []
+
     def clean_model(self):
         self.regions = []
     

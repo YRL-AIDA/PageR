@@ -6,6 +6,7 @@ from ..dtype import ImageSegment
 from pager.nn_models.manager_models import ManagerModels
 from ..dtype import Graph
 from collections import Counter
+from ..extractors import RegionSorterCutXYExtractor
 
 
 class Rows2Regions(BaseConverter):
@@ -18,6 +19,10 @@ class Rows2Regions(BaseConverter):
         page_json = input_model.to_dict()
         region_list = self.get_region(page_json['rows'])
         output_model.from_dict({"regions": region_list})
+
+        # сортировка после создания региона
+        sorter = RegionSorterCutXYExtractor()
+        sorter.extract(output_model)
 
     def get_region(self, rows_json):
         graph_dict_torch = self.rowGLAM_tokenizer(rows_json)
