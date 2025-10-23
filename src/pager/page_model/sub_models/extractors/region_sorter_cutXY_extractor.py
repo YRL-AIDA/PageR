@@ -57,6 +57,7 @@ class RegionSorterCutXYExtractor(BaseExtractor):
         for i, bbox in enumerate(bboxes):
             bbox.id = i
         order = self.sort_using_XYCut(bboxes)
+        print(len(order))
         model.set_regions([model.regions[i] for i in order])
 
 

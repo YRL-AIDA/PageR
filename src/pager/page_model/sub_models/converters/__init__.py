@@ -26,6 +26,8 @@ from .precision_pdf2ms_word import PrecisionPDFToMSWord
 
 from .rows2region import Rows2Regions
 
+from .words2rows import Words2Rows
+
 # Delete
 from .img2words_and_styles import ImageToWordsAndCNNStyles
 from .words2one_block import Words2OneBlock as WordsToOneBlock

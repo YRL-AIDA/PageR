@@ -22,6 +22,8 @@ class Region(ABC):
             self.set_rows_from_dict(dict_region['rows'])
         if  "width" in dict_region.keys() or "x_bottom_right" in dict_region.keys():
             self.set_segment(dict_region)
+        elif "segment" in dict_region.keys():
+            self.set_segment(dict_region["segment"])
         elif len(self.rows) > 0:
             segment = ImageSegment(0, 0, 1, 1)
             segment.set_segment_max_segments([r.segment for r in self.rows])

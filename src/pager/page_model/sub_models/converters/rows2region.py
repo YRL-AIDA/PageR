@@ -21,8 +21,8 @@ class Rows2Regions(BaseConverter):
         output_model.from_dict({"regions": region_list})
 
         # сортировка после создания региона
-        sorter = RegionSorterCutXYExtractor()
-        sorter.extract(output_model)
+        # sorter = RegionSorterCutXYExtractor()
+        # sorter.extract(output_model)
 
     def get_region(self, rows_json):
         graph_dict_torch = self.rowGLAM_tokenizer(rows_json)
@@ -30,8 +30,8 @@ class Rows2Regions(BaseConverter):
         result['deleted_edges'] = result['E_pred'] > 0.5
         result['labels'] = result['node_classes'].argmax(1)
         
-        graph = graph_dict_torch['sp_A'].indices()
-        graph = [graph[0].tolist(), graph[1].tolist()]
+        graph = graph_dict_torch['inds']
+    
         labels = result['labels']
         deleted_edges = result['deleted_edges']
         
@@ -39,16 +39,16 @@ class Rows2Regions(BaseConverter):
         return regions
     
 
-    def regions_from_graph(self, rows_json, graph, labels, deleted_edges):
+    def regions_from_graph(self, rows_json, A, labels, deleted_edges):
         graph_ = Graph()
         regions = []
-        
+
         for row_json in rows_json:
             segment = ImageSegment(dict_2p=row_json['segment'])
             xc, yc = segment.get_center()
             graph_.add_node(xc, yc)
 
-        for node_i, node_j, ind in zip(graph[0], graph[1], deleted_edges):
+        for node_i, node_j, ind in zip(A[0], A[1], deleted_edges):
             if ind != 0:
                 graph_.add_edge(node_i+1, node_j+1)
 
