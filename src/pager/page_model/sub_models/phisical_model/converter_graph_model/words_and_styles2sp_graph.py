@@ -11,14 +11,15 @@ load_dotenv(override=True)
 
 SIZE_VEC = 32
 BERT_COUNT_WORD_AT_ONCE= 250
-
+PATH_MODELS = os.environ['PATH_MODELS']
 device = torch.device('cuda:0' if torch.cuda.device_count() != 0 else 'cpu') if os.environ['DEVICE'] == 'gpu' else torch.device('cpu')
 
 class Word2Vec():
     def __init__(self):
         model_name = "bert-base-multilingual-cased"  # Многоязычная модель BERT
-        self.tokenizer = BertTokenizer.from_pretrained(model_name)
-        self.model = BertModel.from_pretrained(model_name).to(device)
+        cache_path = os.path.join(PATH_MODELS, 'bert')
+        self.tokenizer = BertTokenizer.from_pretrained(model_name, cache_dir=cache_path)
+        self.model = BertModel.from_pretrained(model_name, cache_dir=cache_path).to(device)
     
     def __call__(self, words):
         if len(words) == 0:
