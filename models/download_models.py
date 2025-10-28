@@ -1,5 +1,4 @@
 import os
-from huggingface_hub import snapshot_download
 from transformers import BertTokenizer, BertModel
 
 def download_model():

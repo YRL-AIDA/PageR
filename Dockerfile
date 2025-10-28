@@ -16,11 +16,18 @@ RUN apt-get update && apt-get install -y \
     && apt-get install -y tesseract-ocr tesseract-ocr-rus \
     && rm -rf /var/lib/apt/lists/* 
 
+# Обновление pip
+RUN python3 -m pip install --upgrade pip
 
+WORKDIR /app
+# Установка тяжелых библиотек
+RUN pip install --no-cache-dir torch torch-geometric torchmetrics[detection] \
+                               torchvision tokenizers transformers 
+                               
 ENV JAR_PDF_PARSER=/app/models/PDF2Block/precisionPDF.jar
 ENV PATH_TORCH_SEG_GNN_MODEL=/app/models/seg_gnn
 ENV PATH_TORCH_SEG_LINEAR_MODEL=/app/models/seg_linear
-ENV PATH_STYLE_MODEL=/app/models/style_classmodel_20250121
+ENV PATH_STYLE_MODEL=/app/models/Words2Rows/style_classmodel_20250121
 ENV PATH_TORCH_GLAM_NODE_MODEL=/app/models/glam_node_model_20250221
 ENV PATH_TORCH_GLAM_EDGE_MODEL=/app/models/glam_edge_model_20250221
 ENV PATH_TORCH_GLAM_MODEL=/app/models/glam_model_20250703
@@ -30,16 +37,7 @@ ENV PATH_MODELS=/app/models
 ENV DEVICE=cpu
 ENV PYTHONUNBUFFERED=1
 
-
-# Обновление pip
-RUN python3 -m pip install --upgrade pip
-
-WORKDIR /app
-# Установка тяжелых библиотек
-RUN pip install --no-cache-dir torch torch-geometric torchmetrics[detection] \
-                               torchvision tokenizers transformers "huggingface_hub[cli]"
-
-RUN huggingface-cli download google-bert/bert-base-multilingual-cased --local-dir models/bert
+# RUN huggingface-cli download google-bert/bert-base-multilingual-cased --local-dir models/bert
 # Копирование проекта и установка
 COPY apis apis
 COPY src src

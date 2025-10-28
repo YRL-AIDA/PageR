@@ -16,10 +16,10 @@ device = torch.device('cuda:0' if torch.cuda.device_count() != 0 else 'cpu') if 
 
 class Word2Vec():
     def __init__(self):
-        model_name = "bert-base-multilingual-cased"  # Многоязычная модель BERT
-        cache_path = os.path.join(PATH_MODELS, 'bert')
-        self.tokenizer = BertTokenizer.from_pretrained(model_name, cache_dir=cache_path)
-        self.model = BertModel.from_pretrained(model_name, cache_dir=cache_path).to(device)
+        model_dir = os.path.join(PATH_MODELS, 'bert', 'models--bert-base-multilingual-cased',
+                             'snapshots','3f076fdb1ab68d5b2880cb87a0886f315b8146f8')
+        self.tokenizer = BertTokenizer.from_pretrained(model_dir)
+        self.model = BertModel.from_pretrained(model_dir).to(device)
     
     def __call__(self, words):
         if len(words) == 0:
