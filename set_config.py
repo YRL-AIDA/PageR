@@ -33,13 +33,13 @@ print(model_dir)
 path = os.path.join(model_dir, 'PDF2Block', 'precisionPDF.jar')
 JAR_PDF_PARSER = get_path(path, f'path JAR_PDF_PARSER (default: {path})')
 
-path = os.path.join(model_dir,  'seg_gnn')
-PATH_TORCH_SEG_GNN_MODEL = get_path(path, f'path PATH_TORCH_SEG_GNN_MODEL (default: {path})')
+# path = os.path.join(model_dir,  'seg_gnn')
+# PATH_TORCH_SEG_GNN_MODEL = get_path(path, f'path PATH_TORCH_SEG_GNN_MODEL (default: {path})')
 
-path = os.path.join(model_dir,  'seg_linear')
-PATH_TORCH_SEG_LINEAR_MODEL = get_path(path, f'path PATH_TORCH_SEG_LINEAR_MODEL (default: {path})')
+# path = os.path.join(model_dir,  'seg_linear')
+# PATH_TORCH_SEG_LINEAR_MODEL = get_path(path, f'path PATH_TORCH_SEG_LINEAR_MODEL (default: {path})')
 
-path = os.path.join(model_dir,  'style_classmodel_20250121')
+path = os.path.join(model_dir,  'Words2Rows','style_classmodel_20250121')
 PATH_STYLE_MODEL = get_path(path, f'path PATH_STYLE_MODEL (default: {path})')
 
 path = os.path.join(model_dir,  'glam_node_model_20250221')
@@ -54,22 +54,27 @@ PATH_TORCH_GLAM_MODEL = get_path(path, f'path PATH_TORCH_GLAM_MODEL (default: {p
 path = os.path.join(model_dir,  'row_glam_20250811')
 PATH_TORCH_ROW_GLAM = get_path(path, f'path PATH_TORCH_ROW_GLAM (default: {path})')
 
+path = os.path.join(model_dir, 'Words2Rows', 'words2rows_glam_20251023')
+PATH_TORCH_WORDS2ROWS_GLAM = get_path(path, f'path PATH_TORCH_WORDS2ROWS_GLAM (default: {path})')
+
 path = os.path.join(model_dir,  'glam_config_model_20250221.json')
 PATH_TORCH_GLAM_CONF_MODEL = get_path(path, f'path PATH_TORCH_GLAM_CONF_MODEL (default: {path})')
 
 
 # словарь Python
+
 config = {
         'PATH_MODELS': model_dir,
         'JAR_PDF_PARSER': JAR_PDF_PARSER,
-        'PATH_TORCH_SEG_GNN_MODEL':PATH_TORCH_SEG_GNN_MODEL, 
-        'PATH_TORCH_SEG_LINEAR_MODEL': PATH_TORCH_SEG_LINEAR_MODEL,
+        # 'PATH_TORCH_SEG_GNN_MODEL':PATH_TORCH_SEG_GNN_MODEL, 
+        # 'PATH_TORCH_SEG_LINEAR_MODEL': PATH_TORCH_SEG_LINEAR_MODEL,
         'PATH_STYLE_MODEL': PATH_STYLE_MODEL,
         'PATH_TORCH_GLAM_NODE_MODEL': PATH_TORCH_GLAM_NODE_MODEL,
         'PATH_TORCH_GLAM_EDGE_MODEL': PATH_TORCH_GLAM_EDGE_MODEL,
         'PATH_TORCH_GLAM_MODEL': PATH_TORCH_GLAM_MODEL,
         'PATH_TORCH_GLAM_CONF_MODEL': PATH_TORCH_GLAM_CONF_MODEL,
         'PATH_TORCH_ROW_GLAM': PATH_TORCH_ROW_GLAM,
+        'PATH_TORCH_WORDS2ROWS_GLAM':PATH_TORCH_WORDS2ROWS_GLAM,
         'DEVICE': 'cpu'
 }
 
