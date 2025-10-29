@@ -4,9 +4,9 @@ from pager import PhisicalModel
 
 class TestPhisicalModel(unittest.TestCase):
     phis_model=PhisicalModel()
-    phis_model.read_from_file('files/blocks.json')
+    phis_model.read_from_file('files/only_text_regions.json')
     dict_ = phis_model.to_dict()
-    blocks = dict_['blocks']
+    blocks = dict_['regions']
  
     def test_len_blocks(self) -> None:
        self.assertEqual(len(self.blocks), 8)
