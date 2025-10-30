@@ -4,14 +4,12 @@ import numpy as np
 import matplotlib .pyplot as plt
 # from ..paragraph import Paragraph
 from .image_segment import ImageSegment
-from .word import Word
 from .row import Row
 
 class Region(ABC):
     def __init__(self, dict_region):
-       
+        # print('set regions from dict', dict_region)
         # self.paragraphs: List[Paragraph] = []
-        self.words: List[Word] = []
         self.rows: List[Row] = []
         self.label = None
 
@@ -46,7 +44,14 @@ class Region(ABC):
             return " ".join([row.content for row in self.rows])
         else:
             return ""
-        
+    
+    @property
+    def words(self):
+        words = []
+        for row in self.rows:
+            words.extend(row.get_words())
+        return words
+
     def to_dict(self):
         block_dict = self.segment.get_segment_2p()
         block_dict["text"] = self.text
@@ -54,3 +59,4 @@ class Region(ABC):
             block_dict["label"] = self.label
         block_dict["rows"] = [row.to_dict() for row in self.rows]
         return block_dict
+    

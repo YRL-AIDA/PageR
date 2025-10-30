@@ -1,1 +1,1 @@
-from .utils import merge_segment
+from .merge_segment import *

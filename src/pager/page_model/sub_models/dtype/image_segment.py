@@ -172,6 +172,9 @@ class ImageSegment(ABC):
         self.y_bottom_right = round(k*self.y_bottom_right)
 
 
+    def __repr__(self):
+        return f"<seg ({self.x_top_left, self.y_top_left}) w: {self.width}, h: {self.height}>"
+
 class SegmentException(Exception):
     def __init__(self, x_top_left, y_top_left, x_bottom_right, y_bottom_right):
         self.x_top_left = x_top_left

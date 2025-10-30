@@ -21,8 +21,8 @@ class Rows2Regions(BaseConverter):
         output_model.from_dict({"regions": region_list})
 
         # сортировка после создания региона
-        # sorter = RegionSorterCutXYExtractor()
-        # sorter.extract(output_model)
+        sorter = RegionSorterCutXYExtractor()
+        sorter.extract(output_model)
 
     def get_region(self, rows_json):
         graph_dict_torch = self.rowGLAM_tokenizer(rows_json)

@@ -1,7 +1,7 @@
 from ..base_sub_model import BaseSubModel
 from typing import Dict, List
 from ..dtype import Region
-
+from ..converters.words2rows import dict_words2rows
 
 class RegionModel(BaseSubModel):
     def __init__(self) -> None:
@@ -9,7 +9,10 @@ class RegionModel(BaseSubModel):
         self.regions: List[Region] = []
     
     def from_dict(self, input_model_dict: Dict):
-        self.regions = [Region(region) for region in input_model_dict["regions"]]
+        self.regions = [Region(region) 
+                        if 'rows' in region else 
+                        Region({'rows': dict_words2rows(region['words'])}) 
+                        for region in input_model_dict["regions"]]
 
     def to_dict(self) -> Dict:
         return {"regions": [region.to_dict() for region in self.regions]}
