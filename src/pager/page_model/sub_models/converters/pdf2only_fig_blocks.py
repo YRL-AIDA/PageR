@@ -1,10 +1,10 @@
 from ..base_sub_model import BaseConverter
-from ..phisical_model import PhisicalModel
+from ..region_model import RegionModel
 from ..pdf_model import PDFModel
 from ..dtype import Block
 
 class PDF2OnlyFigBlocks(BaseConverter):
-    def convert(self, input_model:PDFModel, output_model:PhisicalModel):
+    def convert(self, input_model:PDFModel, output_model:RegionModel):
         images = input_model.to_dict()['images']
         for image in images:
             # TODO: сделать FigBlock

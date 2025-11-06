@@ -1,12 +1,13 @@
 from ..base_sub_model import BaseExtractor
 from ..pdf_model import PrecisionPDFModel
-from ..phisical_model import PhisicalModel
+from ..region_model import RegionModel
 from ..exceptions import ConteinNumPage
 from ..dtype.block import Word
 
 
 class PrecisionPDFRegionsFromPhisExtractor(BaseExtractor):
-    def __init__(self, phis_model:PhisicalModel):
+    def __init__(self, phis_model:RegionModel):
+        # TODO block -> region
         self.phis_model = phis_model
         
 

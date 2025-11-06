@@ -1,10 +1,7 @@
 import unittest
 from pager import PageModel, PageModelUnit, WordsAndStylesModel, ImageModel, Image2WordsAndStyles
 import os
-from dotenv import load_dotenv
-load_dotenv()
 
-PATH_STYLE_MODEL = os.environ["PATH_STYLE_MODEL"]
 class TestWords2PhisModel(unittest.TestCase):
     page = PageModel(page_units=[
         PageModelUnit(id="image_model", 
@@ -14,7 +11,7 @@ class TestWords2PhisModel(unittest.TestCase):
         PageModelUnit(id="words_and_styles_model", 
                       sub_model=WordsAndStylesModel(), 
                       extractors=[], 
-                      converters={"image_model": Image2WordsAndStyles(conf={"path_model": PATH_STYLE_MODEL })})
+                      converters={"image_model": Image2WordsAndStyles()})
         ])
 
     page.read_from_file("files/page.png")

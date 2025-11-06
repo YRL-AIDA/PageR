@@ -1,4 +1,4 @@
-from pager.page_model.sub_models.phisical_model.segment_clusterizer import KMeanClusterizer
+from pager.page_model.sub_models.utils.segment_clusterizer import KMeanClusterizer
 from pager.page_model.sub_models.dtype import ImageSegment
 import numpy as np
 import torch

@@ -21,8 +21,7 @@
  ```
 
 ```
-python set_config.py
-python -m pip install .
+pager-install-models
 ```
 
 

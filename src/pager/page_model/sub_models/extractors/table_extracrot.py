@@ -1,12 +1,13 @@
 from ..base_sub_model import BaseExtractor
-from ..phisical_model import PhisicalModel
+from ..region_model import RegionModel
 from ..dtype.block import TableBlock, Block
 import numpy as np
 import cv2
 from typing import List, Tuple, Dict, Any
 
 class TableExtractor(BaseExtractor):
-    def extract(self, model:PhisicalModel):
+    def extract(self, model:RegionModel):
+        # TODO: block -> region
         if not "img" in model.__dict__:
             raise Exception("Can't find img in model")
         

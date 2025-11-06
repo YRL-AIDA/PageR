@@ -1,6 +1,5 @@
 import os
-from dotenv import load_dotenv
-load_dotenv(override=True)
+from .sys_model_manager import get_model_path
 
 class ManagerModels:
     def __init__(self):
@@ -16,15 +15,26 @@ class ManagerModels:
             # from .models.row_glam_20250811 import get_load_model
             # model = get_load_model(os.getenv("PATH_TORCH_ROW_GLAM"))
             from .models.rows2region_glam_20251106 import get_load_model
-            model = get_load_model(os.getenv("PATH_TORCH_ROWS2REGION_GLAM"))
+            model = get_load_model(get_model_path('rows2regions-GLAM'))
             return model
         elif name == "wordGLAM-tokenizer":
             from .models.wordGLAM_tokenizer_20251023 import WordGLAMTokenizer
             return WordGLAMTokenizer()
         elif name == "words2rowsGLAM-model":
             from .models.words2rows_glam_20251023 import get_load_model
-            model = get_load_model(os.getenv("PATH_TORCH_WORDS2ROWS_GLAM"))
+            model = get_load_model(get_model_path('words2rows-GLAM'))
             return model
+        
+        elif name == 'style-model-20250121': 
+            from .models.imgfont_tokenizer_20250121 import classifier_image_word, get_model
+            model = get_model(get_model_path('style_classmodel'))
+            fun = lambda word_img:classifier_image_word(model, word_img).detach().numpy().tolist()
+            return model, fun
+        # elif name == 'style-model-20250424':
+        #     from .models.imgfont_tokenizer_20250424 import classifier_image_word, get_model
+        #     model = get_model(get_model_path('style_classmodel2'))
+        #     fun = lambda word_img:classifier_image_word(model, word_img).detach().numpy().tolist()
+        #     return model, fun
         else:
             raise NotModel(name)
 

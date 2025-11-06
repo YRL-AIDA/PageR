@@ -6,17 +6,16 @@ from transformers import BertTokenizer, BertModel
 import torch
 from ...dtype import ImageSegment
 import os
-from dotenv import load_dotenv
-load_dotenv(override=True)
+from pager.nn_models.sys_model_manager import get_model_path
+from pager import device
 
 SIZE_VEC = 32
 BERT_COUNT_WORD_AT_ONCE= 250
-PATH_MODELS = os.environ['PATH_MODELS']
-device = torch.device('cuda:0' if torch.cuda.device_count() != 0 else 'cpu') if os.environ['DEVICE'] == 'gpu' else torch.device('cpu')
+PATH_MODELS = get_model_path('bert')
 
 class Word2Vec():
     def __init__(self):
-        model_dir = os.path.join(PATH_MODELS, 'bert', 'models--bert-base-multilingual-cased',
+        model_dir = os.path.join(PATH_MODELS, 'models--bert-base-multilingual-cased',
                              'snapshots','3f076fdb1ab68d5b2880cb87a0886f315b8146f8')
         self.tokenizer = BertTokenizer.from_pretrained(model_dir)
         self.model = BertModel.from_pretrained(model_dir).to(device)

@@ -4,9 +4,7 @@ import subprocess
 import json
 import os
 from pdf2image import convert_from_path
-
-from dotenv import load_dotenv
-load_dotenv(override=True)
+from pager.nn_models.sys_model_manager import get_model_path
 
 NULL_PAGE = {
     "number": -1,
@@ -42,7 +40,7 @@ class PrecisionPDFModel(BaseSubModel):
         # self.num_page = 0
     
     def __read(self, path, method):
-        jar_path = os.environ["JAR_PDF_PARSER"]
+        jar_path = get_model_path("precisionPDF.jar")
         comands =["java", "-jar", jar_path, "-i", path]
         if method == "w":
             comands.append("-w")

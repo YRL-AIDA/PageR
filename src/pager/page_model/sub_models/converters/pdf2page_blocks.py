@@ -1,10 +1,11 @@
 from ..base_sub_model import BaseConverter
 from ..pdf_model import PrecisionPDFModel
-from ..phisical_model import PhisicalModel
+from ..region_model import RegionModel
 from ..dtype import Word, ImageSegment, Block
 
 class PDF2PageBlocks(BaseConverter):
-    def convert(self, input_model: PrecisionPDFModel, output_model: PhisicalModel):
+    # TODO: block -> region
+    def convert(self, input_model: PrecisionPDFModel, output_model: RegionModel):
         page_json = input_model.to_dict()
         block_list = self.get_blocks(page_json['pages'])
         output_model.blocks = block_list

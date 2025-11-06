@@ -1,5 +1,5 @@
 [build-system]
-requires = ['setuptools', 'setuptools-scm']
+requires = ['setuptools', 'wheel', 'setuptools-scm']
 build-backend = 'setuptools.build_meta'
 
 [project]
@@ -31,3 +31,10 @@ dependencies = [
 ]
 
 version = '0.0.1' 
+
+[tool.setuptools]
+packages = ["pager"]
+package-dir = {"pager" = "src/pager"}
+
+[project.scripts]
+pager-install-models = "pager.nn_models.sys_model_manager:download_models"

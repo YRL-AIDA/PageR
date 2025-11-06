@@ -1,9 +1,7 @@
 import unittest
 from pager import PageModel, PageModelUnit, WordsAndStylesModel, PDFModel, PDF2WordsAndStyles
-from dotenv import load_dotenv
 import os
-load_dotenv(override=True)
-STYLE_MODEL = os.environ["PATH_STYLE_MODEL"]
+
 class TestWords2PhisModel(unittest.TestCase):
     page = PageModel(page_units=[
         PageModelUnit(id="pdf_model", 
@@ -13,7 +11,7 @@ class TestWords2PhisModel(unittest.TestCase):
         PageModelUnit(id="words_and_styles_model", 
                       sub_model=WordsAndStylesModel(), 
                       extractors=[], 
-                      converters={"pdf_model": PDF2WordsAndStyles(conf={"path_model": STYLE_MODEL})})
+                      converters={"pdf_model": PDF2WordsAndStyles()})
         ])
 
     page.read_from_file(os.path.join("files", "text_header_table.pdf"))
