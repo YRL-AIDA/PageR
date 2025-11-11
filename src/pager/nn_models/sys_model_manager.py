@@ -4,7 +4,7 @@ import os
 
 models = {
     "precisionPDF.jar": Path("models/PDF2Block/precisionPDF.jar"),
-    "rows2regions-GLAM": Path("models/Rows2Regions/row2region_GLAM_20251106"),
+    "rows2regions-GLAM": Path("models/Rows2Regions/row2region_GLAM_20251111"),
     "words2rows-GLAM": Path("models/Words2Rows/words2rows_glam_20251023"),
     "style_classmodel": Path("models/Words2Rows/style_classmodel_20250121"),
 }
@@ -21,13 +21,13 @@ def download_models():
     # Копируем модели в кэш
     for model_name, local_path in models.items():
         model_path = cache_dir / model_name
-        if not model_path.exists():
-            print(local_path)
-            if not local_path.exists():
-                continue
-            shutil.copy2(local_path, model_path)
-            
-            print(f"Downloaded {model_name} to {model_path}")
+        # if not model_path.exists():
+        print(local_path)
+        if not local_path.exists():
+            continue
+        shutil.copy2(local_path, model_path)
+        
+        print(f"Downloaded {model_name} to {model_path}")
     
     # Скачивание моделей в кэш 
     bert_cache_dir = cache_dir/'bert'
