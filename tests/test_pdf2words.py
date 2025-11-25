@@ -1,6 +1,7 @@
 import unittest
 from pager import PageModel, PageModelUnit, WordsAndStylesModel, PDFModel, WordsModel
 from pager.page_model.sub_models.converters import PDF2Words
+import os
 class TestWords2PhisModel(unittest.TestCase):
     page = PageModel(page_units=[
         PageModelUnit(id="pdf_model", 
@@ -13,7 +14,7 @@ class TestWords2PhisModel(unittest.TestCase):
                       converters={"pdf_model": PDF2Words()})
         ])
 
-    page.read_from_file("files/text_header_table.pdf")
+    page.read_from_file(os.path.join("files", "text_header_table.pdf"))
     page.extract()
     words = page.to_dict()
         
@@ -22,7 +23,13 @@ class TestWords2PhisModel(unittest.TestCase):
         self.assertIn("words", keys)
 
     def test_count_words(self) -> None:
-        self.assertEqual(len(self.words['words']), 204)
+        with open(os.path.join("files", "text_header_table_text.txt"), "r", encoding="utf-8") as f:
+            
+            text = f.read().replace("\t", " ").replace("\n", " ")
+            elements = text.split(" ")
+            elements = [el for el in elements if el != '']
+        words = [w['text'] for w in self.words['words']]
+        self.assertEqual(words, elements)
 
     def test_style_word(self) -> None:
         word = self.words['words'][0]

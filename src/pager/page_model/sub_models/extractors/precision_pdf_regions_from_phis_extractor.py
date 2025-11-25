@@ -15,14 +15,14 @@ class PrecisionPDFRegionsFromPhisExtractor(BaseExtractor):
         if not "num_page" in model.__dict__:
             raise ConteinNumPage()
         
-        model.pdf_json["pages"][model.num_page]['regions'] = [{"x_top_left": block.segment.x_top_left,
-                                                               "y_top_left": block.segment.y_top_left,
-                                                               "width": block.segment.width,
-                                                               "height":block.segment.height,
-                                                               "text": block.get_text(),
-                                                               "label": block.label
+        model.pdf_json["pages"][model.num_page]['regions'] = [{"x_top_left": reg.segment.x_top_left,
+                                                               "y_top_left": reg.segment.y_top_left,
+                                                               "width": reg.segment.width,
+                                                               "height":reg.segment.height,
+                                                               "text": reg.text,
+                                                               "label": reg.label
                                                               } 
-                                                              for block in self.phis_model.blocks]
+                                                              for reg in self.phis_model.regions]
         tables =  model.pdf_json["pages"][model.num_page]['tables']
 
         model.pdf_json["pages"][model.num_page]['regions'] += [

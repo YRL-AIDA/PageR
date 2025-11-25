@@ -5,6 +5,7 @@ import json
 import os
 from pdf2image import convert_from_path
 from pager.nn_models.sys_model_manager import get_model_path
+from .exaption_pdf import MethodConflict, NotMethodParsing
 
 NULL_PAGE = {
     "number": -1,
@@ -16,11 +17,12 @@ NULL_PAGE = {
 }
 
 class PrecisionPDFModel(BaseSubModel):
-    def __init__(self) -> None:
+    def __init__(self, conf=None) -> None:
         super().__init__()
         self.pdf_json: Dict
         self.count_page: int|None 
         # self.num_page: int = 0
+        self.method = conf["method"] if conf and "method" in conf.keys() else None
 
     def from_dict(self, input_model_dict: Dict):
         self.pdf_json = input_model_dict
@@ -29,7 +31,17 @@ class PrecisionPDFModel(BaseSubModel):
         return self.pdf_json
     
 
-    def read_from_file(self, path_file: str, method: str = "w") -> None:
+    def read_from_file(self, path_file: str, method: str| None = None) -> None:
+        if method and self.method:
+            if method != self.method:
+                raise MethodConflict(self.method, method)
+
+        if not method:
+            if not self.method:
+                raise NotMethodParsing()
+            else:
+                method = self.method
+        
         self.path = path_file
         self.pdf_json = self.__read(path_file, method)
         self.count_page = len(self.pdf_json['pages']) if "pages" in self.pdf_json.keys() else 0

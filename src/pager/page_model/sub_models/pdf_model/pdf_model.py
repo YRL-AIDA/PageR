@@ -2,6 +2,7 @@ from ..base_sub_model import BaseSubModel
 from typing import Dict
 
 from .precision_pdf_model import PrecisionPDFModel
+from .exaption_pdf import MethodConflict, NotMethodParsing, NotThisNumberPage
 
 NULL_PAGE = {
     "number": -1,
@@ -18,7 +19,7 @@ class PDFModel(BaseSubModel):
         self.pdf_json: Dict
         self.count_page: int
         self.num_page: int = 0
-        self.pdf_parser = PrecisionPDFModel()
+        self.pdf_parser: PrecisionPDFModel = PrecisionPDFModel()
         self.method = conf["method"] if conf and "method" in conf.keys() else None
 
 
@@ -69,29 +70,3 @@ class PDFModel(BaseSubModel):
         self.num_page -= 1
 
 
-class NotThisNumberPage(Exception):
-    def __init__(self, num):
-        self.num = num
-    def __str__(self) -> str:
-        return f'Not this {self.num} page'
-
-class NotMethodParsing(Exception):
-    def __init__(self):
-        pass
-
-    def __str__(self) -> str:
-        return '''No method ('r', 'w') is specified
-    PDFModel(conf={'method': 'name_method'})
-or
-    .read_from_file(..., method='name_method')
-    '''
-
-class MethodConflict(Exception):
-    def __init__(self, method1, method2):
-        self.m1 = method1
-        self.m2 = method2
-        pass
-
-    def __str__(self) -> str:
-        return f'''self.method = '{self.m1}' and method = '{self.m2}' is conflict 
-    '''

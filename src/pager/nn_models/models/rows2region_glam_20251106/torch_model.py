@@ -45,7 +45,7 @@ class NodeGLAM(torch.nn.Module):
         self.softmax = torch.nn.Softmax()
     
     def forward(self, x: torch.Tensor, edge_index: torch.Tensor) -> torch.Tensor:
-        if self.has_bathcnorm:
+        if self.has_bathcnorm and x.shape[0] > 1:
             x = self.batch_norm1(x)
         h = x
         for layer in self.Tag:
@@ -78,7 +78,7 @@ class EdgeGLAM(torch.nn.Module):
         self.linear_end = Linear(linear[-1], output_)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        if self.has_bathcnorm:
+        if self.has_bathcnorm and x.shape[0] > 1:
             x = self.batch_norm2(x)
         h = x
         for layer in self.Linear:

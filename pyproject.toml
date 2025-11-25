@@ -33,7 +33,7 @@ dependencies = [
 version = '0.0.2' 
 
 [tool.setuptools]
-packages = ["pager"]
+packages = {find = {where = ["src"]}}
 package-dir = {"pager" = "src/pager"}
 
 [project.scripts]
