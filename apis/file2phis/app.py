@@ -65,10 +65,7 @@ async def read_pdf(file: UploadFile = File(...),
     with open(path_file, "wb") as f:
         f.write(file.file.read())
     rez = processFile(path_file, process)
-    print(path_dir)
     shutil.rmtree(path_dir)
-    with open('rez.json', 'w') as f:
-        json.dump(rez, f)
     return rez
 
 class JsonTask(BaseModel):
