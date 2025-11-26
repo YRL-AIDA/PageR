@@ -37,11 +37,14 @@ def download_models():
         model_dir = os.path.join(bert_cache_dir, 'models--bert-base-multilingual-cased',
                                 'snapshots','3f076fdb1ab68d5b2880cb87a0886f315b8146f8')
         try:
-            tokenizer = BertTokenizer.from_pretrained(model_dir)
-            model = BertModel.from_pretrained(model_dir).to('cpu')
-        except:
             tokenizer = BertTokenizer.from_pretrained(model_name, cache_dir=bert_cache_dir)
             model = BertModel.from_pretrained(model_name, cache_dir=bert_cache_dir).to('cpu')
+        except:
+            tokenizer = BertTokenizer.from_pretrained(model_dir)
+            model = BertModel.from_pretrained(model_dir).to('cpu')
+            
+            
+            
 
 def get_cache_dir() -> Path:
     """Возвращает путь к кэш-директории"""
