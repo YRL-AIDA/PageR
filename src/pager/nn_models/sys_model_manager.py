@@ -32,16 +32,17 @@ def download_models():
     # Скачивание моделей в кэш 
     bert_cache_dir = cache_dir/'bert'
     if not bert_cache_dir.exists():
+        print("INSTALL BERT")
         from transformers import BertTokenizer, BertModel
         model_name = 'bert-base-multilingual-cased'
         model_dir = os.path.join(bert_cache_dir, 'models--bert-base-multilingual-cased',
                                 'snapshots','3f076fdb1ab68d5b2880cb87a0886f315b8146f8')
-        try:
-            tokenizer = BertTokenizer.from_pretrained(model_name, cache_dir=bert_cache_dir)
-            model = BertModel.from_pretrained(model_name, cache_dir=bert_cache_dir).to('cpu')
-        except:
-            tokenizer = BertTokenizer.from_pretrained(model_dir)
-            model = BertModel.from_pretrained(model_dir).to('cpu')
+        # try:
+        tokenizer = BertTokenizer.from_pretrained(model_name, cache_dir=bert_cache_dir)
+        model = BertModel.from_pretrained(model_name, cache_dir=bert_cache_dir).to('cpu')
+        # except:
+        #     tokenizer = BertTokenizer.from_pretrained(model_dir)
+        #     model = BertModel.from_pretrained(model_dir).to('cpu')
             
             
             

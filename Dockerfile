@@ -23,6 +23,7 @@ WORKDIR /app
 # Установка тяжелых библиотек
 RUN pip install --no-cache-dir torch torch-geometric torchmetrics[detection] \
                                torchvision tokenizers transformers 
+RUN pip install --no-cache-dir opencv-python scikit-learn matplotlib scipy
 ENV PYTHONUNBUFFERED=1
 
 # RUN huggingface-cli download google-bert/bert-base-multilingual-cased --local-dir models/bert
@@ -32,7 +33,7 @@ COPY src src
 COPY models models
 COPY pyproject.toml pyproject.toml
 RUN python3 -m pip install .
-COPY models/bert /.cache/pager/bert
+COPY models/bert /root/.cache/pager/bert
 RUN pager-install-models
 RUN mkdir tmp_dir
 # # Открытие порта и запуск приложения
