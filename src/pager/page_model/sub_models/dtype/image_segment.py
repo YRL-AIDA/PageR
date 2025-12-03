@@ -28,6 +28,14 @@ class ImageSegment(ABC):
             "y_top_left": self.y_top_left,
             "y_bottom_right": self.y_bottom_right
         }
+    
+    def get_segment_p_size(self):
+        return {
+            "x_top_left": self.x_top_left,
+            "y_top_left": self.y_top_left,
+            "height": self.height,
+            "width": self.width
+        }
 
     def get_height(self):
         return self.y_bottom_right-self.y_top_left
