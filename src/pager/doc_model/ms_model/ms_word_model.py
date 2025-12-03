@@ -1,13 +1,9 @@
-from ..base_sub_model import BaseSubModel, BaseExtractor, BaseConverter
-from typing import Dict, List
+from typing import Dict
 import docx
-from ..dtype import Block
-from docx.enum.style import WD_STYLE_TYPE
 
 
-class MSWordModel(BaseSubModel):
+class MSWordModel:
     def __init__(self) -> None:
-        super().__init__()
         self.doc: docx.Document
         
     def from_dict(self, input_model_dict: Dict):
@@ -74,24 +70,6 @@ class MSWordModel(BaseSubModel):
                 "italic": r.font.italic,
                 "underline": r.font.underline}
             }
-    
-    
-class PhisicalToMSWord(BaseConverter):
-    def convert(self, input_model: BaseSubModel, output_model: BaseSubModel)-> None:
-        blocks: List[Block] = input_model.blocks
-        output_model.doc = docx.Document()
-        styles = output_model.doc.styles
-        LABELS = {
-            "text": "Normal",
-            "header": "Heading 1",
-            "list": "List",
-            "table": "Normal",
-            # "figure": "Normal",
-        }
-        for block in blocks:
-            if block.label != "figure":
-                output_model.doc.add_paragraph(block.get_text()).style = styles[LABELS[block.label]]
-    
 
 
 

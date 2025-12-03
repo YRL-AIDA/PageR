@@ -1,9 +1,8 @@
 from pager import RegionModel, WordsModel, Words2Rows, RowsModel, PDFModel, PDF2Words, PDF2Rows, ImageFromPDF, Rows2Regions
 from pager import Words2OneRegion
-from pager import PrecisionPDFRegionsFromPhisExtractor
 from pager import PageModel, PageModelUnit
 from pager import ImageFromPDF
-
+from pager.doc_model import PrecisionPDFModel
 
 # Либо извлекать строки, либо извлекать сразу слова
 unit_pdf_w = PageModelUnit(id = "pdf",
@@ -66,24 +65,6 @@ pdf2one_region = PageModel([unit_pdf_w,
 
 # JSON --------------------------------------------------------------------------
 
-pdf2json_word = PageModel([
-    unit_pdf_w,
-    unit_words,
-    unit_rows_w,
-    unit_regions,
-    PageModelUnit("json", unit_pdf_w.sub_model, extractors=[PrecisionPDFRegionsFromPhisExtractor(unit_regions.sub_model)], converters={})
-])
-
-pdf2json_row = PageModel([
-    unit_pdf_r,
-    unit_rows_p,
-    unit_regions,
-    PageModelUnit("json", unit_pdf_r.sub_model, extractors=[PrecisionPDFRegionsFromPhisExtractor(unit_regions.sub_model)], converters={})
-])
-
-pdf2json_one = PageModel([
-    unit_pdf_w,
-    unit_words,
-    one_region_unit,
-    PageModelUnit("json", unit_pdf_w.sub_model, extractors=[PrecisionPDFRegionsFromPhisExtractor(one_region_unit.sub_model)], converters={})
-])
+pdf2json_word = PrecisionPDFModel({"method": "w", "page_model": pdf2region_word}) 
+pdf2json_row = PrecisionPDFModel({"method": "r", "page_model": pdf2region_row}) 
+pdf2json_one = PrecisionPDFModel({"method": "w", "page_model": pdf2one_region}) 

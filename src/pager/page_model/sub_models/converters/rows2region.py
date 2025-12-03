@@ -5,7 +5,15 @@ from ..dtype import ImageSegment
 from pager.nn_models.manager_models import ManagerModels
 from ..dtype import Graph
 from ..extractors import RegionSorterCutXYExtractor
+import numpy as np
 
+CLASSES = {
+    0: "text",
+    1: "header",
+    2: "list",
+    3: "table",
+    4: "figure"
+}
 
 class Rows2Regions(BaseConverter):
     def __init__(self):
@@ -29,12 +37,12 @@ class Rows2Regions(BaseConverter):
         
         graph = graph_dict_torch['inds']
         deleted_edges = result['deleted_edges']
-        
-        regions = self.regions_from_graph(rows_json, graph, deleted_edges)
+        node_classes = result['node_classes']
+        regions = self.regions_from_graph(rows_json, graph, deleted_edges, node_classes)
         return regions
     
 
-    def regions_from_graph(self, rows_json, graph, deleted_edges):
+    def regions_from_graph(self, rows_json, graph, deleted_edges, node_classes):
         graph_ = Graph()
         regions = []
         
@@ -49,7 +57,9 @@ class Rows2Regions(BaseConverter):
 
         for reg in graph_.get_related_graphs():
             indexes = [node.index-1 for node in reg.get_nodes()]
-            regions.append({'rows': [rows_json[i] for i in indexes]})
+            row_classes  = np.array([node_classes[i].detach().numpy() for i in indexes])
+            lable = CLASSES[np.argmax(row_classes.mean(axis=0))]
+            regions.append({'rows': [rows_json[i] for i in indexes], 'label': lable})
         return regions
 
 

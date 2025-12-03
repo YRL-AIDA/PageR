@@ -1,16 +1,11 @@
-from ..base_sub_model import BaseConverter
-from ..pdf_model import PrecisionPDFModel
-from ..ms_word_model import MSWordModel
-from ..words_model import WordsModel
-from ..dtype import Word
-from ..base_sub_model import BaseSubModel, BaseExtractor, BaseConverter
+from .precision_pdf_model import PrecisionPDFModel
+from .ms_model import MSWordModel
 from typing import Dict, List
 import docx
-from ..dtype import Block
 from docx.enum.style import WD_STYLE_TYPE
 
 
-class PrecisionPDFToMSWord(BaseConverter):
+class PrecisionPDFToMSWord:
     def convert(self, input_model: PrecisionPDFModel, output_model: MSWordModel)-> None:
         pages: List[Dict] = input_model.pdf_json["pages"]
         output_model.doc = docx.Document()

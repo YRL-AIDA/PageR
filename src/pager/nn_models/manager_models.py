@@ -14,7 +14,7 @@ class ManagerModels:
         elif name == "rowGLAM-model":
             # from .models.row_glam_20250811 import get_load_model
             # model = get_load_model(os.getenv("PATH_TORCH_ROW_GLAM"))
-            from .models.rows2region_glam_20251106 import get_load_model
+            from .models.rows2region_glam_20251203 import get_load_model
             model = get_load_model(get_model_path('rows2regions-GLAM'))
             return model
         elif name == "wordGLAM-tokenizer":

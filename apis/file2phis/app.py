@@ -10,14 +10,12 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from pydantic import BaseModel
 
-from pager import PageModel
+from pager.doc_model import PrecisionPDFModel
 from pager.page_model.sub_models import PDFModel, ImageModel
-
-from pager import PrecisionPDFModel
 
 from pager.pager_pipe_line import (
     pdf2json_word, pdf2json_row, pdf2json_one,
-    img2json_word, img2json_row, img2json_one,
+    img2json_word, img2json_one,
     json2docx
 )
 image_model = ImageModel()
@@ -82,7 +80,7 @@ async def convert_json_to_docx(task: JsonTask):
     os.mkdir(path_dir)
     name = "file.docx"
     path = os.path.join(path_dir, name)
-    json2docx.page_units[-1].sub_model.save_doc(path) 
+    json2docx.save_doc(path) 
     # отправка файла без удаления
     # return FileResponse(path=path, 
     #                     filename=task.name_save, media_type='multipart/form-data') 
@@ -98,36 +96,26 @@ def processPDF(path_file, process) -> dict:
     IS_GLAM_ROW = "glam_rows" in process and process["glam_rows"]
     IS_ONLY_TEXT = "only_text" in process and process["only_text"]
     IS_AS_IMAGES = "is_images" in process and process["is_images"]
-    IS_NEED_IMAGES = not IS_GLAM_ROW or not IS_ONLY_TEXT
     
 
     if IS_GLAM_ROW:
-        read_file = lambda file: pdf2json_row.read_from_file(file)
-        filejson: PageModel = pdf2json_row
+        filejson:PrecisionPDFModel = pdf2json_row
     elif IS_ONLY_TEXT:
-        read_file = lambda file: pdf2json_one.read_from_file(file)
-        filejson: PageModel = pdf2json_one
+        filejson:PrecisionPDFModel = pdf2json_one
     else:
-        read_file = lambda file: pdf2json_word.read_from_file(file)
-        filejson: PageModel = pdf2json_word
+        filejson:PrecisionPDFModel = pdf2json_word
 
-    read_file(path_file)
-    pdf_model: PDFModel = filejson.page_units[0].sub_model
-    if IS_NEED_IMAGES:
-        name_imgs_dir = save_images_from_pdf(pdf_model.pdf_parser, path_file)
+    filejson.read_from_file(path_file)
     if IS_AS_IMAGES:
-        rez = pdf_model.pdf_parser.pdf_json
-    print(pdf_model.pdf_parser.count_page)
-    for i in range(pdf_model.pdf_parser.count_page):
-        if IS_AS_IMAGES:
+        name_imgs_dir = save_images_from_pdf(filejson, path_file)
+        rez = {"pages": []}
+        for i in range(filejson.count_page):
             page = processImg(os.path.join(name_imgs_dir, f"page_{i}.png"), process)['pages'][0]
-            rez['pages'][i] = page 
-        else:
-            pdf_model.pdf_parser.num_page = i
-            if IS_NEED_IMAGES:
-                image_model.read_from_file(os.path.join(name_imgs_dir, f"page_{i}.png"))
-            filejson.extract()
-    if not IS_AS_IMAGES:
+            page['number'] = i
+            rez['pages'].append(page.copy())
+    else:
+        print("START")
+        filejson.extract()
         rez = filejson.to_dict()
     return rez
 
@@ -149,7 +137,6 @@ def processPdfImgs(path_file, process) -> dict:
 def processImg(path_file, process) -> dict:
     filejson = img2json_one if "only_text" in process and process["only_text"] else img2json_word
     filejson.read_from_file(path_file)
-    filejson.page_units[1].sub_model.num_page = 0
     filejson.extract()
     return filejson.to_dict()
 

@@ -1,4 +1,3 @@
-from ..base_sub_model import BaseSubModel
 from typing import Dict
 import subprocess
 import json
@@ -6,30 +5,32 @@ import os
 from pdf2image import convert_from_path
 from pager.nn_models.sys_model_manager import get_model_path
 from .exaption_pdf import MethodConflict, NotMethodParsing
+from pager.page_model import PageModel
 
-NULL_PAGE = {
-    "number": -1,
-    "tables": [],
-    "images": [],
-    "width": None,
-    "height": None,
-    "words": []
-}
-
-class PrecisionPDFModel(BaseSubModel):
+class PrecisionPDFModel():
     def __init__(self, conf=None) -> None:
-        super().__init__()
         self.pdf_json: Dict
         self.count_page: int|None 
-        # self.num_page: int = 0
         self.method = conf["method"] if conf and "method" in conf.keys() else None
+        self.page_model: PageModel = conf["page_model"]
 
     def from_dict(self, input_model_dict: Dict):
-        self.pdf_json = input_model_dict
+        self.pdf_json = input_model_dict.copy()
+        self.count_page = len(self.pdf_json['pages']) if "pages" in self.pdf_json.keys() else 0
 
     def to_dict(self) -> Dict:
-        return self.pdf_json
+        return self.pdf_json 
     
+    def extract(self) -> None:
+        for i in range(self.count_page):
+            page_json = self.pdf_json["pages"][i]
+            self.page_model.from_dict(page_json)
+            self.page_model.extract()
+            dict_page = self.page_model.to_dict()
+            # TODO: удалить исходные строки и слова.
+            for key in dict_page.keys():
+                self.pdf_json["pages"][i][key] = dict_page[key]
+
 
     def read_from_file(self, path_file: str, method: str| None = None) -> None:
         if method and self.method:
@@ -49,7 +50,6 @@ class PrecisionPDFModel(BaseSubModel):
     def clean_model(self)-> None:
         self.pdf_json = {}
         self.count_page = None
-        # self.num_page = 0
     
     def __read(self, path, method):
         jar_path = get_model_path("precisionPDF.jar")
