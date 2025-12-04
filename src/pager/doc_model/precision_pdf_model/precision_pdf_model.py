@@ -32,12 +32,12 @@ class PrecisionPDFModel():
                 self.pdf_json["pages"][i][key] = dict_page[key]
 
 
-    def read_from_file(self, path_file: str, method: str| None = None) -> None:
-        if method and self.method:
+    def read_from_file(self, path_file: str, method: str = "") -> None:
+        if method != "" and self.method:
             if method != self.method:
                 raise MethodConflict(self.method, method)
 
-        if not method:
+        if method == "":
             if not self.method:
                 raise NotMethodParsing()
             else:
