@@ -14,9 +14,7 @@ def download_model():
     except:
         tokenizer = BertTokenizer.from_pretrained(model_name, cache_dir=cache_dir)
         model = BertModel.from_pretrained(model_name, cache_dir=cache_dir).to('cpu')
-    inputs = tokenizer(['test', 'BERT'], return_tensors="pt", padding=True).to('cpu')
-    outputs = model(**inputs)
-    print(outputs)
+    print(model)
 
 if __name__ == "__main__":
     download_model()

@@ -4,7 +4,7 @@ from ..words_model import WordsModel
 from ..image_model import ImageModel
 from .pdf2words import PDF2Words
 from .pdf2img import PDF2Img
-from .model_scripts.model_20250121 import classifier_image_word
+# from .model_scripts.model_20250121 import classifier_image_word
 from ..dtype import Style
 from typing import List
 

@@ -93,6 +93,8 @@ class RegionSorterCutXYExtractor(BaseExtractor):
             RegionSorterCutXYExtractor._get_childs_y(bboxes, proec_y, min_coor, max_coor, edge=edge)
         else:
             grups = [Edge(number=bbox.id) for bbox in bboxes]
+            for item in grups:
+                edge.childs.append(item)
             # print(grups, "Если не произошло разделения")
             return grups
 

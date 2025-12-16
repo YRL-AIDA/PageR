@@ -3,22 +3,15 @@ from ..dtype import Word, Style
 from ..exceptions import ConteinImage
 from ..words_and_styles_model import WordsAndStylesModel
 from ..words_model import WordsModel
-from .model_scripts.model_20250121 import classifier_image_word, get_model
-from .model_scripts.model_20250424 import classifier_image_word as classifier_image_word_new, get_model as get_model_new
 import cv2
 from typing import List 
 import numpy as np
+from pager.nn_models.manager_models import ManagerModels
 
 class ImageAndWords2WordsAndStyles(BaseConverter):
     def __init__(self, conf=None):
-        if '20250121' in conf['path_model']: 
-            self.model = get_model(conf["path_model"])
-            self.classifier_image_word = lambda word_img:classifier_image_word(self.model, word_img).detach().numpy().tolist()
-        elif '20250424' in conf['path_model']:
-            self.model = get_model_new(conf["path_model"])
-            self.classifier_image_word = lambda word_img:classifier_image_word_new(self.model, word_img).detach().numpy().tolist()
-        else:
-            print ("ERROR MODEL")
+        manager_models = ManagerModels()
+        self.model, self.classifier_image_word = manager_models.get_model('style-model-20250121')
         
 
     def convert(self, input_model:WordsModel, output_model:WordsAndStylesModel):

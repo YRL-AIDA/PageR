@@ -1,7 +1,7 @@
 from ..base_sub_model import BaseConverter
 from ..pdf_model import PDFModel
 from ..words_model import WordsModel
-from ..dtype import Word
+from ..dtype import Word, ImageSegment
 
 class PDF2Words(BaseConverter):
     def convert(self, input_model: PDFModel, output_model: WordsModel):
@@ -24,7 +24,6 @@ class PDF2Words(BaseConverter):
             #             "content": word["text"],
             #             "segment": word,
             #             "type_align": None}))
-            word["segment"] = word 
             words.append(Word(word))
         return words
 

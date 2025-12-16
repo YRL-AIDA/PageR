@@ -51,8 +51,8 @@ PATH_TORCH_GLAM_EDGE_MODEL = get_path(path, f'path PATH_TORCH_GLAM_EDGE_MODEL (d
 path = os.path.join(model_dir,  'glam_model_20250415')
 PATH_TORCH_GLAM_MODEL = get_path(path, f'path PATH_TORCH_GLAM_MODEL (default: {path})')
 
-path = os.path.join(model_dir,  'row_glam_20250811')
-PATH_TORCH_ROW_GLAM = get_path(path, f'path PATH_TORCH_ROW_GLAM (default: {path})')
+path = os.path.join(model_dir,  'Rows2Region', 'row2region_GLAM_20251106')
+PATH_TORCH_ROWS2REGION_GLAM = get_path(path, f'path PATH_TORCH_ROWS2REGION_GLAM (default: {path})')
 
 path = os.path.join(model_dir, 'Words2Rows', 'words2rows_glam_20251023')
 PATH_TORCH_WORDS2ROWS_GLAM = get_path(path, f'path PATH_TORCH_WORDS2ROWS_GLAM (default: {path})')
@@ -73,7 +73,7 @@ config = {
         'PATH_TORCH_GLAM_EDGE_MODEL': PATH_TORCH_GLAM_EDGE_MODEL,
         'PATH_TORCH_GLAM_MODEL': PATH_TORCH_GLAM_MODEL,
         'PATH_TORCH_GLAM_CONF_MODEL': PATH_TORCH_GLAM_CONF_MODEL,
-        'PATH_TORCH_ROW_GLAM': PATH_TORCH_ROW_GLAM,
+        'PATH_TORCH_ROWS2REGION_GLAM': PATH_TORCH_ROWS2REGION_GLAM,
         'PATH_TORCH_WORDS2ROWS_GLAM':PATH_TORCH_WORDS2ROWS_GLAM,
         'DEVICE': 'cpu'
 }

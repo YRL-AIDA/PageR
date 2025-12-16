@@ -13,7 +13,10 @@ class Word:
         self.size: int|None = None
 
 
-        self.set_segment(dict_word)
+        if  "width" in dict_word.keys() or "x_bottom_right" in dict_word.keys():
+            self.set_segment(dict_word)
+        elif "segment" in dict_word.keys():
+            self.set_segment(dict_word["segment"])
         if "text" in dict_word:
             self.set_text(dict_word["text"])
         if "content" in dict_word:
