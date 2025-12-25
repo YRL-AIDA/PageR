@@ -7,7 +7,7 @@ NULL_PAGE = {
     "images": [],
     "width": None,
     "height": None,
-    "words": []
+    "rows": []
 }
 
 class PDFModel(BaseSubModel):

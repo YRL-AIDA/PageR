@@ -3,7 +3,8 @@ import shutil
 import os
 
 models = {
-    "precisionPDF.jar": Path("models/PDF2Block/precisionPDF.jar"),
+    # "precisionPDF.jar": Path("models/PDF2Block/precisionPDF.jar"),
+    "precisionPDF.jar": Path("models/PDF2Block/precision_pdf_pager.jar"),
     "rows2regions-GLAM": Path("models/Rows2Regions/row2region_GLAM_20251203"),
     "words2rows-GLAM": Path("models/Words2Rows/words2rows_glam_20251113"),
     "style_classmodel": Path("models/Words2Rows/style_classmodel_20250121"),

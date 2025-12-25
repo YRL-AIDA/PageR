@@ -11,7 +11,6 @@ class PrecisionPDFModel():
     def __init__(self, conf=None) -> None:
         self.pdf_json: Dict
         self.count_page: int|None 
-        self.method = conf["method"] if conf and "method" in conf.keys() else None
         self.page_model: PageModel = conf["page_model"]
 
     def from_dict(self, input_model_dict: Dict):
@@ -32,39 +31,24 @@ class PrecisionPDFModel():
                 self.pdf_json["pages"][i][key] = dict_page[key]
 
 
-    def read_from_file(self, path_file: str, method: str| None = None) -> None:
-        if method and self.method:
-            if method != self.method:
-                raise MethodConflict(self.method, method)
-
-        if not method:
-            if not self.method:
-                raise NotMethodParsing()
-            else:
-                method = self.method
-        
+    def read_from_file(self, path_file: str) -> None:
         self.path = path_file
-        self.pdf_json = self.__read(path_file, method)
+        self.pdf_json = self.__read(path_file)
         self.count_page = len(self.pdf_json['pages']) if "pages" in self.pdf_json.keys() else 0
 
     def clean_model(self)-> None:
         self.pdf_json = {}
         self.count_page = None
     
-    def __read(self, path, method):
+    def __read(self, path):
         jar_path = get_model_path("precisionPDF.jar")
         comands =["java", "-jar", jar_path, "-i", path]
-        if method == "w":
-            comands.append("-w")
-        elif method != "r":
-            raise ValueError('Methon "r" - rows or  "w" - words')
-
         
         res = subprocess.run(comands, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if res.stderr:
             print(res.stderr.decode("utf-8"))
         try:
-            str_ = res.stdout.decode("utf-8")
+            str_ = res.stdout.decode("utf-8", errors="replace")
             json_ = json.loads(str_)
             return json_
         except json.JSONDecodeError as e:

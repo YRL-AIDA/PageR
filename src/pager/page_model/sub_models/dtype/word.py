@@ -21,7 +21,8 @@ class Word:
             self.set_text(dict_word["text"])
         if "content" in dict_word:
             self.set_text(dict_word["content"])
-        self.set_style(dict_word)
+        if "font" in dict_word:
+            self.set_style(dict_word["font"])
 
     @property
     def content(self) -> str:

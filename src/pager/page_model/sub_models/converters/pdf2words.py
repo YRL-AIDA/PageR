@@ -6,7 +6,7 @@ from ..dtype import Word, ImageSegment
 class PDF2Words(BaseConverter):
     def convert(self, input_model: PDFModel, output_model: WordsModel):
         page_json = input_model.to_dict()
-        word_list = self.get_words(page_json['words'])
+        word_list = self.get_words([word  for row in page_json['rows'] for word in row['words']])
         output_model.words = word_list
 
     def get_words(self, words_json):

@@ -65,6 +65,6 @@ pdf2one_region = PageModel([unit_pdf_w,
 
 # JSON --------------------------------------------------------------------------
 
-pdf2json_word = PrecisionPDFModel({"method": "w", "page_model": pdf2region_word}) 
-pdf2json_row = PrecisionPDFModel({"method": "r", "page_model": pdf2region_row}) 
-pdf2json_one = PrecisionPDFModel({"method": "w", "page_model": pdf2one_region}) 
+pdf2json_word = PrecisionPDFModel({"page_model": pdf2region_word}) 
+pdf2json_row = PrecisionPDFModel({ "page_model": pdf2region_row}) 
+pdf2json_one = PrecisionPDFModel({ "page_model": pdf2one_region}) 
