@@ -31,6 +31,7 @@ class PrecisionPDFModel():
                 self.pdf_json["pages"][i][key] = dict_page[key]
 
 
+
     def read_from_file(self, path_file: str) -> None:
         self.path = path_file
         self.pdf_json = self.__read(path_file)
