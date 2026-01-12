@@ -31,7 +31,12 @@ class Image2Words(BaseConverter):
     def extract_from_img(self, img):
         conf = self.conf
         dim = (conf["k"]*img.shape[1], conf["k"]*img.shape[0])
-        img_ = cv2.resize(img, dim, interpolation = cv2.INTER_AREA)
+        if conf["k"] == 1:
+            img_ = img
+        elif conf["k"] < 1:
+            img_ = cv2.resize(img, dim, interpolation = cv2.INTER_AREA)
+        else:
+            img_ = cv2.resize(img, dim, interpolation = cv2.INTER_NEAREST)
         tesseract_bboxes = pytesseract.image_to_data(
             config=f"-l {conf['lang']} --psm {conf['psm']} --oem {conf['oem']}",
             image=img_,

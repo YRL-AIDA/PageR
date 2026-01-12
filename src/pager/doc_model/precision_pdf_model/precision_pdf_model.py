@@ -12,6 +12,10 @@ class PrecisionPDFModel():
         self.pdf_json: Dict
         self.count_page: int|None 
         self.page_model: PageModel = conf["page_model"]
+        if "jar_path" in conf.keys():
+            self.jar_path = conf["jar_path"]
+        else:
+            self.jar_path = get_model_path("precisionPDF.jar")
 
     def from_dict(self, input_model_dict: Dict):
         self.pdf_json = input_model_dict.copy()
@@ -42,8 +46,8 @@ class PrecisionPDFModel():
         self.count_page = None
     
     def __read(self, path):
-        jar_path = get_model_path("precisionPDF.jar")
-        comands =["java", "-jar", jar_path, "-i", path]
+        
+        comands =["java", "-jar", self.jar_path, "-i", path]
         
         res = subprocess.run(comands, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if res.stderr:
