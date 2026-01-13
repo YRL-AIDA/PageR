@@ -27,7 +27,8 @@ dependencies = [
   'python-dotenv',
   'fastapi',
   'uvicorn',
-  'python-multipart'
+  'python-multipart',
+  'pdfminer.six==20251107'
 ]
 
 version = '0.0.3' 

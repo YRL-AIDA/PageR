@@ -2,7 +2,7 @@ from pager import RegionModel, WordsModel, Words2Rows, RowsModel, PDFModel, PDF2
 from pager import Words2OneRegion
 from pager import PageModel, PageModelUnit
 from pager import ImageFromPDF
-from pager.doc_model import PrecisionPDFModel
+from pager.doc_model import PrecisionPDFModel, MinerPDFModel
 
 # Либо извлекать строки, либо извлекать сразу слова
 unit_pdf_w = PageModelUnit(id = "pdf",
@@ -65,6 +65,10 @@ pdf2one_region = PageModel([unit_pdf_w,
 
 # JSON --------------------------------------------------------------------------
 
-pdf2json_word = PrecisionPDFModel({"page_model": pdf2region_word}) 
-pdf2json_row = PrecisionPDFModel({ "page_model": pdf2region_row}) 
-pdf2json_one = PrecisionPDFModel({ "page_model": pdf2one_region}) 
+# pdf2json_word = PrecisionPDFModel({"page_model": pdf2region_word}) 
+# pdf2json_row = PrecisionPDFModel({ "page_model": pdf2region_row}) 
+# pdf2json_one = PrecisionPDFModel({ "page_model": pdf2one_region}) 
+
+pdf2json_word = MinerPDFModel({"page_model": pdf2region_word}) 
+pdf2json_row =  MinerPDFModel({ "page_model": pdf2region_row}) 
+pdf2json_one =  MinerPDFModel({ "page_model": pdf2one_region}) 
