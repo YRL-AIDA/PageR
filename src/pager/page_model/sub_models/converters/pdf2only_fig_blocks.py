@@ -9,7 +9,7 @@ class PDF2OnlyFigBlocks(BaseConverter):
         for image in images:
             # TODO: сделать FigBlock
             # TODO: маленькие блоки возможно важные элементы!!!
-            if image['height'] < 1 or image['width'] < 1:
+            if image['segment']['height'] < 1 or image['segment']['width'] < 1:
                 continue
             reg = Region(image)
             reg.set_label('figure')
