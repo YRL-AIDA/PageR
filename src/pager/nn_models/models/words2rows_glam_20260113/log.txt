@@ -1,0 +1,66 @@
+2026-01-13 20:12:27.161819
+DATASET INFO:
+count row: 1000
+first: dict_keys(['N', 'X', 'Y', 'inds', 'true_edges', 'sp_A'])
+	 A:torch.Size([625, 625])
+	 nodes_feature:torch.Size([625, 15])
+	 edges_feature:torch.Size([884, 4])
+	 true_edges:torch.Size([884])
+end:dict_keys(['N', 'X', 'Y', 'inds', 'true_edges', 'sp_A'])
+	 A:torch.Size([155, 155])
+	 nodes_feature:torch.Size([155, 15])
+	 edges_feature:torch.Size([243, 4])
+	 true_edges:torch.Size([243])
+
+node_featch:	15
+edge_featch:	4
+epochs:	20
+batch_size:	50
+learning_rate:	0.05
+Tag:	[{'in': -1, 'size': 64, 'out': 64, 'k': 3}, {'in': 64, 'size': 32, 'out': 32, 'k': 2}, {'in': 32, 'size': 16, 'out': 16, 'k': 1}]
+NodeLinear:	[-1, 32, 16]
+EdgeLinear:	[32, 16, 8]
+batchNormNode:	True
+batchNormEdge:	True
+seg_k:	0.5
+loss_params:	{'edge_imbalance': 0.67, 'edge_coef': 1}
+sigmoidEdge:	False
+EPOCH #0	 0.36739724 (VAL: 0.16793955)
+EPOCH #1	 0.11807369 (VAL: 0.08062152)
+EPOCH #2	 0.07233083 (VAL: 0.05715701)
+EPOCH #3	 0.05541464 (VAL: 0.04874604)
+EPOCH #4	 0.04893599 (VAL: 0.04306602)
+EPOCH #5	 0.04924922 (VAL: 0.04409448)
+EPOCH #6	 0.04370271 (VAL: 0.04044286)
+EPOCH #7	 0.04121134 (VAL: 0.03787594)
+EPOCH #8	 0.03922278 (VAL: 0.03613522)
+EPOCH #9	 0.03704313 (VAL: 0.03446949)
+EPOCH #10	 0.03420440 (VAL: 0.03298845)
+EPOCH #11	 0.03270014 (VAL: 0.03285023)
+EPOCH #12	 0.03026673 (VAL: 0.03155484)
+EPOCH #13	 0.02870249 (VAL: 0.03073231)
+EPOCH #14	 0.02785818 (VAL: 0.02932988)
+EPOCH #15	 0.02674394 (VAL: 0.02976007)
+EPOCH #16	 0.02756802 (VAL: 0.02978178)
+EPOCH #17	 0.02817946 (VAL: 0.02894463)
+EPOCH #18	 0.02695342 (VAL: 0.02872628)
+EPOCH #19	 0.02552909 (VAL: 0.02896764)
+Время обучения: 79.53 сек
+COUNT_TEST_SIZE: 200
+==================================================
+threshold_05--------------------
+precision_row       :0.3630
+recall_row          :0.3861
+f1_row              :0.3742
+precision_word      :0.3535
+recall_word         :0.3753
+f1_word             :0.3641
+threshold_95--------------------
+precision_row       :0.2499
+recall_row          :0.2679
+f1_row              :0.2586
+precision_word      :0.2401
+recall_word         :0.2544
+f1_word             :0.2470
+
+mAP@IoU[0.50:0.95]   :0.19669941

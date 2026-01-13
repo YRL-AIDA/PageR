@@ -22,10 +22,14 @@ class ManagerModels:
             model = get_load_model(get_model_path('rows2regions-GLAM'))
             return model
         elif name == "wordGLAM-tokenizer":
-            from .models.wordGLAM_tokenizer_20251023 import WordGLAMTokenizer
+            # from .models.wordGLAM_tokenizer_20251023 import WordGLAMTokenizer
+            # return WordGLAMTokenizer()
+            from .models.wordGLAM_tokenizer_20260113 import WordGLAMTokenizer
             return WordGLAMTokenizer()
         elif name == "words2rowsGLAM-model":
-            from .models.words2rows_glam_20251023 import get_load_model
+            # from .models.words2rows_glam_20251023 import get_load_model
+            # model = get_load_model(get_model_path('words2rows-GLAM'))
+            from .models.words2rows_glam_20260113 import get_load_model
             model = get_load_model(get_model_path('words2rows-GLAM'))
             return model
         

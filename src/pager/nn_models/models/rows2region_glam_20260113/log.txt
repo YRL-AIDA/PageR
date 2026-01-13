@@ -120,18 +120,18 @@ mAP@IoU[0.50:0.95]   :0.76951629
 COUNT_TEST_SIZE: 200
 ==================================================
 threshold_05--------------------
-precision_row       :0.8486
-recall_row          :0.8305
-f1_row              :0.8394
-precision_word      :0.8535
-recall_word         :0.8346
-f1_word             :0.8439
+precision_row       :0.8576
+recall_row          :0.8371
+f1_row              :0.8472
+precision_word      :0.8289
+recall_word         :0.8101
+f1_word             :0.8194
 threshold_95--------------------
-precision_row       :0.6974
-recall_row          :0.6853
-f1_row              :0.6913
-precision_word      :0.7002
-recall_word         :0.6885
-f1_word             :0.6943
+precision_row       :0.7085
+recall_row          :0.6934
+f1_row              :0.7009
+precision_word      :0.6782
+recall_word         :0.6659
+f1_word             :0.6720
 
-mAP@IoU[0.50:0.95]   :0.69252449
+mAP@IoU[0.50:0.95]   :0.69148463
