@@ -7,14 +7,9 @@ from ..dtype import Graph
 from ..extractors import RegionSorterCutXYExtractor
 import numpy as np
 
-CLASSES = {
-    0: "text",
-    1: "header",
-    2: "list",
-    3: "table",
-    4: "figure"
-}
 
+
+CLASSES = {1: 'text', 2: 'header', 3: 'text', 4: 'table', 5: 'figure', 0: 'other'}
 class Rows2Regions(BaseConverter):
     def __init__(self):
         manager_model = ManagerModels()
@@ -33,7 +28,7 @@ class Rows2Regions(BaseConverter):
     def get_region(self, rows_json):
         graph_dict_torch = self.rows2regionsGLAM_tokenizer(rows_json)
         result = self.rows2regionsGLAM(graph_dict_torch)
-        result['deleted_edges'] = result['E_pred'] > 0.5
+        result['deleted_edges'] = result['E_pred'] < 0.5
         
         graph = graph_dict_torch['inds']
         deleted_edges = result['deleted_edges']
@@ -61,6 +56,61 @@ class Rows2Regions(BaseConverter):
             lable = CLASSES[np.argmax(row_classes.mean(axis=0))]
             regions.append({'rows': [rows_json[i] for i in indexes], 'label': lable})
         return regions
+    
+# Конвертер до 2026.01.13 --------------------------------------------------------------
+# CLASSES = {
+#     0: "text",
+#     1: "header",
+#     2: "list",
+#     3: "table",
+#     4: "figure"
+# }
+# class Rows2Regions(BaseConverter):
+#     def __init__(self):
+#         manager_model = ManagerModels()
+#         self.rows2regionsGLAM_tokenizer = manager_model.get_model("rowGLAM-tokenizer")
+#         self.rows2regionsGLAM = manager_model.get_model("rowGLAM-model")
+
+#     def convert(self, input_model: RowsModel, output_model: RegionModel):
+#         page_json = input_model.to_dict()
+#         region_list = self.get_region(page_json['rows'])
+#         output_model.from_dict({"regions": region_list})
+
+#         # сортировка после создания региона
+#         sorter = RegionSorterCutXYExtractor()
+#         sorter.extract(output_model)
+
+#     def get_region(self, rows_json):
+#         graph_dict_torch = self.rows2regionsGLAM_tokenizer(rows_json)
+#         result = self.rows2regionsGLAM(graph_dict_torch)
+#         result['deleted_edges'] = result['E_pred'] > 0.5
+        
+#         graph = graph_dict_torch['inds']
+#         deleted_edges = result['deleted_edges']
+#         node_classes = result['node_classes']
+#         regions = self.regions_from_graph(rows_json, graph, deleted_edges, node_classes)
+#         return regions
+    
+
+#     def regions_from_graph(self, rows_json, graph, deleted_edges, node_classes):
+#         graph_ = Graph()
+#         regions = []
+        
+#         for row_json in rows_json:
+#             segment = ImageSegment(dict_2p=row_json['segment'])
+#             xc, yc = segment.get_center()
+#             graph_.add_node(xc, yc)
+
+#         for node_i, node_j, ind in zip(graph[0], graph[1], deleted_edges):
+#             if not ind:
+#                 graph_.add_edge(node_i+1, node_j+1)
+
+#         for reg in graph_.get_related_graphs():
+#             indexes = [node.index-1 for node in reg.get_nodes()]
+#             row_classes  = np.array([node_classes[i].detach().numpy() for i in indexes])
+#             lable = CLASSES[int(np.argmax(row_classes.mean(axis=0)))]
+#             regions.append({'rows': [rows_json[i] for i in indexes], 'label': lable})
+#         return regions
 
 
 

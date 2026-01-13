@@ -1,0 +1,137 @@
+2026-01-13 15:44:19.548151
+DATASET INFO:
+count row: 9978
+first: dict_keys(['N', 'X', 'Y', 'inds', 'true_edges', 'true_nodes', 'sp_A', 'file_name'])
+	 A:torch.Size([104, 104])
+	 nodes_feature:torch.Size([104, 15])
+	 edges_feature:torch.Size([151, 4])
+	 true_edges:torch.Size([151])
+end:dict_keys(['N', 'X', 'Y', 'inds', 'true_edges', 'true_nodes', 'sp_A', 'file_name'])
+	 A:torch.Size([107, 107])
+	 nodes_feature:torch.Size([107, 15])
+	 edges_feature:torch.Size([108, 4])
+	 true_edges:torch.Size([108])
+
+node_featch:	15
+edge_featch:	4
+epochs:	40
+batch_size:	50
+learning_rate:	0.001
+Tag:	[{'in': -1, 'size': 512, 'out': 256, 'k': 3}, {'in': 256, 'size': 128, 'out': 64, 'k': 3}, {'in': 64, 'size': 32, 'out': 16, 'k': 3}]
+NodeLinear:	[-1, 32, 16]
+NodeLinearClassifier:	[-1, 8]
+EdgeLinear:	[-1, 64, 8]
+batchNormNode:	True
+batchNormEdge:	True
+seg_k:	0.5
+loss_params:	{'edge_coef': 0.2, 'node_coef': 0.8, 'publaynet_imbalance': [0.07476900517940521, 0.0069934953935444355, 0.44328898191452026, 0.27928033471107483, 0.016054969280958176, 0.17961323261260986], 'edge_imbalance': 0.3711082935333252}
+sigmoidEdge:	False
+NodeClasses:	6
+name_classes:	{1: 'text', 2: 'title', 3: 'list', 4: 'table', 5: 'figure', 0: 'out'}
+EPOCH #0	 0.10383256 (VAL: 0.08089799)
+EPOCH #1	 0.07448242 (VAL: 0.06895060)
+EPOCH #2	 0.06632331 (VAL: 0.06306909)
+EPOCH #3	 0.06255257 (VAL: 0.06137686)
+EPOCH #4	 0.06052930 (VAL: 0.05943961)
+EPOCH #5	 0.05907206 (VAL: 0.05845587)
+EPOCH #6	 0.05788389 (VAL: 0.05783667)
+EPOCH #7	 0.05709059 (VAL: 0.05700059)
+EPOCH #8	 0.05609215 (VAL: 0.05719291)
+EPOCH #9	 0.05556488 (VAL: 0.05675746)
+EPOCH #10	 0.05477975 (VAL: 0.05605393)
+EPOCH #11	 0.05416442 (VAL: 0.05597898)
+EPOCH #12	 0.05355351 (VAL: 0.05537204)
+EPOCH #13	 0.05315374 (VAL: 0.05545874)
+EPOCH #14	 0.05262484 (VAL: 0.05471853)
+EPOCH #15	 0.05215158 (VAL: 0.05526142)
+EPOCH #16	 0.05172040 (VAL: 0.05490059)
+EPOCH #17	 0.05136041 (VAL: 0.05570000)
+EPOCH #18	 0.05109715 (VAL: 0.05483523)
+EPOCH #19	 0.05092009 (VAL: 0.05550734)
+EPOCH #20	 0.05042937 (VAL: 0.05471426)
+EPOCH #21	 0.05016727 (VAL: 0.05536717)
+EPOCH #22	 0.04982423 (VAL: 0.05511228)
+EPOCH #23	 0.04955247 (VAL: 0.05531428)
+EPOCH #24	 0.04938132 (VAL: 0.05529314)
+EPOCH #25	 0.04920127 (VAL: 0.05514497)
+EPOCH #26	 0.04924049 (VAL: 0.05515523)
+EPOCH #27	 0.04875792 (VAL: 0.05487354)
+EPOCH #28	 0.04835105 (VAL: 0.05508442)
+EPOCH #29	 0.04813809 (VAL: 0.05456158)
+EPOCH #30	 0.04782553 (VAL: 0.05504634)
+EPOCH #31	 0.04782051 (VAL: 0.05467658)
+EPOCH #32	 0.04753118 (VAL: 0.05492262)
+COUNT_TEST_SIZE: 20
+COUNT_TEST_SIZE: 20
+COUNT_TEST_SIZE: 20
+COUNT_TEST_SIZE: 20
+================================================== (30 epochs)
+threshold_05--------------------
+precision_row       :0.8584
+recall_row          :0.7315
+f1_row              :0.7899
+precision_word      :0.8695
+recall_word         :0.7410
+f1_word             :0.8001
+threshold_95--------------------
+precision_row       :0.6425
+recall_row          :0.5826
+f1_row              :0.6111
+precision_word      :0.6295
+recall_word         :0.5714
+f1_word             :0.5991
+
+mAP@IoU[0.50:0.95]   :0.69868994
+R E S T A R T 
+2026-01-13 16:34:31.152561
+R E S T A R T 
+2026-01-13 16:36:43.816050
+R E S T A R T 
+2026-01-13 16:37:24.342963
+EPOCH #30	 0.04906014 (VAL: 0.04997996)
+EPOCH #31	 0.04815338 (VAL: 0.04952419)
+EPOCH #32	 0.04761345 (VAL: 0.04924171)
+EPOCH #33	 0.04719579 (VAL: 0.04944336)
+EPOCH #34	 0.04708522 (VAL: 0.04958320)
+EPOCH #35	 0.04699421 (VAL: 0.05002768)
+EPOCH #36	 0.04742952 (VAL: 0.04999500)
+EPOCH #37	 0.04743586 (VAL: 0.05018258)
+EPOCH #38	 0.04674140 (VAL: 0.05001526)
+EPOCH #39	 0.04624573 (VAL: 0.05011400)
+Время обучения: 478.08 сек
+COUNT_TEST_SIZE: 20
+================================================== (40 epoch)
+threshold_05--------------------
+precision_row       :0.8632
+recall_row          :0.7633
+f1_row              :0.8102
+precision_word      :0.8799
+recall_word         :0.7728
+f1_word             :0.8229
+threshold_95--------------------
+precision_row       :0.6127
+recall_row          :0.5587
+f1_row              :0.5844
+precision_word      :0.6053
+recall_word         :0.5526
+f1_word             :0.5777
+
+mAP@IoU[0.50:0.95]   :0.76951629
+COUNT_TEST_SIZE: 200
+==================================================
+threshold_05--------------------
+precision_row       :0.8486
+recall_row          :0.8305
+f1_row              :0.8394
+precision_word      :0.8535
+recall_word         :0.8346
+f1_word             :0.8439
+threshold_95--------------------
+precision_row       :0.6974
+recall_row          :0.6853
+f1_row              :0.6913
+precision_word      :0.7002
+recall_word         :0.6885
+f1_word             :0.6943
+
+mAP@IoU[0.50:0.95]   :0.69252449

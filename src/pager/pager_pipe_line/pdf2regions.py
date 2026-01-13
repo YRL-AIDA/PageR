@@ -3,6 +3,7 @@ from pager import Words2OneRegion
 from pager import PageModel, PageModelUnit
 from pager import ImageFromPDF
 from pager.doc_model import PrecisionPDFModel, MinerPDFModel
+from pager import MergeExtractor
 
 # Либо извлекать строки, либо извлекать сразу слова
 unit_pdf_w = PageModelUnit(id = "pdf",
@@ -33,12 +34,12 @@ unit_rows_w = PageModelUnit(id = "rows",
 
 unit_regions = PageModelUnit(id = "regions",
                              sub_model=RegionModel(),
-                             extractors=[],
+                             extractors=[MergeExtractor()],
                              converters={"rows": Rows2Regions()})
 
 one_region_unit = PageModelUnit(id = "regions",
                                 sub_model=RegionModel(),
-                                extractors=[],
+                                extractors=[MergeExtractor()],
                                 converters={"words": Words2OneRegion()})
 
 
