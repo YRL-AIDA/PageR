@@ -2,6 +2,7 @@ from pager import RegionModel, WordsModel, Words2Rows, Image2Rows, RowsModel, Im
 from pager import Words2OneRegion
 from pager import PageModel, PageModelUnit
 from pager.doc_model import ImageAsPrecisionPDFModel
+from pager import MergeExtractor
 
 img_unit = PageModelUnit(id = "img",
                         sub_model=ImageModel(),
@@ -25,7 +26,7 @@ row_unit_i = PageModelUnit(id = "rows",
 
 regions_unit = PageModelUnit(id = "regions",
                         sub_model=RegionModel(),
-                        extractors=[],
+                        extractors=[MergeExtractor()],
                         converters={"rows": Rows2Regions()})
 
 one_region_unit = PageModelUnit(id = "regions",
