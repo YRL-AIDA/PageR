@@ -1,6 +1,109 @@
 from pager.page_model.sub_models.dtype import ImageSegment 
 import re
+from pager.page_model.sub_models.utils.segment_clusterizer import KMeanClusterizer
+from pager.page_model.sub_models.base_sub_model import BaseSubModel, BaseConverter
+from typing import List, Dict
+import matplotlib.pyplot as plt
+from pager.page_model.sub_models.dtype import ImageSegment
 
+import numpy as np
+class SpGraph4NModel(BaseSubModel):
+    def __init__(self) -> None:
+        super().__init__()
+        self.A = None
+        self.nodes_feature  = None
+        self.edges_feature = None
+        self.true_edges = None
+        self.true_nodes = None
+
+    def from_dict(self, input_model_dict: Dict):
+        pass
+
+    def to_dict(self) -> Dict:
+        return {"A": self.A.tolist(), "nodes_feature":self.nodes_feature.tolist(), "edges_feature": self.edges_feature.tolist()}
+
+    def read_from_file(self, path_file: str) -> None:
+        pass
+
+    def clean_model(self):
+        self.A = None
+        self.nodes_feature  = None
+        self.edges_feature = None
+
+    def show(self):
+        def get_color(i):
+            if i == -1:
+                return "black"
+            elif i == 0:
+                return "aqua"
+            elif i == 1:
+                return "gold"
+            elif i == 2:
+                return "lime"
+            elif i == 3:
+                return "violet"
+            elif i == 4:
+                return "teal"
+            
+        def plot_index(indexs, colors=["b", "b", "r"]):
+            i, j = indexs
+            #TODO: автоматически подтянуть длину вектора
+            xi = self.nodes_feature[i][32]
+            yi = self.nodes_feature[i][33]
+            xj = self.nodes_feature[j][32]
+            yj = self.nodes_feature[j][33]
+            plt.scatter(xi, yi, c=colors[0])
+            plt.scatter(xj, yj, c=colors[1])
+            plt.plot([xi, xj], [yi, yj], colors[2])
+        if self.true_edges is None:
+            for indexs in zip(self.A[0], self.A[1]):
+                plot_index(indexs)
+        else:
+            for k, indexs in enumerate(zip(self.A[0], self.A[1] )):
+                i, j = indexs
+                plot_index(indexs, [get_color(self.true_nodes[i]), 
+                                    get_color(self.true_nodes[j]), "g" if self.true_edges[k] == 1 else "r"])
+
+class RowToSpGraph4N(BaseConverter):
+    def __init__(self, conf=None, add_text=True) -> None:
+        super().__init__()
+        self.kmean_clusterizer = KMeanClusterizer()
+        self.with_text = False
+        self.add_text = add_text
+        if conf is not None:
+            self.with_text = conf["with_text"] if "with_text" in conf.keys() else False
+        
+    def convert(self, input_model: BaseSubModel, output_model: BaseSubModel)-> None:
+        rows = input_model.rows
+        segments: List[ImageSegment]  = [r.segment for r in rows]
+        graph4n = self.kmean_clusterizer.get_index_neighbors_segment(segments)
+        distans = self.kmean_clusterizer.get_distans(graph4n, segments)
+        edges_set = set()
+        edges = [[], []]
+        edges_feature = []
+        for i, nodes in enumerate(graph4n):
+            for k, j in enumerate(nodes):
+                edge = (min(i, j), max(i, j))
+                if edge in edges_set:
+                    continue
+                edges_set.add(edge)
+                
+                edges[0].append(i)
+                edges[1].append(j)
+                edges_feature.append([
+                    distans[i][k],
+                    segments[i].get_angle_center(segments[j]),
+                    ])
+        output_model.A = np.array(edges)
+        #TODO: TEST !!!!
+
+        # if self.add_text:
+        #     output_model.nodes_feature = np.array(self.get_vec_words(words, styles, self.with_text))
+        #     output_model.edges_feature = np.array(edges_feature)
+        # else:
+        output_model.nodes_feature = np.array([]) #np.array(self.get_vec_words(words, styles, self.with_text))
+        output_model.edges_feature = np.array([]) #np.array(edges_feature)
+    
 class RowGLAMTokenizer:
     def __call__(self, rows_json):
         A = self.get_A(rows_json)
@@ -14,7 +117,7 @@ class RowGLAMTokenizer:
         return self.get_tensor_from_graph(json_info)
 
     def get_A(self, rows_json):
-        from pager import PageModel, PageModelUnit, RowToSpGraph4N, SpGraph4NModel, RowsModel
+        from pager import PageModel, PageModelUnit, RowsModel
         r2g_converter=RowToSpGraph4N()
         unit_rows_start = PageModelUnit(id="rows",
                           sub_model=RowsModel(),
