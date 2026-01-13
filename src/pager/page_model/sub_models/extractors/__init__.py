@@ -1,3 +1,4 @@
 from .table_extracrot import TableExtractor
 from .region_sorter_cutXY_extractor import RegionSorterCutXYExtractor
 from .row_image_extractor import ImageFromPDF
+from .merge_extractor import MergeExtractor
