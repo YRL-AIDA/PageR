@@ -40,6 +40,7 @@ class MinerPDFToMSWord:
             "header": "Heading 1",
             "list": "List",
             "table": "Normal",
+            "other": "Normal",
             # "figure": "Normal",
         }
         for page in pages:
