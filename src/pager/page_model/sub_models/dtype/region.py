@@ -53,10 +53,13 @@ class Region(ABC):
         return words
 
     def to_dict(self):
-        block_dict = self.segment.get_segment_p_size()
-        block_dict["text"] = self.text
+        block_dict ={
+            "segment": self.segment.get_segment_2p(),
+            "text": self.text,
+            "rows": [row.to_dict() for row in self.rows]
+        }
         if self.label is not None:
             block_dict["label"] = self.label
-        block_dict["rows"] = [row.to_dict() for row in self.rows]
+        
         return block_dict
     
