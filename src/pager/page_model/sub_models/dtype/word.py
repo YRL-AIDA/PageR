@@ -1,5 +1,7 @@
 from .image_segment import ImageSegment
 from typing import Dict
+from .style import Style
+
 
 class Word:
     def __init__(self, dict_word):
@@ -36,6 +38,7 @@ class Word:
         self.segment = ImageSegment(dict_p_size = seg) if "width" in seg else ImageSegment(dict_2p = seg)
 
     def set_style(self, dict_word: Dict):
+        
         if "bold" in dict_word:
             bold = dict_word["bold"]
             if type(bold) == bool:
@@ -53,15 +56,20 @@ class Word:
             self.size = dict_word["size"]
         elif "font_size" in dict_word:
             self.size = dict_word["font_size"]
+        elif "fontsize" in dict_word:
+            self.size = dict_word["fontsize"]
         else:
             self.size = self.segment.height
         if "font_type" in dict_word:
             self.font_name = dict_word["font_type"]
         elif "font_name" in dict_word:
             self.font_name = dict_word["font_name"]
-    
+        elif "fontname" in dict_word:
+            self.font_name = dict_word["fontname"]
+
     def to_dict(self) -> Dict:
-        dict_word = {
+        dict_word = {}
+        font_word = {
             "bold": self.bold,
             "italic": self.italic,
             "font_name": self.font_name,
@@ -71,5 +79,6 @@ class Word:
         }
         dict_word["text"] = self.text
         dict_word["segment"]= self.segment.get_segment_2p()
+        dict_word["font"] = font_word
         return dict_word
     

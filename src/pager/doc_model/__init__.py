@@ -1,4 +1,2 @@
-from .precision_pdf_model import *
-from .ms_model import *
-from .miner_pdf_model import *
-from .pdf2ms_word import *
+from .pdf_as_json_model import *
+from .converters import *

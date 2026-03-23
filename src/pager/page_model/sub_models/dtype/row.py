@@ -35,7 +35,8 @@ class Row:
             self.set_text(dict_row["content"])
         elif len(self.words) > 0:
             self.set_text_from_words(self.words)
-        self.set_style(dict_row)
+        if "font" in dict_row:
+            self.set_style(dict_row['font'])
 
     @property
     def content(self) -> str:
@@ -58,6 +59,7 @@ class Row:
         self.segment = ImageSegment(dict_p_size = seg) if "width" in seg else ImageSegment(dict_2p = seg)
 
     def set_style(self, dict_row: Dict):
+
         if "bold" in dict_row:
             bold = dict_row["bold"]
             if type(bold) == bool:
@@ -75,15 +77,20 @@ class Row:
             self.size = dict_row["size"]
         elif "font_size" in dict_row:
             self.size = dict_row["font_size"]
+        elif "fontsize" in dict_row:
+            self.size = dict_row["fontsize"]
         else:
             self.size = self.segment.height
         if "font_type" in dict_row:
             self.font_name = dict_row["font_type"]
         elif "font_name" in dict_row:
             self.font_name = dict_row["font_name"]
+        elif "fontname" in dict_row:
+            self.font_name = dict_row["fontname"]
     
     def to_dict(self) -> Dict:
-        dict_row = {
+        dict_row = {}
+        font_row = {
             "bold": self.bold,
             "italic": self.italic,
             "font_name": self.font_name,
@@ -94,6 +101,7 @@ class Row:
         }
         dict_row["text"] = self.text
         dict_row["segment"]= self.segment.get_segment_2p()
+        dict_row["font"] = font_row
         return dict_row
     
     def get_words(self) -> list[Word]:

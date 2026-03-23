@@ -5,7 +5,7 @@ from pdfminer.layout import LTImage,  LTFigure
 import math
 import os
 from pdf2image import convert_from_path
-
+from ..base_pdf_as_json_model import BasePDFasJsonModel
 
 class PDFStructureExtractor:
     def __init__(self, laparams: LAParams = None):
@@ -22,7 +22,7 @@ class PDFStructureExtractor:
         """Извлечение структуры из PDF файла"""
         result = {
             "document": pdf_path,
-            "pages": []
+            "pages": [],
         }
         
         for page_num, page_layout in enumerate(extract_pages(pdf_path, laparams=self.laparams)):
@@ -134,15 +134,23 @@ class PDFStructureExtractor:
         words = []
         current_word_chars = []
         current_word_bbox = None
+        font_info = {}
         
         for child in text_line:
             if isinstance(child, LTChar):
                 char_text = child.get_text()
                 char_bbox = child.bbox
+                # TODO: Сейчас по первой букве По первой букве!!!!
+                fontname = child.fontname
+                fontsize = child.size
+                is_normal = child.upright
                 
                 if char_text.strip() and not char_text.isspace():
                     if not current_word_chars:
                         current_word_bbox = list(char_bbox)
+                        font_info = {
+                            "fontname": fontname, "fontsize": fontsize, "is_normal": is_normal
+                        }
                     else:
                         current_word_bbox[0] = min(current_word_bbox[0], char_bbox[0])
                         current_word_bbox[1] = min(current_word_bbox[1], char_bbox[1])
@@ -153,18 +161,19 @@ class PDFStructureExtractor:
                 else:
                     if current_word_chars:
                         word_info = self._create_word_info(
-                            current_word_chars, current_word_bbox, page_height
+                            current_word_chars, current_word_bbox, page_height, font_info
                         )
                         words.append(word_info)
                         current_word_chars = []
+                        font_info = {}
                         current_word_bbox = None
         
         if current_word_chars:
             word_info = self._create_word_info(
-                current_word_chars, current_word_bbox, page_height
+                current_word_chars, current_word_bbox, page_height, font_info
             )
             words.append(word_info)
-        
+
         return words
     
     def _process_image(self, image: LTImage, page_height: float) -> Dict:
@@ -206,7 +215,7 @@ class PDFStructureExtractor:
             print(f"Ошибка при обработке изображения: {e}")
             return None
     
-    def _create_word_info(self, chars: List[str], bbox: List[float], page_height: float) -> Dict:
+    def _create_word_info(self, chars: List[str], bbox: List[float], page_height: float, font_info: Dict) -> Dict:
         """Создание информации о слове"""
         word_text = ''.join(chars)
         x0, y0, x1, y1 = bbox
@@ -220,21 +229,17 @@ class PDFStructureExtractor:
         
         return {
             "segment": word_segment,
-            "text": word_text
+            "text": word_text,
+            "font": font_info
         }
 
 
 
-class MinerPDFModel:
+class MinerPDFModel(BasePDFasJsonModel):
     """Класс-аналог вашего PrecisionPDFModel, но использующий pdfminer"""
-    
     def __init__(self, conf=None) -> None:
-        self.pdf_json: Dict = {}
-        self.count_page: int = 0
-        self.page_model = None
-        if conf and "page_model" in conf:
-            self.page_model = conf["page_model"]
-        
+        if conf is None:
+            conf = {}
         # Инициализируем парсер
         laparams = LAParams(
             line_margin=0.5,
@@ -242,42 +247,5 @@ class MinerPDFModel:
             char_margin=2.0,
             boxes_flow=0.5
         )
-        self.extractor = PDFStructureExtractor(laparams)
-    
-    def from_dict(self, input_model_dict: Dict):
-        self.pdf_json = input_model_dict.copy()
-        self.count_page = len(self.pdf_json['pages']) if "pages" in self.pdf_json.keys() else 0
-    
-    def to_dict(self) -> Dict:
-        return self.pdf_json
-    
-    def extract(self) -> None:
-        if not self.page_model:
-            return
-        
-        for i in range(self.count_page):
-            page_json = self.pdf_json["pages"][i]
-            self.page_model.from_dict(page_json)
-            self.page_model.extract()
-            dict_page = self.page_model.to_dict()
-            # TODO: удалить исходные строки и слова
-            for key in dict_page.keys():
-                self.pdf_json["pages"][i][key] = dict_page[key]
-    
-    def read_from_file(self, path_file: str) -> None:
-        """Чтение структуры из PDF файла с использованием pdfminer"""
-        self.path = path_file
-        self.pdf_json = self.extractor.extract_from_path(path_file)
-        self.count_page = len(self.pdf_json['pages']) if "pages" in self.pdf_json.keys() else 0
-    
-    def clean_model(self) -> None:
-        self.pdf_json = {}
-        self.count_page = 0
-
-    def save_pdf_as_imgs(self, path_dir: str):
-        for i, page in enumerate(self.pdf_json["pages"]):
-            name_file = os.path.join(path_dir, f"page_{i}.png")
-            w = int(page["width"])
-            h = int(page["height"])
-            img = convert_from_path(self.path, first_page=i+1, last_page=i+1, size=(w,h))[0]
-            img.save(name_file)
+        conf['extractor'] = PDFStructureExtractor(laparams)
+        super().__init__(conf)

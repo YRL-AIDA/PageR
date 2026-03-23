@@ -63,3 +63,11 @@ class Region(ABC):
         
         return block_dict
     
+    @property
+    def md(self):
+        if self.label == 'header':
+            return f'# {self.text} \n\n'
+        else:
+            return self.text + '\n\n'
+        
+    
