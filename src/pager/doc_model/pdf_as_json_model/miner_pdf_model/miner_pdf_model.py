@@ -107,10 +107,10 @@ class PDFStructureExtractor:
                 page_info["images"].append(image_info)
         
         # Сортируем строки по Y координате (сверху вниз)
-        page_info["rows"].sort(key=lambda x: x["segment"]["y_top_left"], reverse=True)
+        page_info["rows"].sort(key=lambda x: x["segment"]["y_top_left"], reverse=False)
         
         # Сортируем изображения по Y координате (сверху вниз)
-        page_info["images"].sort(key=lambda x: x["segment"]["y_top_left"], reverse=True)
+        page_info["images"].sort(key=lambda x: x["segment"]["y_top_left"], reverse=False)
         
         return page_info
     

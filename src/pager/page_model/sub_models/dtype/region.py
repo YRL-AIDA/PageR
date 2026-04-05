@@ -36,6 +36,9 @@ class Region(ABC):
         elif len(self.rows) > 0:
             self.set_font_from_rows(self.rows)
 
+        if "header_level" in dict_region:
+            self.set_header_level(dict_region["header_level"])
+
         if "metainfo" in dict_region:
             self.metainfo = dict_region["metainfo"]
     

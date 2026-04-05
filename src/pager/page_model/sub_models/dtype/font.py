@@ -59,8 +59,9 @@ class Font:
     def __lt__(self, other:'Font'):
         if self.size/other.size < 0.9:
             return True
-        if self.width > 0.8 and other.width < 0.8:
+        if self.width < 0.8 and other.width > 0.8:
             return True
-        if self.italic > 0.8 and other.italic < 0.8:
+        if self.width < 0.8 and other.width < 0.8 and \
+          self.italic > 0.8 and other.italic < 0.8:
             return True
         return False
