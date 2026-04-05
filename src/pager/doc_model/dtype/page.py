@@ -4,16 +4,34 @@ from typing import List, Dict
 class Page:
     def __init__(self, num_page, regions:List[Region]=None, rows:List[Row]=None, words:List[Word]=None, height=None, width=None):
         # TODO: fix info
-        self.regions = regions
+        self.num_page = num_page
+        self.regions = None
+        self.set_regions(regions, num_page) 
         self.rows = rows
         self.words = words
         self.set_regions_rows_words(regions, rows, words)
-        self.num_page = num_page
+        
         self.height = height
         self.width = width
 
-    def set_regions_rows_words(self, regions:List[Region]=None, rows:List[Row]=None, words:List[Word]=None):
+    def set_num_page(self, num_page):
+        self.num_page = num_page
+        self.set_regions(self.regions, num_page)
+
+    def set_regions(self, regions:List[Region]|None, num_page):
+        if regions is None:
+            self.regions = None
+            return 
+        for reg in regions:
+            if reg.metainfo is None:
+                reg.metainfo = {"page": num_page}
+            else:
+                reg.metainfo["page"] = num_page
         self.regions = regions
+
+
+    def set_regions_rows_words(self, regions:List[Region]=None, rows:List[Row]=None, words:List[Word]=None):
+        self.set_regions(regions, self.num_page)
 
         if rows is None and regions is not None:
             rows = [row for reg in regions for row in reg.rows]

@@ -1,0 +1,62 @@
+T: 2026-02-25 15:35:15.972802
+Create Trainer
+T: 2026-02-25 15:35:15.973263
+
+            DATASET INFO:
+            count row: 335703
+            first: dict_keys(['X', 'Y', 'N', 'inds', 'sp_A', 'true_edges', 'true_nodes', 'file_name'])
+            	 A:torch.Size([74, 74])
+            	 nodes_feature:torch.Size([74, 15])
+            	 edges_feature:torch.Size([97, 4])
+            	 true_edges:torch.Size([97])
+            end:dict_keys(['X', 'Y', 'N', 'inds', 'sp_A', 'true_edges', 'true_nodes', 'file_name'])
+            	 A:torch.Size([90, 90])
+            	 nodes_feature:torch.Size([90, 15])
+            	 edges_feature:torch.Size([99, 4])
+            	 true_edges:torch.Size([99])
+        node_featch:	15
+edge_featch:	4
+epochs:	10
+batch_size:	128
+learning_rate:	0.001
+Tag:	[{'in': -1, 'size': 512, 'out': 512, 'k': 3}, {'in': 512, 'size': 256, 'out': 256, 'k': 3}]
+NodeLinear:	[-1, 64, 32]
+NodeLinearClassifier:	[-1, 16, 8]
+EdgeLinear:	[-1, 16, 4]
+batchNormNode:	True
+batchNormEdge:	True
+seg_k:	0.5
+loss_params:	{'edge_coef': 0.35, 'node_coef': 0.65, 'publaynet_imbalance': [0.07980386912822723, 0.007467313203960657, 0.4224816858768463, 0.294582337141037, 0.018921731039881706, 0.1767430305480957], 'edge_imbalance': 0.3927478527546576}
+sigmoidEdge:	False
+NodeClasses:	6
+EPOCH #0	 0.06389192 (VAL: 0.05037642)
+EPOCH #1	 0.04758652 (VAL: 0.04569864)
+EPOCH #2	 0.04405883 (VAL: 0.04308196)
+EPOCH #3	 0.04222941 (VAL: 0.04222696)
+EPOCH #4	 0.04123492 (VAL: 0.04185595)
+EPOCH #5	 0.04050935 (VAL: 0.04169311)
+EPOCH #6	 0.03993941 (VAL: 0.04141377)
+EPOCH #7	 0.03950455 (VAL: 0.04126799)
+EPOCH #8	 0.03914914 (VAL: 0.04184592)
+EPOCH #9	 0.03894880 (VAL: 0.04101680)
+Время обучения: 53086.90 сек
+T: 2026-02-26 06:36:12.206978
+Create Tester
+Test Result
+mAP@IoU[0.50:0.95]   :0.51428419
+==================================================
+threshold_05--------------------
+precision_row       :0.9253
+recall_row          :0.8675
+f1_row              :0.8955
+precision_word      :0.9014
+recall_word         :0.8441
+f1_word             :0.8718
+threshold_95--------------------
+precision_row       :0.7918
+recall_row          :0.7429
+f1_row              :0.7666
+precision_word      :0.7749
+recall_word         :0.7259
+f1_word             :0.7496
+

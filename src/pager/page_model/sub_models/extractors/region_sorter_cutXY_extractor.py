@@ -53,11 +53,13 @@ class Edge:
 
 class RegionSorterCutXYExtractor(BaseExtractor):
     def extract(self, model:RegionModel):
+        # Один уже отсортирован
+        if len(model.regions) <= 1:
+            return
         bboxes = [reg.segment for reg in model.regions]
         for i, bbox in enumerate(bboxes):
             bbox.id = i
         order = self.sort_using_XYCut(bboxes)
-        print(len(order))
         model.set_regions([model.regions[i] for i in order])
 
 

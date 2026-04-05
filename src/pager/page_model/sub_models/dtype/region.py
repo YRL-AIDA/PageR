@@ -14,6 +14,7 @@ class Region(ABC):
         self.rows: List[Row] = []
         self.label = None
         self.header_level = None
+        self.metainfo = None
 
 
         if "label" in dict_region.keys():
@@ -34,6 +35,9 @@ class Region(ABC):
             self.set_font(dict_region['font'])
         elif len(self.rows) > 0:
             self.set_font_from_rows(self.rows)
+
+        if "metainfo" in dict_region:
+            self.metainfo = dict_region["metainfo"]
     
     def set_label(self, label:str):
         self.label = label
@@ -87,6 +91,9 @@ class Region(ABC):
             block_dict["header_level"] = self.header_level
         if self.font is not None:
             block_dict["font"] = self.font.to_dict()
+
+        if self.metainfo is not None:
+            block_dict["metainfo"] = self.metainfo
         return block_dict
     
     @property

@@ -1,12 +1,15 @@
 from typing import Dict, List
 from pdfminer.high_level import extract_pages
-from pdfminer.layout import LTTextLine, LTChar, LAParams
-from pdfminer.layout import LTImage,  LTFigure
+from pdfminer.layout import LTTextLine, LTTextLineHorizontal
+from pdfminer.layout import  LTChar, LAParams
+from pdfminer.layout import LTImage,  LTFigure, LTPage
 import math
 import os
 from pdf2image import convert_from_path
 from ..base_pdf_as_json_model import BasePDFasJsonModel
 
+
+DPI = 72
 class PDFStructureExtractor:
     def __init__(self, laparams: LAParams = None):
         """Инициализация парсера PDF"""
@@ -18,6 +21,36 @@ class PDFStructureExtractor:
             detect_vertical=True
         )
     
+    def _pdf_to_pixel_coords(self, x, y, page_height_points, dpi=DPI):
+        """
+        x, y — координаты в points из PDFMiner (относительно cropbox)
+        page_height_points — высота страницы в points (cropbox.y1 - cropbox.y0)
+        dpi — разрешение для рендеринга
+        возвращает (x_px, y_px) — пиксельные координаты с началом в верхнем левом углу
+        """
+        # Масштабируем в пиксели
+        x_px = x * dpi / 72.0
+        y_px = (page_height_points - y) * dpi / 72.0  # переворот вертикали
+        return int(x_px), int(y_px)
+
+
+    def _get_coords(self, bbox, page_height):
+        x_pdf_bottom_left, y_pdf_bottom_left, x_pdf_top_right, y_pdf_top_right = bbox
+
+        x0_px, y0_px = self._pdf_to_pixel_coords(x_pdf_bottom_left, y_pdf_top_right, page_height)
+        x1_px, y1_px = self._pdf_to_pixel_coords(x_pdf_top_right, y_pdf_bottom_left, page_height)
+
+        # Нормализуем координаты
+        x_top_left = min(x0_px, x1_px)
+        x_bottom_right = max(x0_px, x1_px)
+        y_top_left = min(y0_px, y1_px)
+        y_bottom_right = max(y0_px, y1_px)
+        # Преобразуем координаты
+        
+        height = y_bottom_right - y_top_left
+        width = x_bottom_right - x_top_left
+        return x_top_left, x_bottom_right, width, y_top_left, y_bottom_right, height
+
     def extract_from_path(self, pdf_path: str) -> Dict:
         """Извлечение структуры из PDF файла"""
         result = {
@@ -31,12 +64,12 @@ class PDFStructureExtractor:
         
         return result
     
-    def _process_page(self, page_layout, page_number: int) -> Dict:
+    def _process_page(self, page_layout:LTPage, page_number: int) -> Dict:
         """Обработка одной страницы"""
         page_info = {
             "number": page_number,
-            "width": math.ceil(page_layout.width),
-            "height": math.ceil(page_layout.height),
+            "width": math.ceil(page_layout.width*DPI/72),
+            "height": math.ceil(page_layout.height*DPI/72),
             "rows": [],
             "images": []  # Добавляем список для изображений
         }
@@ -52,6 +85,8 @@ class PDFStructureExtractor:
         for element in elements:
             if isinstance(element, LTTextLine):
                 text_lines.append(element)
+            elif isinstance(element, LTTextLineHorizontal):
+                text_lines.append(element)
             elif isinstance(element, LTImage):
                 images.append(element)
             elif isinstance(element, LTFigure):
@@ -61,14 +96,14 @@ class PDFStructureExtractor:
         
         # Обрабатываем текстовые строки
         for text_line in text_lines:
-            row_info = self._process_text_line(text_line, page_info["height"])
-            if row_info:
+            row_info = self._process_text_line(text_line, page_layout.height)
+            if row_info and self.__is_correct_segment(row_info['segment']):
                 page_info["rows"].append(row_info)
         
         # Обрабатываем изображения
         for image in images:
-            image_info = self._process_image(image, page_info["height"])
-            if image_info:
+            image_info = self._process_image(image, page_layout.height)
+            if image_info and self.__is_correct_segment(image_info['segment']):
                 page_info["images"].append(image_info)
         
         # Сортируем строки по Y координате (сверху вниз)
@@ -103,24 +138,16 @@ class PDFStructureExtractor:
         """Обработка текстовой строки"""
         if not text_line.get_text().strip():
             return None
-        
-        x0, y0, x1, y1 = text_line.bbox
-        
-        # Фильтруем слишком высокие элементы (вероятно, блоки)
-        line_height = y1 - y0
-        if line_height > 50:
+        x0, y0, x1, y1 = text_line.x0, text_line.y0, text_line.x1, text_line.y1
+        x_top_left, x_bottom_right, width, y_top_left, y_bottom_right, height=self._get_coords([x0, y0, x1, y1], page_height)
+        if height > 50:
             return None
-        
-        y_top_left = page_height - y1
-        height = y1 - y0
-        width = x1 - x0
-        
         # Извлекаем слова
         words = self._extract_words_from_line(text_line, page_height)
         
         return {
             "segment": {
-                "x_top_left": math.ceil(x0),
+                "x_top_left": math.ceil(x_top_left),
                 "y_top_left": math.ceil(y_top_left),
                 "width": math.ceil(width),
                 "height": math.ceil(height)
@@ -173,19 +200,19 @@ class PDFStructureExtractor:
                 current_word_chars, current_word_bbox, page_height, font_info
             )
             words.append(word_info)
-
+        
+        words = [word for word in words if self.__is_correct_segment(word['segment'])]
         return words
     
+    def __is_correct_segment(self, segment):
+        return segment['width'] > 0 and segment['height'] > 0
+
     def _process_image(self, image: LTImage, page_height: float) -> Dict:
         """Обработка изображения"""
         try:
             # Получаем координаты изображения
-            x0, y0, x1, y1 = image.bbox
+            x_top_left, x_bottom_right, width, y_top_left, y_bottom_right, height=self._get_coords(image.bbox, page_height)
             
-            # Преобразуем координаты
-            y_top_left = page_height - y1
-            height = y1 - y0
-            width = x1 - x0
             
             # Проверяем, что это действительно изображение (имеет ненулевые размеры)
             if width <= 0 or height <= 0:
@@ -197,7 +224,7 @@ class PDFStructureExtractor:
             
             image_info = {
                 "segment": {
-                    "x_top_left": math.ceil(x0),
+                    "x_top_left": math.ceil(x_top_left),
                     "y_top_left": math.ceil(y_top_left),
                     "width": math.ceil(width),
                     "height": math.ceil(height),
@@ -218,13 +245,13 @@ class PDFStructureExtractor:
     def _create_word_info(self, chars: List[str], bbox: List[float], page_height: float, font_info: Dict) -> Dict:
         """Создание информации о слове"""
         word_text = ''.join(chars)
-        x0, y0, x1, y1 = bbox
+        x_top_left, x_bottom_right, width, y_top_left, y_bottom_right, height=self._get_coords(bbox, page_height)
         
         word_segment = {
-            "x_top_left": math.ceil(x0),
-            "y_top_left": math.ceil(page_height - y1),
-            "width": math.ceil(x1 - x0),
-            "height": math.ceil(y1 - y0)
+            "x_top_left": math.ceil(x_top_left),
+            "y_top_left": math.ceil(y_top_left),
+            "width": math.ceil(width),
+            "height": math.ceil(height)
         }
         
         return {
