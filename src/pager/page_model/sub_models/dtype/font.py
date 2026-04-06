@@ -61,7 +61,7 @@ class Font:
             return True
         if self.width < 0.8 and other.width > 0.8:
             return True
-        if self.width < 0.8 and other.width < 0.8 and \
+        if self.width > 0.8 and other.width > 0.8 and \
           self.italic > 0.8 and other.italic < 0.8:
             return True
         return False
