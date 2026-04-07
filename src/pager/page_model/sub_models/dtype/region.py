@@ -61,8 +61,16 @@ class Region(ABC):
 
     def set_font_from_rows(self, rows: list[Row]):
         fonts = [row.font.to_dict() for row in rows]
+        names = [font['name'] for font in fonts]
+        counter_name = {name:0 for name in set(names)}
+        for name in names:
+            counter_name[name] += 1
+        counter_name = [(name, count) for name, count in counter_name.items()]
+        counter_name.sort(key=lambda x: x[1], reverse=True)
+        name = counter_name[0][0]
+
         self.font = Font({
-            'name': fonts[0]['name'],
+            'name': name,
             'width': float(np.mean([f['width'] for f in fonts])),
             'italic': float(np.mean([f['italic'] for f in fonts])),
             'size': float(np.max([f['size'] for f in fonts]))
