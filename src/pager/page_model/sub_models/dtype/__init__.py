@@ -6,7 +6,7 @@ from .sortable_image_segment import Top2BottomLeft2RightImageSegment, Left2Right
 from .segment_relationship import Graph
 from .style import Style
 from .region import Region
-
+from .font import Font
 
 import warnings
 class StyleWord(Word):
