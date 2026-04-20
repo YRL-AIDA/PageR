@@ -139,8 +139,11 @@ class TorchModelBase(torch.nn.Module):
         Y: torch.Tensor = data_graph_dict["Y"]
         sp_A: torch.Tensor = data_graph_dict["sp_A"] 
         inds:List[int] = data_graph_dict["inds"]
-
+        if X.shape[0] == 0:
+            return {"node_classes": torch.Tensor([]), "E_pred": torch.Tensor([])}  
         Node_embs, Node_classes = self.node_emb(X, sp_A)
+        if Y.shape[0] == 0:
+            return {"node_classes": Node_classes, "E_pred": torch.Tensor([])}
         # Node_embs = self.node_emb(X, sp_A)
         Omega = torch.cat([Node_embs[inds[0]], Node_embs[inds[1]], X[inds[0]], X[inds[1]], Y],dim=1)
         E_pred = self.bin_edge_emb(Omega)
