@@ -18,7 +18,13 @@ class Rows2Regions(BaseConverter):
 
     def convert(self, input_model: RowsModel, output_model: RegionModel):
         page_json = input_model.to_dict()
-        region_list = self.get_region(page_json['rows'])
+        count_rows = len(page_json['rows'])
+        if  count_rows == 0:
+            region_list = []
+        elif count_rows == 1:
+            region_list = [{"rows": page_json['rows'], 'label': CLASSES[0]}]
+        else:
+            region_list = self.get_region(page_json['rows'])
         output_model.from_dict({"regions": region_list})
 
         # сортировка после создания региона

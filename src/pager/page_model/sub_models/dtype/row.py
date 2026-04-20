@@ -1,20 +1,16 @@
 from .image_segment import ImageSegment
-from typing import Dict
+from typing import Dict, List
 from .word import Word
 import numpy as np
-
+from .font import Font
 class Row:
     def __init__(self, dict_row):
         self.segment:ImageSegment 
+        self.words: List[Word] = []
         #=========== style =========================
         self.style_id:int|None = dict_row["style_id"] if "style_id" in dict_row else None
-        self.bold: float|None = None
-        self.italic: float|None = None # Наклон 0 - нет, 1 - как линия.
-        self.font_name: str|None = None
-        self.size: int|None = None
-        self.words: list[Word] = []
         
-        
+
         if "words" in dict_row.keys():
             self.set_words(dict_row["words"])
 
@@ -35,7 +31,12 @@ class Row:
             self.set_text(dict_row["content"])
         elif len(self.words) > 0:
             self.set_text_from_words(self.words)
-        self.set_style(dict_row)
+
+        self.font = None
+        if "font" in dict_row:
+            self.set_font(dict_row['font'])
+        elif len(self.words) > 0:
+            self.set_font_from_words(self.words)
 
     @property
     def content(self) -> str:
@@ -47,6 +48,15 @@ class Row:
     def set_text_from_words(self, words: list[Word]):
         self.text = " ".join([word.text for word in words])
             
+    def set_font_from_words(self, words: list[Word]):
+        fonts = [word.font.to_dict() for word in words]
+        self.font = Font({
+            'name': fonts[0]['name'],
+            'width': float(np.mean([f['width'] for f in fonts])),
+            'italic': float(np.mean([f['italic'] for f in fonts])),
+            'size': float(np.max([f['size'] for f in fonts]))
+        })
+
 
     def set_words(self, words: list[Dict]):
         self.words = [Word(w_json) for w_json in words]
@@ -57,41 +67,15 @@ class Row:
         seg = dict_row["segment"] if "segment" in dict_row else dict_row
         self.segment = ImageSegment(dict_p_size = seg) if "width" in seg else ImageSegment(dict_2p = seg)
 
-    def set_style(self, dict_row: Dict):
-        if "bold" in dict_row:
-            bold = dict_row["bold"]
-            if type(bold) == bool:
-                self.bold = 1.0 if bold else 0.0
-            elif type(bold) in (float, int):
-                self.bold = bold  
-        
-        if "italic" in dict_row:
-            italic = dict_row["italic"]
-            if type(italic) == bool:
-                self.italic = 0.45 if italic else 0
-            elif type(italic) in (float, int):
-                self.italic = italic  
-        if "size" in dict_row:
-            self.size = dict_row["size"]
-        elif "font_size" in dict_row:
-            self.size = dict_row["font_size"]
-        else:
-            self.size = self.segment.height
-        if "font_type" in dict_row:
-            self.font_name = dict_row["font_type"]
-        elif "font_name" in dict_row:
-            self.font_name = dict_row["font_name"]
+    def set_font(self, dict_font: Dict):
+        self.font = Font(dict_font)
     
     def to_dict(self) -> Dict:
         dict_row = {
-            "bold": self.bold,
-            "italic": self.italic,
-            "font_name": self.font_name,
-            "size": self.size,
+            "style_id": self.style_id,
+            "font": self.font.to_dict() if self.font is not None else None ,
             "words": [w.to_dict() for w in self.words]
-        } if self.style_id is None else {
-            "style_id": self.style_id
-        }
+        } 
         dict_row["text"] = self.text
         dict_row["segment"]= self.segment.get_segment_2p()
         return dict_row

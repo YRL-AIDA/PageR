@@ -5,6 +5,7 @@ from typing import Dict, List
 import matplotlib.pyplot as plt 
 
 class ImageSegment(ABC):
+    # TODO: num_page
     def __init__(self, x_top_left=None, y_top_left=None, x_bottom_right=None, y_bottom_right=None, dict_2p=None, dict_p_size=None):
         if dict_2p is not None:
             self.set_segment_2p(dict_2p)
@@ -165,13 +166,13 @@ class ImageSegment(ABC):
         return num/den if den != 0 else 0.0
         
 
-    def plot(self, color="b", text="", width=1):
+    def plot(self, color="b", text="", text_size='medium', width=1):
         x0 = self.x_top_left
         y0 = self.y_top_left
         x1 = self.x_bottom_right
         y1 = self.y_bottom_right
         plt.plot([x0, x0, x1, x1, x0], [y0, y1, y1, y0, y0], color=color, linewidth=width)
-        plt.text(x=x0, y=y0, s=text)
+        plt.text(x=x0, y=y0, s=text, size=text_size)
 
     def resize(self, k):
         self.x_top_left = round(k*self.x_top_left)

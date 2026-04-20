@@ -1,8 +1,8 @@
 from typing import Dict
 import docx
+from ..base_doc_model import BaseDocModel
 
-
-class MSWordModel:
+class MSWordModel(BaseDocModel):
     def __init__(self) -> None:
         self.doc: docx.Document
         

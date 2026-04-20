@@ -1,11 +1,10 @@
-from .precision_pdf_model import PrecisionPDFModel
-from .miner_pdf_model import MinerPDFModel
-from .ms_model import MSWordModel
+from ..pdf_as_json_model import PrecisionPDFModel, MinerPDFModel
+from ..ms_model import MSWordModel
 from typing import Dict, List
 import docx
 from docx.enum.style import WD_STYLE_TYPE
 
-
+# TODO: переделать на абстрактный класс
 class PrecisionPDFToMSWord:
     def convert(self, input_model: PrecisionPDFModel, output_model: MSWordModel)-> None:
         pages: List[Dict] = input_model.pdf_json["pages"]
