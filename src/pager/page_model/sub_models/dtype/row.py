@@ -71,8 +71,10 @@ class Row:
         self.font = Font(dict_font)
     
     def to_dict(self) -> Dict:
+        dict_row = dict()
+        if self.style_id:
+            dict_row["style_id"] = self.style_id
         dict_row = {
-            "style_id": self.style_id,
             "font": self.font.to_dict() if self.font is not None else None ,
             "words": [w.to_dict() for w in self.words]
         } 

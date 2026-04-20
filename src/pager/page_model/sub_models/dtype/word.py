@@ -39,9 +39,9 @@ class Word:
         self.font = Font(dict_font)
 
     def to_dict(self) -> Dict:
-        dict_word = {
-            "style_id": self.style_id
-        }
+        dict_word = dict()
+        if self.style_id:
+            dict_word["style_id"] = self.style_id
         dict_word["font"] = self.font.to_dict()
         dict_word["text"] = self.text
         dict_word["segment"]= self.segment.get_segment_2p()
