@@ -11,13 +11,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from pagerlib.dtypes import PageRDF
-from pagerlib.extractors.page_extractor import Rows2Regions , Words2Rows
+from pagerlib.extractors.page_extractor import Rows2Regions , Words2Rows, MergeRegion
 from pagerlib.file_input import FileInput
 from pathlib import Path
 
 file_inpit = FileInput()
 words2rows = Words2Rows()
 rows2regions = Rows2Regions()
+merge_region = MergeRegion()
 path = Path(os.getcwd(), "tmp_dir")
 path.mkdir(exist_ok=True)
 
@@ -49,7 +50,23 @@ def pagerdf2json(pagerdf):
     return {
         "pages": pages 
     }
-    
+
+def pdf2region4precission(path):
+    path = Path(path)
+    pagerdf = file_inpit(path)
+    rows2regions.extract(pagerdf)
+    merge_region.extract(pagerdf)
+    pages = [page.to_dict() for page in pagerdf.data['pages']] 
+    for i, page in enumerate(pages):
+        page['number'] = i
+        new_regions = [{"segment": reg['segment'], 
+                        "label":  reg['data']['label'] if 'label' in reg['data'] else 'text'} for reg in page['regions']]
+        page['regions'] = new_regions
+    return {
+        "pages": pages
+    }
+
+            
 
 def file2json(path, params):
     path = Path(path)
@@ -68,6 +85,7 @@ def file2json(path, params):
     if is_image:
         for page in pagerdf.data['pages']:
             page.children = page.children[1:] # Первый регион на изображениях - это страница
+    merge_region.extract(pagerdf)
     return pagerdf2json(pagerdf)
         
 NAME_DIR_IMAGES = "image_pages"
@@ -106,6 +124,22 @@ async def read_pdf(file: UploadFile = File(...),
     with open(path_file, "wb") as f:
         f.write(file.file.read())
     rez = file2json(path_file, process)
+    shutil.rmtree(path_dir)
+    return rez
+
+@app.post("/precision-pdf/")
+async def read_pdf(file: UploadFile = File(...)):
+    logger.info("start")
+    path_dir = os.path.join(os.getcwd(), "tmp_dir", uuid.uuid4().hex)
+    os.mkdir(path_dir)
+    typefile = file.filename.split(".")[-1].lower() 
+    if not typefile in ('pdf'):
+        shutil.rmtree(path_dir)
+        return {"error": "Неизвестный тип файла"} 
+    path_file =  os.path.join(path_dir, "file.pdf")   
+    with open(path_file, "wb") as f:
+        f.write(file.file.read())
+    rez = pdf2region4precission(path_file)
     shutil.rmtree(path_dir)
     return rez
 

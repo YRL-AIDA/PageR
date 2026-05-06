@@ -12,7 +12,7 @@ license = {file = 'LICENSE'}
 requires-python = '>=3.9'
 
 dependencies = [
-  'pagerlib @ git+https://github.com/YRL-AIDA/PageRLib.git@v0.0.2',
+  'pagerlib @ git+https://github.com/YRL-AIDA/PageRLib.git@v0.0.3',
   'pytesseract',
   'pdf2image',
   'numpy',
