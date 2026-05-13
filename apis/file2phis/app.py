@@ -11,29 +11,49 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from pagerlib.dtypes import PageRDF
-from pagerlib.extractors.page_extractor import Rows2Regions , Words2Rows, MergeRegion
+from pagerlib.extractors.page_extractor import Rows2Regions , Words2Rows, MergeRegion, PDFIMGExtractor
 from pagerlib.file_input import FileInput
 from pathlib import Path
+
+from PIL import Image
+from io import BytesIO
+import base64
+import numpy as np
 
 file_inpit = FileInput()
 words2rows = Words2Rows()
 rows2regions = Rows2Regions()
 merge_region = MergeRegion()
+pdf2img = PDFIMGExtractor()
 path = Path(os.getcwd(), "tmp_dir")
 path.mkdir(exist_ok=True)
 
-def pagerdf2json(pagerdf):
-    pages = [page.to_dict() for page in pagerdf.data['pages']] 
-    for i, page in enumerate(pages):
+def np_array_to_base64(image: np.ndarray) -> str:
+    image = Image.fromarray(image)
+    image_bytes = BytesIO()
+    image.save(image_bytes, format='PNG')
+    base64_image = base64.b64encode(image_bytes.getvalue()).decode('utf-8')
+
+    return base64_image
+
+def pagerdf2json(pagerdf:PageRDF):
+    pages = []
+    for i, prdf_page in enumerate(pagerdf.data['pages']):
+        img_page = prdf_page.children[0].data['array']
+        prdf_page.children = prdf_page.children[1:]
+        page = prdf_page.to_dict()
         page['number'] = i
         seg = page.pop('segment')
         page['height'] = seg['height']
         page['width'] = seg['width']
         data = page.pop('data')
-        for reg in page['regions']:
+        for reg, prdf_reg in zip(page['regions'], prdf_page.children) :
             reg['text'] = ''
             data = reg.pop('data')
             reg['label'] = data['label'] if 'label' in data else 'text'
+
+            if reg['label'] in  ('figure', 'image'):
+                reg['base64'] = np_array_to_base64(prdf_reg.segment.get_segment_from_img(img_page))
 
             if not 'rows' in reg:
                 continue
@@ -45,7 +65,7 @@ def pagerdf2json(pagerdf):
                     word['text'] = data['text']
                     row['text'] += word['text'] + ' '
                 reg['text'] += row['text'] + ' '
-            
+        pages.append(page)    
                     
     return {
         "pages": pages 
@@ -82,9 +102,8 @@ def file2json(path, params):
     
     if not "glam_rows" in params or params["glam_rows"]:
         rows2regions.extract(pagerdf)
-    if is_image:
-        for page in pagerdf.data['pages']:
-            page.children = page.children[1:] # Первый регион на изображениях - это страница
+    if not is_image:
+        pdf2img.extract(pagerdf)
     merge_region.extract(pagerdf)
     return pagerdf2json(pagerdf)
         
