@@ -11,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from pagerlib.dtypes import PageRDF
-from pagerlib.extractors.page_extractor import Rows2Regions , Words2Rows, MergeRegion, PDFIMGExtractor
+from pagerlib.extractors.page_extractor import Rows2Regions , Words2Rows, MergeRegion, PDFIMGExtractor, Images2RegionsExtractor
 from pagerlib.file_input import FileInput
 from pathlib import Path
 
@@ -19,9 +19,12 @@ from PIL import Image
 from io import BytesIO
 import base64
 import numpy as np
+from urllib.parse import quote
+from pager.pager_pipe_line.json2docx import PDF2MSWord
 
 file_inpit = FileInput()
 words2rows = Words2Rows()
+img2region = Images2RegionsExtractor()
 rows2regions = Rows2Regions()
 merge_region = MergeRegion()
 pdf2img = PDFIMGExtractor()
@@ -52,7 +55,7 @@ def pagerdf2json(pagerdf:PageRDF):
             data = reg.pop('data')
             reg['label'] = data['label'] if 'label' in data else 'text'
 
-            if reg['label'] in  ('figure', 'image'):
+            if reg['label'] in  ('figure', 'image', 'table'):
                 reg['base64'] = np_array_to_base64(prdf_reg.segment.get_segment_from_img(img_page))
 
             if not 'rows' in reg:
@@ -74,6 +77,7 @@ def pagerdf2json(pagerdf:PageRDF):
 def pdf2region4precission(path):
     path = Path(path)
     pagerdf = file_inpit(path)
+    pdf2img.extract(pagerdf)
     rows2regions.extract(pagerdf)
     merge_region.extract(pagerdf)
     pages = [page.to_dict() for page in pagerdf.data['pages']] 
@@ -91,22 +95,37 @@ def pdf2region4precission(path):
 def file2json(path, params):
     path = Path(path)
     pagerdf = file_inpit(path)
+    pagerdf.data['path'] = path
     is_image = path.suffix.lower() in ('.png', '.jpg', '.jpeg')
     if "only_text" in params and params["only_text"]:
         return pagerdf2json(pagerdf)
-    
-    if "glam_words" in params and params["glam_words"]:
+
+    if is_image:
+        # pagerlib reads images differently from PDFs: the first (and only)
+        # child of a page is the page raster itself. Save a reference to it
+        # before OCR replaces the children with regions, then restore the
+        # raster at the front so rows2regions/pagerdf2json see the same layout
+        # as for PDFs (page raster at children[0], regions after it).
+        page = pagerdf.data['pages'][0]
+        page_img = page.children[0]
+        img2region.extract(pagerdf)   # OCR page raster -> text regions
+        words2rows.extract(pagerdf)   # cluster words into rows
+        page.children = [page_img] + page.children
+    elif "glam_words" in params and params["glam_words"]:
         words2rows.extract(pagerdf)
-    elif not "glam_words" in params and is_image:
-        words2rows.extract(pagerdf)
+
+    if not is_image:
+        pdf2img.extract(pagerdf)
     
     if not "glam_rows" in params or params["glam_rows"]:
         rows2regions.extract(pagerdf)
-    if not is_image:
-        pdf2img.extract(pagerdf)
+        if is_image:
+            page.children = [page_img] + page.children
+        else:
+            pdf2img.extract(pagerdf)
+
     merge_region.extract(pagerdf)
     return pagerdf2json(pagerdf)
-        
 NAME_DIR_IMAGES = "image_pages"
 # PATH_STYLE_MODEL = os.getenv("PATH_STYLE_MODEL")
 
@@ -162,29 +181,75 @@ async def read_pdf(file: UploadFile = File(...)):
     shutil.rmtree(path_dir)
     return rez
 
-# class JsonTask(BaseModel):
-#     precisionPDF_json: str
-#     name_save: str
-# @app.post("/json2word")
-# async def convert_json_to_docx(task: JsonTask):
-#     logger.info("start")
+class JsonTask(BaseModel):
+    precisionPDF_json: str
+    name_save: str
 
-#     json_task = json.loads(task.precisionPDF_json)
-#     json2docx.from_dict(json_task)
-#     json2docx.extract()
-#     path_dir = os.path.join(os.getcwd(), "tmp_dir", uuid.uuid4().hex)
-#     os.mkdir(path_dir)
-#     name = "file.docx"
-#     path = os.path.join(path_dir, name)
-#     json2docx.save_doc(path) 
-#     # отправка файла без удаления
-#     # return FileResponse(path=path, 
-#     #                     filename=task.name_save, media_type='multipart/form-data') 
-#     with open(path, "rb") as f:
-#         file = f.read()
 
-#     shutil.rmtree(path_dir)
-#     return Response(file)
+def _prepare_json2docx(json_task: dict) -> None:
+    """Доводит JSON (вывод / или /precision-pdf/) до формата, который ожидает
+    конвертер MinerPDFToMSWord: у каждого region должен быть 'label' из
+    известного набора и непустой 'text'."""
+    known_labels = {"text", "header", "list", "table", "other", "figure"}
+    for page in json_task.get("pages", []):
+        regions = page.get("regions", [])
+        for region in regions:
+            label = region.get("label", "text")
+            if label in ("figure", "image"):
+                region["label"] = "figure"
+            else:
+                region["label"] = label if label in known_labels else "text"
+
+            text = region.get("text")
+            if text is not None and str(text).strip():
+                continue
+            parts = []
+            for row in region.get("rows", []):
+                row_text = row.get("text")
+                if row_text is not None and str(row_text).strip():
+                    parts.append(str(row_text).strip())
+                    continue
+                words = [w.get("text", "") for w in row.get("words", [])]
+                parts.append(" ".join(str(w) for w in words if str(w).strip()))
+            region["text"] = " ".join(p for p in parts if p).strip()
+        page["regions"] = [r for r in regions if str(r["text"]).strip() or r.get("base64")]
+
+
+@app.post("/json2word")
+async def convert_json_to_docx(task: JsonTask):
+    logger.info("start")
+
+    json_task = json.loads(task.precisionPDF_json)
+    _prepare_json2docx(json_task)
+
+    json2docx = PDF2MSWord()
+    json2docx.from_dict(json_task)
+    json2docx.extract()
+
+    path_dir = os.path.join(os.getcwd(), "tmp_dir", uuid.uuid4().hex)
+    os.mkdir(path_dir)
+    path = os.path.join(path_dir, "file.docx")
+    json2docx.save_doc(path)
+
+    with open(path, "rb") as f:
+        file = f.read()
+
+    shutil.rmtree(path_dir)
+
+    filename = task.name_save.replace('"', "").strip() or "file.docx"
+    ascii_filename = filename.encode("ascii", "ignore").decode("ascii").strip()
+    ascii_stem = ascii_filename.rsplit(".", 1)[0] if "." in ascii_filename else ascii_filename
+    if not any(c.isalnum() for c in ascii_stem):
+        ascii_filename = "file.docx"
+    content_disposition = (
+        f'attachment; filename="{ascii_filename}"; '
+        f"filename*=UTF-8''{quote(filename)}"
+    )
+    return Response(
+        content=file,
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        headers={"Content-Disposition": content_disposition},
+    )
 
     
 
